@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "fraustrohbach.de",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
