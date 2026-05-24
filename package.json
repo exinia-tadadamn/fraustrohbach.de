@@ -1,0 +1,12 @@
+{
+  "name": "fraustrohbach-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright-mcp test",
+    "install-browsers": "npx playwright-mcp install"
+  },
+  "devDependencies": {
+    "playwright-mcp": "0.0.19"
+  }
+}
