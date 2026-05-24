@@ -81,3 +81,8 @@ node_modules/
 # Build / cache
 dist/
 .cache/
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/

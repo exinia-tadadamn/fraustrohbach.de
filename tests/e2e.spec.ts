@@ -1,26 +1,43 @@
-import { test, expect } from 'playwright-mcp';
+import { test, expect } from '@playwright/test';
 
-test('homepage basic checks and gallery modal', async ({ page }) => {
+test('homepage basic checks and visual archive modal', async ({ page }) => {
   await page.goto('/');
 
-  // Title
   await expect(page).toHaveTitle('Exinia | Temporal Lenses');
-
-  // Hero text visible
   await expect(page.locator('text=Temporal Observation Protocol')).toBeVisible();
 
-  // Navigate to the lenses section via anchor and verify heading
   await page.click('a[href="#lenses"]');
   await expect(page.locator('h2', { hasText: 'Through the Lenses' })).toBeVisible();
 
-  // Ensure archive teaser is present
-  await expect(page.locator('text=Access Full Visual Archive')).toBeVisible();
+  const trigger = page.locator('button', { hasText: 'VISUAL GALLERY' });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
 
-  // Open gallery modal by clicking the teaser area (click inner text so event bubbles)
-  await page.click('text=Access Full Visual Archive');
-  await expect(page.locator('#gallery-modal')).toBeVisible();
+  const modal = page.locator('#gallery-modal');
+  await expect(modal).toBeVisible();
+  await expect(modal.locator('text=VISUAL ARCHIVE')).toBeVisible();
 
-  // Close gallery modal
-  await page.click('text=Close');
-  await expect(page.locator('#gallery-modal')).toBeHidden();
+  const cards = page.locator('#modal-lenses-grid > div');
+  await expect(cards).toHaveCount(87);
+  await expect(cards.first().locator('img')).toHaveAttribute(
+    'src',
+    /imagesTimeMashine\/image1\./
+  );
+
+  // Regression: scroll container must be actually scrollable (scrollHeight > clientHeight)
+  // and scrolling must move scrollTop. Catches modal display:none → block bug that
+  // collapses the flex layout and kills the inner scroll.
+  const scrollMetrics = await page.locator('#gallery-scroll-container').evaluate((el) => ({
+    scrollHeight: el.scrollHeight,
+    clientHeight: el.clientHeight,
+  }));
+  expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+
+  await page.locator('#gallery-scroll-container').evaluate((el) => el.scrollTo({ top: 800 }));
+  await expect
+    .poll(() => page.locator('#gallery-scroll-container').evaluate((el) => el.scrollTop))
+    .toBeGreaterThan(100);
+
+  await modal.locator('button', { hasText: 'Close' }).click();
+  await expect(modal).toBeHidden();
 });
