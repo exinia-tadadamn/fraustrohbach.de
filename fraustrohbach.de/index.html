@@ -44,6 +44,27 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* Gallery modal scrollbar styling */
+        .gallery-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #22d3ee #0f172a;
+            scrollbar-gutter: stable;
+        }
+        .gallery-scrollbar::-webkit-scrollbar {
+            width: 10px;
+        }
+        .gallery-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .gallery-scrollbar::-webkit-scrollbar-thumb {
+            background: #22d3ee;
+            border-radius: 6px;
+            border: 2px solid #0f172a;
+        }
+        .gallery-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #67e8f9;
+        }
     </style>
 </head>
 <body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
@@ -260,7 +281,7 @@
         </div>
         
         <!-- Modal Grid Container -->
-        <div id="gallery-scroll-container" class="flex-1 overflow-y-auto overflow-x-hidden" style="min-height: 0; flex: 1;">
+        <div id="gallery-scroll-container" class="flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
             <div class="p-6 md:p-12">
                 <div id="modal-lenses-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-screen-2xl mx-auto">
                     <!-- Images will be inserted here by JavaScript -->
