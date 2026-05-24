@@ -126,11 +126,11 @@
             </div>
 
             <!-- Teaser for the Gallery -->
-            <button onclick="openGallery()" class="w-full aspect-[21/9] md:aspect-[3/1] bg-slate-900 border border-slate-800 hover:border-neon-cyan transition-colors cursor-pointer flex items-center justify-center">
+            <button onclick="openGallery()" class="group relative w-full aspect-[21/9] md:aspect-[3/1] bg-slate-900 border border-slate-800 hover:border-neon-cyan transition-colors cursor-pointer flex items-center justify-center overflow-hidden">
                 <span class="text-white text-2xl md:text-4xl font-display tracking-widest">VISUAL GALLERY</span>
                 <!-- Sci-fi scanline effect on hover -->
                 <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
-            </div>
+            </button>
         </div>
     </section>
 
@@ -269,7 +269,7 @@
     </footer>
 
     <!-- Fullscreen Gallery Modal -->
-    <div id="gallery-modal" class="fixed inset-0 z-[100] bg-[#020617]/95 backdrop-blur-xl hidden flex-col opacity-0 transition-opacity duration-500" style="overflow: hidden;">
+    <div id="gallery-modal" class="fixed inset-0 z-[100] bg-[#020617]/95 backdrop-blur-xl flex-col opacity-0 transition-opacity duration-500" style="display: none; overflow: hidden;">
         <!-- Modal Header -->
         <div class="flex justify-between items-center p-6 border-b border-slate-800 bg-[#020617] flex-shrink-0">
             <div class="font-display text-white text-xl tracking-widest flex items-center gap-3">
@@ -295,6 +295,14 @@
         </button>
     </div>
 
+    <!-- Fullscreen Image Viewer -->
+    <div id="image-viewer" class="fixed inset-0 z-[110] bg-black/95 backdrop-blur-xl items-center justify-center opacity-0 transition-opacity duration-300" style="display: none;" onclick="handleViewerBackdropClick(event)">
+        <button onclick="closeImageViewer()" class="absolute top-6 right-6 z-10 text-slate-300 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+            <i class="ph ph-x text-2xl"></i> Close
+        </button>
+        <img id="image-viewer-img" alt="Temporal capture fullscreen" class="max-w-[95vw] max-h-[95vh] object-contain" />
+    </div>
+
     <!-- JavaScript to load images dynamically -->
     <script>
         // Gallery logic
@@ -304,8 +312,8 @@
         let scrollListenerAttached = false;
 
         function openGallery() {
-            modal.classList.remove('hidden');
-            // small delay to allow display:block to apply before animating opacity
+            modal.style.display = 'flex';
+            // small delay to allow display to apply before animating opacity
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
             }, 10);
@@ -339,7 +347,7 @@
         }
 
         function handleGalleryKeyboard(e) {
-            if (modal.classList.contains('hidden')) {
+            if (modal.style.display === 'none') {
                 document.removeEventListener('keydown', handleGalleryKeyboard);
                 galleryKeyboardActive = false;
                 return;
@@ -347,6 +355,14 @@
 
             const scrollContainer = document.getElementById('gallery-scroll-container');
             if (!scrollContainer) return;
+
+            if (isImageViewerOpen()) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeImageViewer();
+                }
+                return;
+            }
 
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -376,7 +392,7 @@
             document.removeEventListener('keydown', handleGalleryKeyboard);
             galleryKeyboardActive = false;
             setTimeout(() => {
-                modal.classList.add('hidden');
+                modal.style.display = 'none';
                 document.body.style.overflow = ''; // Restore body scroll
                 const scrollBtn = document.getElementById('scroll-to-top-btn');
                 if (scrollBtn) {
@@ -439,7 +455,7 @@
 
             for (let i = 1; i <= totalImages; i++) {
                 const imageCard = document.createElement('div');
-                imageCard.className = 'group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors';
+                imageCard.className = 'group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer';
                 const captureId = i.toString().padStart(3, '0');
 
                 const imageElem = document.createElement('img');
@@ -463,8 +479,38 @@
                 overlay.innerHTML = '';
                 imageCard.appendChild(overlay);
 
+                imageCard.addEventListener('click', () => {
+                    if (imageElem.src) openImageViewer(imageElem.src);
+                });
+
                 gridContainer.appendChild(imageCard);
             }
+        }
+
+        // Fullscreen image viewer
+        function openImageViewer(src) {
+            const viewer = document.getElementById('image-viewer');
+            const img = document.getElementById('image-viewer-img');
+            if (!viewer || !img) return;
+            img.src = src;
+            viewer.style.display = 'flex';
+            setTimeout(() => viewer.classList.remove('opacity-0'), 10);
+        }
+
+        function closeImageViewer() {
+            const viewer = document.getElementById('image-viewer');
+            if (!viewer) return;
+            viewer.classList.add('opacity-0');
+            setTimeout(() => { viewer.style.display = 'none'; }, 300);
+        }
+
+        function handleViewerBackdropClick(e) {
+            if (e.target.id === 'image-viewer') closeImageViewer();
+        }
+
+        function isImageViewerOpen() {
+            const viewer = document.getElementById('image-viewer');
+            return viewer && viewer.style.display !== 'none';
         }
 
         function scrollArchivePreview(direction) {
