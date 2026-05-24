@@ -105,76 +105,8 @@
             </div>
 
             <!-- Teaser for the Gallery -->
-            <div class="relative w-full aspect-[21/9] md:aspect-[3/1] bg-slate-900 border border-slate-800 overflow-hidden group flex items-center justify-center cursor-pointer" onclick="openGallery()">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent z-0"></div>
-                <div class="relative z-10 flex w-full max-w-5xl flex-col items-center gap-6 px-6">
-                    <div class="flex flex-col items-center gap-6">
-                        <i class="ph ph-aperture text-6xl text-neon-cyan group-hover:rotate-90 transition-transform duration-700 inline-block"></i>
-                        <div class="flex items-center justify-center gap-4 flex-wrap">
-                            <div class="hidden lg:flex items-center gap-2">
-                                <img src="imagesTimeMashine/image1.JPG" alt="Archive preview" class="w-16 h-12 rounded-xl border border-slate-700 object-cover shadow-lg shadow-cyan-500/10">
-                                <img src="imagesTimeMashine/image2.jpeg" alt="Archive preview" class="w-16 h-12 rounded-xl border border-slate-700 object-cover shadow-lg shadow-cyan-500/10">
-                            </div>
-                            <div class="px-4 py-3 bg-slate-950/50 border border-slate-700 rounded-3xl backdrop-blur-sm">
-                                <h3 class="text-2xl md:text-3xl font-display text-white mb-2">Access Full Visual Archive</h3>
-                                <p class="text-slate-400 text-sm uppercase tracking-widest">87 Encrypted Captures</p>
-                            </div>
-                            <div class="hidden md:flex items-center gap-2">
-                                <img src="imagesTimeMashine/image10.JPG" alt="Archive preview" class="w-16 h-12 rounded-xl border border-slate-700 object-cover shadow-lg shadow-cyan-500/10">
-                                <img src="imagesTimeMashine/image87.JPG" alt="Archive preview" class="w-16 h-12 rounded-xl border border-slate-700 object-cover shadow-lg shadow-cyan-500/10">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative w-full">
-                        <button type="button" onclick="event.stopPropagation(); scrollArchivePreview(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-slate-900/95 text-slate-300 transition hover:border-neon-cyan hover:text-neon-cyan focus:outline-none">
-                            <span class="text-lg">‹</span>
-                        </button>
-                        <button type="button" onclick="event.stopPropagation(); scrollArchivePreview(1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-slate-900/95 text-slate-300 transition hover:border-neon-cyan hover:text-neon-cyan focus:outline-none">
-                            <span class="text-lg">›</span>
-                        </button>
-                        <div id="archive-preview-strip" onclick="event.stopPropagation()" class="w-full overflow-x-auto whitespace-nowrap rounded-3xl border border-slate-700 bg-slate-950/40 py-4 px-2" style="-webkit-overflow-scrolling: touch;">
-                            <div class="inline-flex gap-3">
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image3.jpeg" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image5.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image12.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image25.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image40.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image58.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image70.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image87.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image22.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image34.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image45.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-[120px] h-24 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-                                <img src="imagesTimeMashine/image68.JPG" alt="Archive preview" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                    <div class="text-slate-400 uppercase tracking-[0.35em] text-[10px]">Swipe or scroll through archive previews</div>
-                </div>
+            <button onclick="openGallery()" class="w-full aspect-[21/9] md:aspect-[3/1] bg-slate-900 border border-slate-800 hover:border-neon-cyan transition-colors cursor-pointer flex items-center justify-center">
+                <span class="text-white text-2xl md:text-4xl font-display tracking-widest">VISUAL GALLERY</span>
                 <!-- Sci-fi scanline effect on hover -->
                 <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
             </div>
@@ -328,7 +260,7 @@
         </div>
         
         <!-- Modal Grid Container -->
-        <div id="gallery-scroll-container" class="flex-1 overflow-y-auto" style="min-height: 0;">
+        <div id="gallery-scroll-container" class="flex-1 overflow-y-auto overflow-x-hidden" style="min-height: 0; flex: 1;">
             <div class="p-6 md:p-12">
                 <div id="modal-lenses-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-screen-2xl mx-auto">
                     <!-- Images will be inserted here by JavaScript -->
@@ -348,6 +280,7 @@
         const modal = document.getElementById('gallery-modal');
         let imagesLoaded = false;
         let galleryKeyboardActive = false;
+        let scrollListenerAttached = false;
 
         function openGallery() {
             modal.classList.remove('hidden');
@@ -359,10 +292,11 @@
             // Prevent body scroll behind the modal
             document.body.style.overflow = 'hidden';
 
-            // Attach scroll listener for the button
+            // Attach scroll listener only once
             const scrollContainer = document.getElementById('gallery-scroll-container');
-            if (scrollContainer) {
+            if (scrollContainer && !scrollListenerAttached) {
                 scrollContainer.addEventListener('scroll', handleGalleryScroll);
+                scrollListenerAttached = true;
             }
 
             // Add keyboard navigation (only once)
@@ -376,11 +310,17 @@
                 loadImages();
                 imagesLoaded = true;
             }
+
+            // Focus scroll container to ensure keyboard events work
+            if (scrollContainer) {
+                scrollContainer.focus();
+            }
         }
 
         function handleGalleryKeyboard(e) {
             if (modal.classList.contains('hidden')) {
                 document.removeEventListener('keydown', handleGalleryKeyboard);
+                galleryKeyboardActive = false;
                 return;
             }
 
@@ -393,6 +333,18 @@
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 scrollContainer.scrollBy({ top: -200, behavior: 'smooth' });
+            } else if (e.key === 'PageDown') {
+                e.preventDefault();
+                scrollContainer.scrollBy({ top: scrollContainer.clientHeight * 0.8, behavior: 'smooth' });
+            } else if (e.key === 'PageUp') {
+                e.preventDefault();
+                scrollContainer.scrollBy({ top: -scrollContainer.clientHeight * 0.8, behavior: 'smooth' });
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
             } else if (e.key === 'Escape') {
                 closeGallery();
             }
@@ -400,8 +352,8 @@
 
         function closeGallery() {
             modal.classList.add('opacity-0');
-            galleryKeyboardActive = false;
             document.removeEventListener('keydown', handleGalleryKeyboard);
+            galleryKeyboardActive = false;
             setTimeout(() => {
                 modal.classList.add('hidden');
                 document.body.style.overflow = ''; // Restore body scroll
