@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Am I Vegan?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              forest: '#2E7D32',
+              teal2: '#00796B',
+              yellowOrange: '#F9A825',
+              bgForest: '#0A321E',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html, body { background-color: #0A321E; color: #fff; min-height: 100vh; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+      .btn { display: inline-block; padding: 12px 24px; border-radius: 10px; font-weight: 600; transition: filter 0.2s; }
+      .btn:hover { filter: brightness(1.1); }
+      .btn:active { filter: brightness(0.95); }
+      .btn-teal { background: #00796B; color: #fff; }
+      .btn-forest { background: #2E7D32; color: #fff; }
+      .btn-yellow { background: #F9A825; color: #000; }
+      .btn-red { background: #FF0000; color: #fff; min-width: 200px; }
+      .name-input { padding: 12px 16px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; color: #111; text-align: center; }
+      ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.3s; }
+    </style>
+</head>
+<body class="antialiased">
+    <main class="min-h-screen flex flex-col items-center justify-center p-6">
+
+        <!-- START SCREEN -->
+        <section data-screen="start" class="w-full max-w-md flex flex-col items-center gap-6">
+            <h1 class="text-3xl font-semibold text-forest text-center">Enter Your Name</h1>
+            <form id="start-form" class="w-full flex flex-col items-center gap-4">
+                <input id="player-name" type="text" class="name-input w-full max-w-xs" placeholder="Your name" autocomplete="off" />
+                <button type="submit" class="btn btn-teal">Start the Test!</button>
+            </form>
+            <a href="index.html" class="text-slate-400 hover:text-white text-xs uppercase tracking-widest mt-8">← Back</a>
+        </section>
+
+        <!-- QUIZ SCREEN -->
+        <section data-screen="quiz" class="hidden w-full max-w-2xl flex flex-col items-center gap-8">
+            <p id="current-question" class="text-2xl md:text-3xl text-white text-center leading-snug min-h-[6rem] flex items-center justify-center">Tap the button to judge yourself!</p>
+            <button id="judge-me" class="btn btn-yellow">Judge Me!</button>
+            <div id="answer-buttons" class="hidden flex flex-col items-center gap-4">
+                <button id="soul-pure" class="btn btn-forest">MY SOUL IS PURE</button>
+                <button id="fail-button" class="btn btn-red" aria-label="No"></button>
+            </div>
+            <button id="test-passed" class="hidden btn btn-forest">TEST PASSED</button>
+        </section>
+
+        <!-- FAIL SCREEN -->
+        <section data-screen="fail" class="hidden w-full max-w-xl flex flex-col items-center gap-4 text-center">
+            <h2 class="text-2xl text-red-500">You're <span id="fail-percentage">0</span>% vegan today! Try harder.</h2>
+            <p id="fail-summary" class="text-lg"></p>
+            <h3 class="text-xl text-forest mt-4">Leaderboard</h3>
+            <ul id="fail-leaderboard" data-leaderboard class="text-white space-y-1"></ul>
+            <div class="flex flex-col gap-3 mt-4">
+                <button id="fail-save" class="btn btn-teal">Save My Score</button>
+                <button id="fail-reflections" class="btn btn-teal">Reflections</button>
+            </div>
+        </section>
+
+        <!-- SUCCESS SCREEN -->
+        <section data-screen="success" class="hidden w-full max-w-xl flex flex-col items-center gap-4 text-center">
+            <h2 class="text-3xl text-yellowOrange">Impressive! You are <span id="success-percentage">0</span>% Vegan! 🎉</h2>
+            <h3 class="text-xl text-forest mt-4">Leaderboard</h3>
+            <ul id="success-leaderboard" data-leaderboard class="text-white space-y-1"></ul>
+            <button id="success-save" class="btn btn-teal mt-4">Save My Score</button>
+            <button id="success-reflections" class="btn btn-teal">Reflections</button>
+        </section>
+
+        <!-- REFLECTIONS SCREEN -->
+        <section data-screen="reflections" class="hidden w-full max-w-2xl flex flex-col items-center gap-6 text-center">
+            <h2 id="reflections-title" class="text-3xl text-forest">What is Vegan?</h2>
+            <div id="reflections-body" class="space-y-4 text-white text-base md:text-lg leading-relaxed text-left"></div>
+            <button id="start-over" class="btn btn-yellow mt-4">Start Over.</button>
+        </section>
+
+    </main>
+
+    <script src="quiz.js"></script>
+</body>
+</html>
