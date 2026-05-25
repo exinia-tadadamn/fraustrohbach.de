@@ -128,7 +128,17 @@
 
             <!-- Teaser for the Gallery -->
             <button onclick="openGallery()" class="group relative w-full aspect-[21/9] md:aspect-[3/1] bg-slate-900 border border-slate-800 hover:border-neon-cyan transition-colors cursor-pointer flex items-center justify-center overflow-hidden">
-                <span class="text-white text-2xl md:text-4xl font-display tracking-widest">VISUAL GALLERY</span>
+                <!-- Preview Images Container -->
+                <div class="absolute inset-0 flex gap-1 opacity-40 group-hover:opacity-60 transition-opacity">
+                    <div class="flex-1 overflow-hidden">
+                        <img id="gallery-preview-1" src="" alt="Preview 1" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <img id="gallery-preview-2" src="" alt="Preview 2" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <!-- Text Overlay -->
+                <span class="text-white text-2xl md:text-4xl font-display tracking-widest relative z-10">VISUAL GALLERY</span>
                 <!-- Sci-fi scanline effect on hover -->
                 <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
             </button>
@@ -146,14 +156,14 @@
             <div class="grid md:grid-cols-2 gap-12">
                 <!-- Video 1 -->
                 <div class="group">
-                    <a href="https://www.youtube.com/@exinia0.0" target="_blank" rel="noopener noreferrer" class="aspect-video bg-slate-900 border border-slate-800 flex items-center justify-center relative overflow-hidden group-hover:border-neon-cyan/50 transition-colors block">
-                        <i class="ph-fill ph-play-circle text-6xl text-slate-700 group-hover:text-neon-cyan transition-colors z-10 cursor-pointer hover:scale-110 duration-300"></i>
+                    <div class="aspect-video bg-slate-900 border border-slate-800 flex items-center justify-center relative overflow-hidden group-hover:border-neon-cyan/50 transition-colors">
+                        <iframe class="absolute inset-0 w-full h-full z-0" width="560" height="315" src="https://www.youtube.com/embed/YgTrLJMbS-M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         
                         <!-- Overlay simulating a viewfinder -->
                         <div class="absolute inset-0 pointer-events-none border-[8px] border-black/40 z-20"></div>
                         <div class="absolute top-4 left-4 text-xs font-mono text-neon-cyan opacity-50 z-20">REC // 89:22:10</div>
                         <div class="absolute bottom-4 right-4 text-xs font-mono text-neon-cyan opacity-50 z-20">LENS A-01</div>
-                    </a>
+                    </div>
                     <div class="mt-6">
                         <h3 class="font-display text-2xl text-white">Transmission #01: External Database</h3>
                         <p class="text-slate-400 text-sm mt-3 leading-relaxed">Access the full archive of visual temporal recordings directly on YouTube. Click the lens to establish the connection.</p>
@@ -162,13 +172,13 @@
 
                 <!-- Video 2 -->
                 <div class="group">
-                    <a href="https://www.youtube.com/@exinia0.0/" target="_blank" rel="noopener noreferrer" class="aspect-video bg-slate-900 border border-slate-800 flex items-center justify-center relative overflow-hidden group-hover:border-neon-cyan/50 transition-colors block">
-                        <i class="ph-fill ph-play-circle text-6xl text-slate-700 group-hover:text-neon-cyan transition-colors z-10 cursor-pointer hover:scale-110 duration-300"></i>
+                    <div class="aspect-video bg-slate-900 border border-slate-800 flex items-center justify-center relative overflow-hidden group-hover:border-neon-cyan/50 transition-colors">
+                        <iframe class="absolute inset-0 w-full h-full z-0" width="560" height="315" src="https://www.youtube.com/embed/ejqCnYFode4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         
                         <div class="absolute inset-0 pointer-events-none border-[8px] border-black/40 z-20"></div>
                         <div class="absolute top-4 left-4 text-xs font-mono text-neon-cyan opacity-50 z-20">REC // 44:12:00</div>
                         <div class="absolute bottom-4 right-4 text-xs font-mono text-neon-cyan opacity-50 z-20">LENS B-04</div>
-                    </a>
+                    </div>
                     <div class="mt-6">
                         <h3 class="font-display text-2xl text-white">Transmission #02: Video Playlists</h3>
                         <p class="text-slate-400 text-sm mt-3 leading-relaxed">A detailed look into different fragmented timelines, sorted into playlists.</p>
@@ -178,83 +188,97 @@
         </div>
     </section>
 
-    <!-- Section: The Book / Logbook -->
-    <section id="book" class="py-32 relative">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="flex flex-col lg:flex-row gap-16 items-center">
-                <!-- Book Cover -->
-                <div class="w-full lg:w-5/12 aspect-[2/3] bg-slate-900 border border-slate-800 relative group">
-                    <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 p-8 text-center z-10">
-                        <i class="ph ph-book-bookmark text-6xl mb-6"></i>
-                        <span class="font-display text-sm tracking-widest uppercase"></span>
-                    </div>
-                    <!-- Sci-fi scanline effect on hover -->
-                    <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
+    <!-- Section: Books / Logbooks -->
+    <section id="books" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="flex items-center gap-3 justify-center mb-4">
+                    <div class="h-px w-8 bg-neon-cyan"></div>
+                    <h2 class="text-xs text-neon-cyan uppercase tracking-[0.3em] font-bold">My Logbooks</h2>
+                    <div class="h-px w-8 bg-neon-cyan"></div>
                 </div>
-                
-                <!-- Book Info -->
-                <div class="w-full lg:w-7/12">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="h-px w-8 bg-neon-cyan"></div>
-                        <h2 class="text-xs text-neon-cyan uppercase tracking-[0.3em] font-bold">The Main Logbook</h2>
+                <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Published Books</h1>
+                <p class="text-slate-400 max-w-2xl mx-auto">Chronicles extracted from the temporal archives. Stories recovered from the machine's memory.</p>
+            </div>
+
+            <div class="grid md:grid-cols-1 gap-8">
+                <!-- Book 1 -->
+                <div class="flex flex-row gap-6 items-start">
+                    <!-- Book Cover -->
+                    <div class="w-[12%] aspect-[2/3] bg-slate-900 border border-slate-800 relative group flex-shrink-0 overflow-hidden">
+                        <img src="https://m.media-amazon.com/images/P/B0H2VFGV28.01._SX300_.jpg" alt="I WAS AWOKEN BY A DREAM: It Was A Dream Of Truth And Light" class="w-full h-full object-cover" />
+                        <!-- Sci-fi scanline effect on hover -->
+                        <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
                     </div>
-                    <h3 class="text-4xl md:text-5xl font-display font-bold text-white mb-8">Alles Zufall: Aus Meinem Echten Leben</h3>
-                    <div class="space-y-6 text-lg text-slate-400 font-light leading-relaxed mb-10">
-                        <p>
-                            This is where you describe your book. Imagine it as the ultimate logbook of your journey. What themes does it cover? How does it tie into the visual elements of the time machine?
+                    
+                    <!-- Book Info -->
+                    <div class="flex-1">
+                        <h3 class="text-lg font-display font-bold text-white mb-3">I WAS AWOKEN BY A DREAM: It Was A Dream Of Truth And Light</h3>
+                        <p class="text-slate-400 mb-4 text-sm leading-relaxed">
+                            A chronicle recovered from the depths of the archive. Rediscover the moments that shaped timelines.
                         </p>
-                        <p class="italic text-slate-300 border-l-2 border-slate-700 pl-6">
-                            "A profound quote from the book that hints at the bending of time, memory, and the human experience within the machine."
-                        </p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="https://amazon.de/Alles-Zufall-Meinem-Echten-Leben/dp/B0GBW35ZJ1/" target="_blank" rel="noopener noreferrer" class="bg-white text-black px-8 py-4 font-bold uppercase tracking-widest text-sm hover:bg-neon-cyan hover:text-black transition-colors text-center inline-block">
-                            Acquire Log (Amazon)
+                        <a href="https://amazon.de/-/en/dp/B0H2VFGV28/" target="_blank" rel="noopener noreferrer" class="bg-white text-black px-4 py-2 font-bold uppercase tracking-widest text-xs hover:bg-neon-cyan hover:text-black transition-colors inline-block">
+                            Get on Amazon
                         </a>
-                        <button class="border border-slate-700 text-slate-300 px-8 py-4 font-bold uppercase tracking-widest text-sm hover:border-white transition-colors">
-                            Read Extract
-                        </button>
+                    </div>
+                </div>
+
+                <!-- Book 2 -->
+                <div class="flex flex-row gap-6 items-start">
+                    <!-- Book Cover -->
+                    <div class="w-[12%] aspect-[2/3] bg-slate-900 border border-slate-800 relative group flex-shrink-0 overflow-hidden">
+                        <img src="https://m.media-amazon.com/images/P/B0GBW35ZJ1.01._SX300_.jpg" alt="Alles IST Ein Zufall In Meinem Echten Leben: Erste Sammlung von Haikus und Kurzgeschichten aus'25" class="w-full h-full object-cover" />
+                        <!-- Sci-fi scanline effect on hover -->
+                        <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
+                    </div>
+                    
+                    <!-- Book Info -->
+                    <div class="flex-1">
+                        <h3 class="text-lg font-display font-bold text-white mb-3">Alles IST Ein Zufall In Meinem Echten Leben: Erste Sammlung von Haikus und Kurzgeschichten aus'25</h3>
+                        <p class="text-slate-400 mb-4 text-sm leading-relaxed">
+                            A candid memoir documenting the intersection of chance and destiny. Through photographs and memories.
+                        </p>
+                        <a href="https://www.amazon.de/-/en/Alles-Zufall-Meinem-Echten-Leben/dp/B0GBW35ZJ1/" target="_blank" rel="noopener noreferrer" class="bg-white text-black px-4 py-2 font-bold uppercase tracking-widest text-xs hover:bg-neon-cyan hover:text-black transition-colors inline-block">
+                            Get on Amazon
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Book 3 (Placeholder for future book) -->
+                <div class="flex flex-row gap-6 items-start">
+                    <!-- Book Cover -->
+                    <div class="w-[12%] aspect-[2/3] bg-slate-900 border border-slate-800 relative group flex-shrink-0 opacity-50 overflow-hidden">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 p-8 text-center z-10">
+                            <i class="ph ph-book-bookmark text-2xl mb-3"></i>
+                            <span class="text-xs text-slate-500">Coming</span>
+                        </div>
+                        <!-- Sci-fi scanline effect on hover -->
+                        <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.1)_50%,transparent_100%)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 z-20 transition-opacity pointer-events-none"></div>
+                    </div>
+                    
+                    <!-- Book Info -->
+                    <div class="flex-1">
+                        <h3 class="text-lg font-display font-bold text-slate-400 mb-3">Next Transmission</h3>
+                        <p class="text-slate-500 mb-4 text-sm leading-relaxed">
+                            The next chapter of temporal chronicles is being assembled.
+                        </p>
+                        <div class="text-xs uppercase tracking-[0.2em] text-neon-cyan/50 font-mono">
+                            Archiving in progress
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Section: Poetry & Prose -->
-    <section id="fragments" class="py-32 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')]">
+    <!-- Section: I am Vegan Quiz -->
+    <section id="vegan-quiz" class="py-32 relative">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-display font-bold text-white mb-4">Textual Fragments</h2>
-                <p class="text-slate-400">Recovered prose and poetry. Data that survived the temporal jump.</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Fragment 1 -->
-                <div class="bg-[#020617] border border-slate-800 p-10 hover:border-slate-600 transition-colors relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 text-slate-800 group-hover:text-slate-700 transition-colors"><i class="ph ph-quotes text-4xl"></i></div>
-                    <div class="text-slate-300 text-lg leading-relaxed mb-8 relative z-10">
-                        "We built the lenses not to see the future, but to understand why the past refuses to stay silent."
-                    </div>
-                    <div class="text-xs uppercase tracking-[0.2em] text-neon-cyan/70 font-mono">Timestamp: Unknown</div>
-                </div>
-
-                <!-- Fragment 2 -->
-                <div class="bg-[#020617] border border-slate-800 p-10 hover:border-slate-600 transition-colors relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 text-slate-800 group-hover:text-slate-700 transition-colors"><i class="ph ph-quotes text-4xl"></i></div>
-                    <div class="text-slate-300 text-lg leading-relaxed mb-8 relative z-10">
-                        "Memory is just a machine we haven't learned to calibrate yet. Every photograph is a portal."
-                    </div>
-                    <div class="text-xs uppercase tracking-[0.2em] text-neon-cyan/70 font-mono">Timestamp: 2084.12</div>
-                </div>
-
-                <!-- Fragment 3 -->
-                <div class="bg-[#020617] border border-slate-800 p-10 hover:border-slate-600 transition-colors relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 text-slate-800 group-hover:text-slate-700 transition-colors"><i class="ph ph-quotes text-4xl"></i></div>
-                    <div class="text-slate-300 text-lg leading-relaxed mb-8 relative z-10">
-                        "Through the glass, the city burns in reverse. Ash becomes paper. Words unwrite themselves."
-                    </div>
-                    <div class="text-xs uppercase tracking-[0.2em] text-neon-cyan/70 font-mono">Timestamp: Error</div>
-                </div>
+            <div class="text-center">
+                <a href="quiz.html" class="inline-flex items-center gap-4 px-12 py-8 bg-gradient-to-r from-neon-cyan to-slate-600 hover:from-neon-cyan hover:to-slate-500 text-black font-display text-3xl font-bold uppercase tracking-widest transition-all duration-300 transform hover:scale-105 border border-neon-cyan hover:border-white">
+                    <i class="ph ph-leaf text-4xl"></i>
+                    Am I Vegan?
+                </a>
             </div>
         </div>
     </section>
@@ -306,6 +330,61 @@
 
     <!-- JavaScript to load images dynamically -->
     <script>
+        // Gallery Preview Setup
+        const imageExtensions = ['.JPG', '.jpeg', '.jpg', '.JPEG'];
+        const imageFolder = 'imagesTimeMashine/';
+        const totalImages = 87;
+        let previewInterval;
+
+        function getRandomImageIndex() {
+            return Math.floor(Math.random() * totalImages) + 1;
+        }
+
+        function findImageSrc(index, callback, failure) {
+            const tryExtension = (extIndex) => {
+                if (extIndex >= imageExtensions.length) {
+                    failure();
+                    return;
+                }
+                const ext = imageExtensions[extIndex];
+                const candidate = `${imageFolder}image${index}${ext}`;
+                const testImg = new Image();
+                testImg.onload = () => callback(candidate);
+                testImg.onerror = () => tryExtension(extIndex + 1);
+                testImg.src = candidate;
+            };
+            tryExtension(0);
+        }
+
+        function updateGalleryPreviews() {
+            const preview1 = document.getElementById('gallery-preview-1');
+            const preview2 = document.getElementById('gallery-preview-2');
+            if (!preview1 || !preview2) return;
+
+            findImageSrc(getRandomImageIndex(), (src) => {
+                preview1.src = src;
+            }, () => {
+                updateGalleryPreviews();
+            });
+
+            findImageSrc(getRandomImageIndex(), (src) => {
+                preview2.src = src;
+            }, () => {
+                updateGalleryPreviews();
+            });
+        }
+
+        // Initialize previews on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateGalleryPreviews();
+            previewInterval = setInterval(updateGalleryPreviews, 2000);
+        });
+
+        // Clean up interval if needed
+        window.addEventListener('beforeunload', () => {
+            if (previewInterval) clearInterval(previewInterval);
+        });
+
         // Gallery logic
         const modal = document.getElementById('gallery-modal');
         let imagesLoaded = false;
