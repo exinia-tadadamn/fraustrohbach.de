@@ -1,0 +1,33 @@
+
+name: Deploy to Firebase
+
+on:
+  push:
+    branches:
+      - main # Der Branch, bei dem deployed werden soll
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # Optional: Node.js installieren, falls du z.B. Functions hast
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Optional: Abhängigkeiten installieren
+      - name: Install Dependencies
+        run: npm ci
+
+      # Deployment via Firebase Action
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy # Deployt alles (Hosting, Functions, Rules...). Alternativ z.B.: deploy --only functions
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          PROJECT_ID: website-7c871
