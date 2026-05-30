@@ -10,6 +10,10 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 
     <script>
         tailwind.config = {
@@ -181,6 +185,54 @@
             background: rgba(6, 182, 212, 0.03);
             border: 1px solid rgba(6, 182, 212, 0.15);
         }
+
+        /* Social login buttons */
+        .btn-google {
+            background: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        .btn-google:hover {
+            background: #f8f9fa;
+        }
+        .btn-apple {
+            background: #000;
+            color: #fff;
+            border: 1px solid #333;
+        }
+        .btn-apple:hover {
+            background: #1a1a1a;
+        }
+
+        /* Comment section */
+        .comment-item {
+            border-left: 2px solid rgba(6, 182, 212, 0.2);
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .comment-input {
+            background: rgba(6, 182, 212, 0.03);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: #e2e8f0;
+        }
+        .comment-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+        }
+
+        /* Auth tabs */
+        .auth-tab-btn {
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            color: #94a3b8;
+        }
+        .auth-tab-btn.active {
+            border-bottom-color: #06b6d4;
+            color: #06b6d4;
+        }
+        .auth-tab-btn:hover {
+            color: #e2e8f0;
+        }
     </style>
 </head>
 <body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
@@ -202,18 +254,15 @@
                     <a href="blog.html" class="text-neon-cyan transition-colors">Blog</a>
                     <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
                     <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
-                    <!-- Auth status indicator -->
                     <div id="nav-auth" class="flex items-center gap-3 ml-4 pl-4 border-l border-slate-800">
                         <!-- Injected via JS -->
                     </div>
                 </div>
-                <!-- Mobile menu button -->
                 <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-neon-cyan">
                     <i class="ph ph-list text-2xl"></i>
                 </button>
             </div>
         </div>
-        <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-[#020617]/95 border-b border-slate-800/50 px-6 pb-6">
             <div class="flex flex-col space-y-4 text-sm font-medium uppercase tracking-widest">
                 <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors">The Lenses</a>
@@ -263,23 +312,19 @@
                 </div>
             </div>
 
-            <!-- Tags container -->
             <div id="tags-container" class="flex flex-wrap gap-2 mb-8">
                 <!-- Tags injected via JS -->
             </div>
 
-            <!-- Stats line -->
             <div class="flex items-center gap-3 text-xs font-mono text-slate-500 border-b border-slate-800 pb-4 mb-0">
                 <span class="w-2 h-2 rounded-full bg-neon-cyan animate-pulse"></span>
                 <span id="stream-stats">Initializing archive...</span>
             </div>
 
-            <!-- Posts List (Substack style) -->
             <div id="posts-list" class="divide-y divide-slate-800/40">
                 <!-- Posts injected via JS -->
             </div>
 
-            <!-- Empty state -->
             <div id="empty-state" class="hidden text-center py-24">
                 <i class="ph ph-radio text-5xl text-slate-700 mb-4"></i>
                 <p class="text-slate-500 font-mono text-sm uppercase tracking-widest">No transmissions found.</p>
@@ -287,34 +332,104 @@
         </div>
     </section>
 
-    <!-- Section: Secure Access Terminal (Admin Login Only) -->
+    <!-- Section: Auth Terminal (Login / Register / Social) -->
     <section id="auth-terminal" class="py-24 border-t border-slate-800/50 relative">
         <div class="max-w-xl mx-auto px-6">
-            <div class="auth-terminal rounded p-8 md:p-10">
+            <div id="auth-panel" class="auth-terminal rounded p-8 md:p-10">
                 <div class="text-center mb-8">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-neon-cyan/30 bg-neon-cyan/5 mb-4">
                         <i class="ph ph-lock-key text-3xl text-neon-cyan"></i>
                     </div>
-                    <h2 class="text-2xl font-display font-bold text-white glow-text mb-2">Secure Access Terminal</h2>
-                    <p class="text-slate-500 text-sm font-mono">Admin authentication required to broadcast new transmissions.</p>
+                    <h2 class="text-2xl font-display font-bold text-white glow-text mb-2">Access Terminal</h2>
+                    <p class="text-slate-500 text-sm font-mono">Login to comment or authenticate as operator.</p>
                 </div>
 
-                <!-- Admin Login Form -->
+                <!-- Auth Tabs -->
+                <div class="flex justify-center gap-8 mb-8 text-sm uppercase tracking-widest font-medium">
+                    <button id="tab-login" onclick="switchAuthTab('login')" class="auth-tab-btn active pb-2">Login</button>
+                    <button id="tab-register" onclick="switchAuthTab('register')" class="auth-tab-btn pb-2">Register</button>
+                </div>
+
+                <!-- Login Form -->
                 <div id="form-login" class="space-y-5">
                     <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Operator Nickname</label>
-                        <input id="login-nickname" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Enter your callsign">
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Email</label>
+                        <input id="login-email" type="email" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="operator@exinia.null">
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Access Key</label>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Password</label>
                         <input id="login-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="••••••••">
                     </div>
-                    <button onclick="handleLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                    <button onclick="handleEmailLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
                         <i class="ph ph-key mr-2"></i> Authenticate
+                    </button>
+
+                    <div class="relative my-6">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
+                        <div class="relative flex justify-center text-xs uppercase tracking-widest text-slate-600 font-mono"><span class="px-2 bg-[#020617]">or</span></div>
+                    </div>
+
+                    <button onclick="handleGoogleLogin()" class="w-full btn-google py-3 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Continue with Google
+                    </button>
+                    <button onclick="handleAppleLogin()" class="w-full btn-apple py-3 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all">
+                        <i class="ph ph-apple-logo text-lg"></i>
+                        Continue with Apple
+                    </button>
+                    <p class="text-[10px] text-slate-600 text-center font-mono">Apple Sign-In requires Firebase Console setup.</p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="form-register" class="space-y-5 hidden">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Nickname / Callsign</label>
+                        <input id="reg-nickname" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Your callsign">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Email</label>
+                        <input id="reg-email" type="email" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="operator@exinia.null">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Password</label>
+                        <input id="reg-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Min. 6 characters">
+                    </div>
+                    <button onclick="handleEmailRegister()" class="w-full border border-neon-magenta bg-neon-magenta/10 text-neon-magenta py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/20 transition-all">
+                        <i class="ph ph-user-plus mr-2"></i> Register Operator
                     </button>
                 </div>
 
-                <!-- Auth Message -->
+                <!-- Logged-in State -->
+                <div id="auth-logged-in" class="hidden text-center space-y-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-neon-lime/30 bg-neon-lime/5 mb-2">
+                        <i class="ph ph-check-circle text-3xl text-neon-lime"></i>
+                    </div>
+                    <p class="text-white font-mono text-sm">Authenticated as <span id="logged-in-name" class="text-neon-cyan"></span></p>
+                    <button onclick="handleLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-6 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
+                        <i class="ph ph-sign-out"></i> Logout
+                    </button>
+                </div>
+
+                <!-- Operator Override (Admin Login) -->
+                <div id="admin-login-area" class="mt-10 pt-8 border-t border-slate-800/50">
+                    <p class="text-center text-xs uppercase tracking-widest text-slate-600 font-mono mb-4">Operator Override</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input id="admin-nickname" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Callsign">
+                        <input id="admin-password" type="password" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Override code">
+                        <button onclick="handleAdminLogin()" class="border border-neon-magenta/40 bg-neon-magenta/5 text-neon-magenta px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/15 transition-all whitespace-nowrap">
+                            <i class="ph ph-shield-check mr-1"></i> Override
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Logged-in State -->
+                <div id="admin-logged-in" class="hidden mt-10 pt-8 border-t border-slate-800/50 text-center">
+                    <p class="text-neon-magenta font-mono text-sm mb-3"><i class="ph ph-shield-check mr-2"></i>Operator override active.</p>
+                    <button onclick="handleAdminLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-5 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
+                        <i class="ph ph-sign-out"></i> End Override
+                    </button>
+                </div>
+
                 <div id="auth-message" class="hidden mt-6 text-center text-xs font-mono uppercase tracking-wider"></div>
             </div>
         </div>
@@ -324,7 +439,6 @@
     <div id="post-modal" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
         <div class="w-full max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
             <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
-                <!-- Modal top bar -->
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
                     <div class="flex items-center gap-3">
                         <i class="ph ph-aperture text-neon-cyan text-xl"></i>
@@ -337,6 +451,40 @@
 
                 <div id="modal-content" class="p-6 md:p-10">
                     <!-- Content injected via JS -->
+                </div>
+
+                <!-- Comments Section inside Modal -->
+                <div id="modal-comments" class="px-6 md:px-10 pb-10 border-t border-slate-800">
+                    <h3 class="text-lg font-display font-bold text-white mb-6 flex items-center gap-2">
+                        <i class="ph ph-chat-circle-text text-neon-cyan"></i>
+                        Signal Responses
+                        <span id="comment-count" class="text-xs font-mono text-slate-500 ml-2">(0)</span>
+                    </h3>
+
+                    <!-- Comment Form (visible when logged in) -->
+                    <div id="comment-form-area" class="mb-8">
+                        <textarea id="comment-text" rows="3" class="comment-input w-full px-4 py-3 rounded text-sm mb-3" placeholder="Broadcast your response..."></textarea>
+                        <div class="flex justify-end">
+                            <button onclick="submitComment()" class="inline-flex items-center gap-2 border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-5 py-2 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                                <i class="ph ph-paper-plane-right"></i> Transmit
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Login Prompt (visible when not logged in) -->
+                    <div id="comment-login-prompt" class="mb-8 hidden">
+                        <div class="border border-slate-800 bg-slate-900/30 rounded p-4 text-center">
+                            <p class="text-slate-500 text-sm font-mono mb-3">Authentication required to broadcast a response.</p>
+                            <button onclick="closePostModal(); document.getElementById('auth-terminal').scrollIntoView({behavior:'smooth'});" class="inline-flex items-center gap-2 border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-4 py-2 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                                <i class="ph ph-key"></i> Go to Login
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments List -->
+                    <div id="comments-list" class="space-y-4">
+                        <!-- Injected via JS -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -423,75 +571,217 @@
     </footer>
 
     <script>
-        // ─── AUTHENTICATION SYSTEM ───
+        // ─── FIREBASE INIT ───
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzS5TxVpbnxOruWWIVpxnz9SPQ1uZ0B2w",
+            authDomain: "website-7c871.firebaseapp.com",
+            projectId: "website-7c871",
+            storageBucket: "website-7c871.firebasestorage.app",
+            messagingSenderId: "371207772629",
+            appId: "1:371207772629:web:b1b7782d37df9b72a3055c",
+            measurementId: "G-STDL59VZFS"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ─── ADMIN CREDENTIALS ───
         const ADMIN_NICKNAME = 'exinia';
         const ADMIN_PASSWORD = 'temporal-void-2026';
-        const AUTH_KEY = 'exinia_auth_session';
 
-        function getSession() {
-            try {
-                return JSON.parse(sessionStorage.getItem(AUTH_KEY)) || null;
-            } catch { return null; }
-        }
+        // ─── STATE ───
+        let currentUser = null;
+        let currentPostId = null;
+        let allPosts = [];
+        let allTags = new Set();
+        let activeTag = null;
+        let searchQuery = '';
+        let generatedPayload = null;
+        let commentsUnsub = null;
 
-        function setSession(nickname) {
-            sessionStorage.setItem(AUTH_KEY, JSON.stringify({ nickname, timestamp: Date.now() }));
-        }
+        // ─── AUTH LISTENER ───
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            renderAuthUI();
+            renderHeroButtons();
+            renderNavAuth();
+            if (currentPostId) {
+                renderCommentForm();
+            }
+        });
 
-        function clearSession() {
-            sessionStorage.removeItem(AUTH_KEY);
-        }
-
-        function isLoggedIn() {
-            return !!getSession();
+        // ─── AUTH UI ───
+        function switchAuthTab(tab) {
+            document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+            document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+            hideAuthMessage();
         }
 
         function showAuthMessage(text, type = 'info') {
             const msg = document.getElementById('auth-message');
             msg.textContent = text;
             msg.classList.remove('hidden');
-            if (type === 'error') {
-                msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-magenta';
-            } else if (type === 'success') {
-                msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-lime';
-            } else {
-                msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-cyan';
+            if (type === 'error') msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-magenta';
+            else if (type === 'success') msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-lime';
+            else msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-cyan';
+        }
+
+        function hideAuthMessage() {
+            document.getElementById('auth-message').classList.add('hidden');
+        }
+
+        // ─── EMAIL / PASSWORD ───
+        async function handleEmailRegister() {
+            const nickname = document.getElementById('reg-nickname').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            if (!nickname) { showAuthMessage('Callsign required.', 'error'); return; }
+            if (!email) { showAuthMessage('Email required.', 'error'); return; }
+            if (password.length < 6) { showAuthMessage('Password must be at least 6 characters.', 'error'); return; }
+
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                await cred.user.updateProfile({ displayName: nickname });
+                await db.collection('userProfiles').doc(cred.user.uid).set({
+                    nickname,
+                    email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showAuthMessage('Operator registered successfully.', 'success');
+                document.getElementById('reg-nickname').value = '';
+                document.getElementById('reg-email').value = '';
+                document.getElementById('reg-password').value = '';
+            } catch (e) {
+                showAuthMessage(e.message, 'error');
             }
         }
 
-        function handleLogin() {
-            const nickname = document.getElementById('login-nickname').value.trim();
+        async function handleEmailLogin() {
+            const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
 
-            if (!nickname) { showAuthMessage('Enter your callsign.', 'error'); return; }
-            if (!password) { showAuthMessage('Enter your access key.', 'error'); return; }
-
-            if (nickname !== ADMIN_NICKNAME || password !== ADMIN_PASSWORD) {
-                showAuthMessage('Access denied. Invalid credentials.', 'error');
+            // Check for hardcoded admin
+            if (email === ADMIN_NICKNAME || email === 'exinia') {
+                showAuthMessage('Use social login or the hardcoded admin flow is not supported via email. Please contact the operator.', 'error');
                 return;
             }
 
-            setSession(nickname);
-            showAuthMessage('Authentication successful. Welcome, Operator.', 'success');
-            document.getElementById('login-nickname').value = '';
-            document.getElementById('login-password').value = '';
-            renderAuthStatus();
-            renderHeroButtons();
+            if (!email || !password) {
+                showAuthMessage('Email and password required.', 'error');
+                return;
+            }
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showAuthMessage('Authentication successful.', 'success');
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+            } catch (e) {
+                showAuthMessage(e.message, 'error');
+            }
         }
 
-        function handleLogout() {
-            clearSession();
-            renderAuthStatus();
-            renderHeroButtons();
+        // ─── GOOGLE SIGN IN ───
+        async function handleGoogleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+                const user = auth.currentUser;
+                if (user) {
+                    const profileRef = db.collection('userProfiles').doc(user.uid);
+                    const doc = await profileRef.get();
+                    if (!doc.exists) {
+                        await profileRef.set({
+                            nickname: user.displayName || 'Operator',
+                            email: user.email,
+                            photoURL: user.photoURL || '',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+            } catch (e) {
+                showAuthMessage(e.message, 'error');
+            }
         }
 
-        function renderAuthStatus() {
+        // ─── APPLE SIGN IN ───
+        async function handleAppleLogin() {
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            provider.addScope('email');
+            provider.addScope('name');
+            try {
+                await auth.signInWithPopup(provider);
+                const user = auth.currentUser;
+                if (user) {
+                    const profileRef = db.collection('userProfiles').doc(user.uid);
+                    const doc = await profileRef.get();
+                    if (!doc.exists) {
+                        await profileRef.set({
+                            nickname: user.displayName || 'Operator',
+                            email: user.email,
+                            photoURL: user.photoURL || '',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+            } catch (e) {
+                showAuthMessage('Apple Sign-In requires configuration in Firebase Console and Apple Developer Portal.', 'error');
+            }
+        }
+
+        // ─── LOGOUT ───
+        async function handleLogout() {
+            await auth.signOut();
+            currentPostId = null;
+            if (commentsUnsub) { commentsUnsub(); commentsUnsub = null; }
+        }
+
+        // ─── AUTH UI RENDERING ───
+        function renderAuthUI() {
+            const panel = document.getElementById('auth-panel');
+            const loginForm = document.getElementById('form-login');
+            const registerForm = document.getElementById('form-register');
+            const loggedIn = document.getElementById('auth-logged-in');
+            const tabs = document.querySelector('.auth-tab-btn');
+
+            if (currentUser) {
+                loginForm.classList.add('hidden');
+                registerForm.classList.add('hidden');
+                loggedIn.classList.remove('hidden');
+                document.getElementById('logged-in-name').textContent = getUserDisplayName(currentUser);
+                document.getElementById('tab-login').parentElement.classList.add('hidden');
+            } else {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loggedIn.classList.add('hidden');
+                document.getElementById('tab-login').parentElement.classList.remove('hidden');
+                switchAuthTab('login');
+            }
+            renderAdminAuthUI();
+        }
+
+        function getUserDisplayName(user) {
+            if (!user) return 'Guest';
+            return user.displayName || 'Operator';
+        }
+
+        function renderNavAuth() {
             const navAuth = document.getElementById('nav-auth');
-            const session = getSession();
-            if (session) {
+            const isAdminSession = sessionStorage.getItem('exinia_auth_session') === 'true';
+            if (currentUser) {
                 navAuth.innerHTML = `
-                    <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${session.nickname}</span>
+                    <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${getUserDisplayName(currentUser)}</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                        <i class="ph ph-sign-out text-lg"></i> Logout
+                    </button>
+                `;
+            } else if (isAdminSession) {
+                navAuth.innerHTML = `
+                    <span class="text-neon-magenta font-mono text-xs hidden lg:inline"><i class="ph ph-shield-check mr-1"></i>Operator</span>
+                    <button onclick="handleAdminLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-sign-out text-lg"></i> Logout
                     </button>
                 `;
@@ -504,29 +794,67 @@
             }
         }
 
-        function handleNewTransmissionClick() {
-            if (isLoggedIn()) {
-                openComposer();
-            } else {
-                document.getElementById('auth-terminal').scrollIntoView({ behavior: 'smooth' });
-                showAuthMessage('Authentication required. Please login below.', 'error');
-            }
-        }
-
         function renderHeroButtons() {
             const container = document.getElementById('hero-buttons');
             if (!container) return;
-            if (isLoggedIn()) {
+            if (isAdmin()) {
                 container.innerHTML = `
                     <button onclick="openComposer()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
                         <i class="ph ph-broadcast text-xl"></i> New Transmission
                     </button>
-                    <button onclick="document.getElementById('stream').scrollIntoView({behavior:'smooth'})" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-magenta hover:bg-neon-magenta/10 transition-all duration-300">
-                        <i class="ph ph-scroll text-xl"></i> View Stream
-                    </button>
                 `;
             } else {
                 container.innerHTML = '';
+            }
+        }
+
+        function isAdmin() {
+            if (sessionStorage.getItem('exinia_auth_session') === 'true') return true;
+            if (!currentUser) return false;
+            if (currentUser.displayName === ADMIN_NICKNAME) return true;
+            return false;
+        }
+
+        function handleAdminLogin() {
+            const nick = document.getElementById('admin-nickname').value.trim();
+            const pass = document.getElementById('admin-password').value;
+            if (nick === ADMIN_NICKNAME && pass === ADMIN_PASSWORD) {
+                sessionStorage.setItem('exinia_auth_session', 'true');
+                document.getElementById('admin-nickname').value = '';
+                document.getElementById('admin-password').value = '';
+                renderAdminAuthUI();
+                renderHeroButtons();
+                showAuthMessage('Operator override granted.', 'success');
+            } else {
+                showAuthMessage('Invalid override credentials.', 'error');
+            }
+        }
+
+        function handleAdminLogout() {
+            sessionStorage.removeItem('exinia_auth_session');
+            renderAdminAuthUI();
+            renderHeroButtons();
+        }
+
+        function renderAdminAuthUI() {
+            const adminArea = document.getElementById('admin-login-area');
+            const adminLoggedIn = document.getElementById('admin-logged-in');
+            if (sessionStorage.getItem('exinia_auth_session') === 'true') {
+                adminArea.classList.add('hidden');
+                adminLoggedIn.classList.remove('hidden');
+            } else {
+                adminArea.classList.remove('hidden');
+                adminLoggedIn.classList.add('hidden');
+            }
+            renderNavAuth();
+        }
+
+        function handleNewTransmissionClick() {
+            if (isAdmin()) {
+                openComposer();
+            } else {
+                document.getElementById('auth-terminal').scrollIntoView({ behavior: 'smooth' });
+                showAuthMessage('Admin authentication required.', 'error');
             }
         }
 
@@ -549,13 +877,7 @@
             });
         }
 
-        // ─── BLOG STATE ───
-        let allPosts = [];
-        let allTags = new Set();
-        let activeTag = null;
-        let searchQuery = '';
-        let generatedPayload = null;
-
+        // ─── BLOG POSTS ───
         async function loadPosts() {
             try {
                 const res = await fetch('blog-data.json?t=' + Date.now());
@@ -566,7 +888,7 @@
                 renderTags();
                 renderPosts();
             } catch (e) {
-                console.warn('Could not load blog-data.json, using empty archive.', e);
+                console.warn('Could not load blog-data.json', e);
                 allPosts = [];
                 renderPosts();
             }
@@ -574,9 +896,7 @@
 
         function extractTags() {
             allTags.clear();
-            allPosts.forEach(p => {
-                (p.tags || []).forEach(t => allTags.add(t));
-            });
+            allPosts.forEach(p => { (p.tags || []).forEach(t => allTags.add(t)); });
         }
 
         function renderTags() {
@@ -584,8 +904,7 @@
             if (!container) return;
             let html = `<button onclick="filterByTag(null)" class="tag-pill px-3 py-1 rounded text-xs uppercase tracking-widest font-mono ${!activeTag ? 'active' : ''}">All</button>`;
             Array.from(allTags).sort().forEach(tag => {
-                const isActive = activeTag === tag;
-                html += `<button onclick="filterByTag('${tag}')" class="tag-pill px-3 py-1 rounded text-xs uppercase tracking-widest font-mono ${isActive ? 'active' : ''}">${escapeHtml(tag)}</button>`;
+                html += `<button onclick="filterByTag('${tag}')" class="tag-pill px-3 py-1 rounded text-xs uppercase tracking-widest font-mono ${activeTag === tag ? 'active' : ''}">${escapeHtml(tag)}</button>`;
             });
             container.innerHTML = html;
         }
@@ -619,12 +938,7 @@
             const posts = getFilteredPosts();
 
             if (stats) stats.textContent = `Displaying ${posts.length} of ${allPosts.length} transmissions`;
-
-            if (posts.length === 0) {
-                list.innerHTML = '';
-                empty.classList.remove('hidden');
-                return;
-            }
+            if (posts.length === 0) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
             list.innerHTML = posts.map((post, idx) => {
@@ -636,41 +950,31 @@
 
                 return `
                 <article class="list-entry py-8 md:py-10 decode-in flex flex-col md:flex-row gap-6 md:gap-8 items-start" style="animation-delay: ${idx * 50}ms">
-                    <!-- Thumbnail -->
                     <div class="w-full md:w-56 flex-shrink-0">
                         <div class="scanline-wrap aspect-[4/3] bg-slate-900/80 rounded border border-slate-800 overflow-hidden relative">
                             ${featuredImg ? `<img src="${escapeHtml(featuredImg)}" alt="${escapeHtml(post.title || '')}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">NO_VISUAL_DATA</div>`}
                         </div>
                     </div>
-
-                    <!-- Content -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-3 text-xs font-mono text-slate-500 uppercase tracking-wider">
-                            <i class="ph ph-calendar-blank text-neon-cyan/60"></i>
-                            ${dateStr}
+                            <i class="ph ph-calendar-blank text-neon-cyan/60"></i> ${dateStr}
                             <span class="mx-2 text-slate-700">|</span>
-                            <i class="ph ph-user text-neon-cyan/60"></i>
-                            ${escapeHtml(post.author || 'Unknown Operator')}
+                            <i class="ph ph-user text-neon-cyan/60"></i> ${escapeHtml(post.author || 'Unknown Operator')}
                         </div>
-
                         <h3 onclick="openPostModal('${post.id}')" class="text-xl md:text-2xl font-display font-bold text-white mb-3 leading-snug hover:text-neon-cyan transition-colors cursor-pointer">
                             ${escapeHtml(post.title || 'Untitled Transmission')}
                         </h3>
-
                         <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-4">
                             ${escapeHtml(post.excerpt || '')}
                         </p>
-
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="flex flex-wrap gap-2">${tagsHtml}</div>
                             <button onclick="openPostModal('${post.id}')" class="ml-auto inline-flex items-center gap-1 text-neon-cyan text-xs uppercase tracking-widest font-mono hover:text-white transition-colors group">
-                                <span>mehr</span>
-                                <i class="ph ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                <span>mehr</span><i class="ph ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </button>
                         </div>
                     </div>
-                </article>
-                `;
+                </article>`;
             }).join('');
         }
 
@@ -687,13 +991,14 @@
             return div.innerHTML;
         }
 
-        // Post Modal
-        function openPostModal(id) {
+        // ─── POST MODAL ───
+        async function openPostModal(id) {
             const post = allPosts.find(p => p.id === id);
             if (!post) return;
+            currentPostId = id;
+
             const modal = document.getElementById('post-modal');
             const content = document.getElementById('modal-content');
-
             const dateStr = post.date ? formatDate(post.date) : 'DATE_UNKNOWN';
             const tagsHtml = (post.tags || []).map(t =>
                 `<span class="text-xs uppercase tracking-wider text-neon-cyan border border-neon-cyan/30 px-3 py-1 rounded font-mono">${escapeHtml(t)}</span>`
@@ -707,26 +1012,13 @@
                     }
                     if (block.type === 'image') {
                         if (block.src && block.src === post.featuredImage) return '';
-                        return `
-                        <div class="scanline-wrap rounded border border-slate-800 my-8 overflow-hidden">
-                            <img src="${escapeHtml(block.src || '')}" alt="${escapeHtml(block.alt || '')}" class="w-full object-cover">
-                        </div>`;
+                        return `<div class="scanline-wrap rounded border border-slate-800 my-8 overflow-hidden"><img src="${escapeHtml(block.src || '')}" alt="${escapeHtml(block.alt || '')}" class="w-full object-cover"></div>`;
                     }
                     if (block.type === 'video') {
-                        return `
-                        <div class="viewfinder aspect-video bg-slate-900 border border-slate-800 my-8 relative overflow-hidden rounded">
-                            <iframe class="absolute inset-0 w-full h-full" src="${escapeHtml(block.src || '')}" title="${escapeHtml(block.title || 'Video')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            <div class="rec-badge">REC // VISUAL_FEED</div>
-                        </div>`;
+                        return `<div class="viewfinder aspect-video bg-slate-900 border border-slate-800 my-8 relative overflow-hidden rounded"><iframe class="absolute inset-0 w-full h-full" src="${escapeHtml(block.src || '')}" title="${escapeHtml(block.title || 'Video')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><div class="rec-badge">REC // VISUAL_FEED</div></div>`;
                     }
                     if (block.type === 'link') {
-                        return `
-                        <div class="my-6">
-                            <a href="${escapeHtml(block.url || '#')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 border border-neon-cyan/40 bg-neon-cyan/5 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/15 transition-all">
-                                <i class="ph ph-link-simple text-lg"></i>
-                                ${escapeHtml(block.label || block.url)}
-                            </a>
-                        </div>`;
+                        return `<div class="my-6"><a href="${escapeHtml(block.url || '#')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 border border-neon-cyan/40 bg-neon-cyan/5 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/15 transition-all"><i class="ph ph-link-simple text-lg"></i>${escapeHtml(block.label || block.url)}</a></div>`;
                     }
                     return '';
                 }).join('');
@@ -736,12 +1028,8 @@
                 <div class="mb-6">
                     <div class="flex flex-wrap items-center gap-3 mb-4">
                         <span class="font-mono text-[10px] text-neon-cyan uppercase tracking-widest border border-neon-cyan/30 px-2 py-1 rounded">ID: ${escapeHtml(post.id || '???')}</span>
-                        <span class="font-mono text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                            <i class="ph ph-calendar-blank"></i> ${dateStr}
-                        </span>
-                        <span class="font-mono text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                            <i class="ph ph-user"></i> ${escapeHtml(post.author || 'Unknown Operator')}
-                        </span>
+                        <span class="font-mono text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2"><i class="ph ph-calendar-blank"></i> ${dateStr}</span>
+                        <span class="font-mono text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2"><i class="ph ph-user"></i> ${escapeHtml(post.author || 'Unknown Operator')}</span>
                     </div>
                     <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-6 glow-text leading-tight">${escapeHtml(post.title || 'Untitled')}</h2>
                     <div class="flex flex-wrap gap-2">${tagsHtml}</div>
@@ -754,6 +1042,9 @@
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
             document.body.style.overflow = 'hidden';
+
+            renderCommentForm();
+            listenToComments(id);
         }
 
         function closePostModal() {
@@ -763,9 +1054,89 @@
                 modal.style.display = 'none';
                 document.body.style.overflow = '';
             }, 300);
+            currentPostId = null;
+            if (commentsUnsub) { commentsUnsub(); commentsUnsub = null; }
         }
 
-        // Composer
+        // ─── COMMENTS ───
+        function renderCommentForm() {
+            const formArea = document.getElementById('comment-form-area');
+            const loginPrompt = document.getElementById('comment-login-prompt');
+            if (currentUser) {
+                formArea.classList.remove('hidden');
+                loginPrompt.classList.add('hidden');
+            } else {
+                formArea.classList.add('hidden');
+                loginPrompt.classList.remove('hidden');
+            }
+        }
+
+        function listenToComments(postId) {
+            if (commentsUnsub) { commentsUnsub(); commentsUnsub = null; }
+
+            const list = document.getElementById('comments-list');
+            list.innerHTML = '<p class="text-slate-600 text-xs font-mono uppercase tracking-wider">Receiving signals...</p>';
+
+            commentsUnsub = db.collection('comments')
+                .where('postId', '==', postId)
+                .orderBy('createdAt', 'asc')
+                .onSnapshot(snapshot => {
+                    const comments = [];
+                    snapshot.forEach(doc => comments.push({ id: doc.id, ...doc.data() }));
+                    renderCommentsList(comments);
+                }, err => {
+                    console.warn('Comments listener error:', err);
+                    list.innerHTML = '<p class="text-slate-600 text-xs font-mono uppercase tracking-wider">Signal interference. Comments unavailable.</p>';
+                });
+        }
+
+        function renderCommentsList(comments) {
+            const list = document.getElementById('comments-list');
+            const count = document.getElementById('comment-count');
+            count.textContent = `(${comments.length})`;
+
+            if (comments.length === 0) {
+                list.innerHTML = '<p class="text-slate-600 text-xs font-mono uppercase tracking-wider">No responses yet. Be the first to broadcast.</p>';
+                return;
+            }
+
+            list.innerHTML = comments.map(c => {
+                const date = c.createdAt ? formatDate(c.createdAt.toDate ? c.createdAt.toDate() : c.createdAt) : 'UNKNOWN';
+                return `
+                    <div class="comment-item">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-mono text-neon-cyan font-bold">${escapeHtml(c.author || 'Anonymous')}</span>
+                            <span class="text-[10px] text-slate-600 font-mono">${date}</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">${escapeHtml(c.text || '')}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function submitComment() {
+            if (!currentUser || !currentPostId) return;
+            const text = document.getElementById('comment-text').value.trim();
+            if (!text) return;
+
+            const author = currentUser.displayName || 'Operator';
+
+            try {
+                await db.collection('comments').add({
+                    postId: currentPostId,
+                    text,
+                    author,
+                    uid: currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById('comment-text').value = '';
+            } catch (e) {
+                console.error('Failed to post comment:', e);
+                alert('Failed to transmit comment. Please try again.');
+            }
+        }
+
+        // ─── COMPOSER (Admin only) ───
         function openComposer() {
             const modal = document.getElementById('composer-modal');
             modal.style.display = 'flex';
@@ -776,10 +1147,7 @@
         function closeComposer() {
             const modal = document.getElementById('composer-modal');
             modal.classList.add('opacity-0');
-            setTimeout(() => {
-                modal.style.display = 'none';
-                document.body.style.overflow = '';
-            }, 300);
+            setTimeout(() => { modal.style.display = 'none'; document.body.style.overflow = ''; }, 300);
         }
 
         function encodeTransmission() {
@@ -794,37 +1162,19 @@
 
             let content = [];
             if (contentRaw) {
-                try {
-                    content = JSON.parse(contentRaw);
-                } catch (e) {
-                    alert('Content blocks JSON is invalid: ' + e.message);
-                    return;
-                }
+                try { content = JSON.parse(contentRaw); }
+                catch (e) { alert('Content blocks JSON is invalid: ' + e.message); return; }
             }
 
             const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
             const id = 'tx-' + Date.now().toString(36).slice(-6).toUpperCase();
             const date = new Date().toISOString();
 
-            const payload = {
-                id,
-                title,
-                author,
-                date,
-                tags,
-                excerpt,
-                featuredImage: image || undefined,
-                content
-            };
-
+            const payload = { id, title, author, date, tags, excerpt, featuredImage: image || undefined, content };
             generatedPayload = payload;
-            const out = document.getElementById('json-output');
-            const wrap = document.getElementById('json-output-wrap');
-            const dlBtn = document.getElementById('download-btn');
-
-            out.textContent = JSON.stringify(payload, null, 2);
-            wrap.classList.remove('hidden');
-            dlBtn.classList.remove('hidden');
+            document.getElementById('json-output').textContent = JSON.stringify(payload, null, 2);
+            document.getElementById('json-output-wrap').classList.remove('hidden');
+            document.getElementById('download-btn').classList.remove('hidden');
         }
 
         function downloadJSON() {
@@ -840,17 +1190,16 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closePostModal();
-                closeComposer();
-            }
+            if (e.key === 'Escape') { closePostModal(); closeComposer(); }
         });
 
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             loadPosts();
-            renderAuthStatus();
+            renderAuthUI();
+            renderAdminAuthUI();
             renderHeroButtons();
+            renderNavAuth();
         });
     </script>
 </body>
