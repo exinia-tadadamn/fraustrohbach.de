@@ -202,6 +202,24 @@
             50% { filter: blur(2px); }
             100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
+
+        /* Auth terminal panel */
+        .auth-terminal {
+            background: rgba(6, 182, 212, 0.03);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+        }
+        .auth-tab {
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .auth-tab.active {
+            border-bottom-color: #06b6d4;
+            color: #06b6d4;
+        }
+        .auth-tab:not(.active):hover {
+            border-bottom-color: #334155;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
@@ -216,13 +234,17 @@
                 <a href="index.html" class="text-2xl font-display font-bold text-white tracking-widest glow-text">
                     EXINIA.
                 </a>
-                <div class="hidden md:flex space-x-8 text-sm font-medium uppercase tracking-widest">
+                <div class="hidden md:flex items-center space-x-8 text-sm font-medium uppercase tracking-widest">
                     <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors">The Lenses</a>
                     <a href="index.html#videos" class="text-slate-400 hover:text-neon-cyan transition-colors">Recordings</a>
                     <a href="index.html#books" class="text-slate-400 hover:text-neon-cyan transition-colors">Fragments</a>
                     <a href="blog.html" class="text-neon-cyan transition-colors">Blog</a>
                     <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
                     <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
+                    <!-- Auth status indicator -->
+                    <div id="nav-auth" class="flex items-center gap-3 ml-4 pl-4 border-l border-slate-800">
+                        <!-- Injected via JS -->
+                    </div>
                 </div>
                 <!-- Mobile menu button -->
                 <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-neon-cyan">
@@ -261,7 +283,7 @@
                 Decoded chronicles from the temporal archive. Browse transmissions, filter by classification tags, or broadcast a new signal into the stream.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <button onclick="openComposer()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
+                <button id="hero-compose-btn" onclick="handleNewTransmissionClick()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
                     <i class="ph ph-broadcast text-xl"></i>
                     New Transmission
                 </button>
@@ -307,6 +329,64 @@
             <div id="empty-state" class="hidden text-center py-24">
                 <i class="ph ph-radio text-5xl text-slate-700 mb-4"></i>
                 <p class="text-slate-500 font-mono text-sm uppercase tracking-widest">No transmissions found.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Secure Access Terminal (Login/Register) -->
+    <section id="auth-terminal" class="py-24 border-t border-slate-800/50 relative">
+        <div class="max-w-xl mx-auto px-6">
+            <div class="auth-terminal rounded p-8 md:p-10">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full border border-neon-cyan/30 bg-neon-cyan/5 mb-4">
+                        <i class="ph ph-lock-key text-3xl text-neon-cyan"></i>
+                    </div>
+                    <h2 class="text-2xl font-display font-bold text-white glow-text mb-2">Secure Access Terminal</h2>
+                    <p class="text-slate-500 text-sm font-mono">Authentication required to broadcast new transmissions.</p>
+                </div>
+
+                <!-- Auth Tabs -->
+                <div class="flex justify-center gap-8 mb-8 text-sm uppercase tracking-widest font-medium">
+                    <button id="tab-login" onclick="switchAuthTab('login')" class="auth-tab active pb-2 text-slate-400">Login</button>
+                    <button id="tab-register" onclick="switchAuthTab('register')" class="auth-tab pb-2 text-slate-400">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="form-login" class="space-y-5">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Operator Nickname</label>
+                        <input id="login-nickname" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Enter your callsign">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Access Key</label>
+                        <input id="login-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="••••••••">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                        <i class="ph ph-key mr-2"></i> Authenticate
+                    </button>
+                </div>
+
+                <!-- Register Form -->
+                <div id="form-register" class="space-y-5 hidden">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Choose Nickname</label>
+                        <input id="reg-nickname" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Your callsign">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Access Key</label>
+                        <input id="reg-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Min. 6 characters">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Confirm Access Key</label>
+                        <input id="reg-password-confirm" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Repeat key">
+                    </div>
+                    <button onclick="handleRegister()" class="w-full border border-neon-magenta bg-neon-magenta/10 text-neon-magenta py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/20 transition-all">
+                        <i class="ph ph-user-plus mr-2"></i> Register Operator
+                    </button>
+                </div>
+
+                <!-- Auth Message -->
+                <div id="auth-message" class="hidden mt-6 text-center text-xs font-mono uppercase tracking-wider"></div>
             </div>
         </div>
     </section>
@@ -414,7 +494,167 @@
     </footer>
 
     <script>
-        // Live clock
+        // ─── AUTHENTICATION SYSTEM ───
+        const AUTH_KEY = 'exinia_auth_session';
+        const USERS_KEY = 'exinia_auth_users';
+
+        function getUsers() {
+            try {
+                return JSON.parse(localStorage.getItem(USERS_KEY)) || {};
+            } catch { return {}; }
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        function getSession() {
+            try {
+                return JSON.parse(sessionStorage.getItem(AUTH_KEY)) || null;
+            } catch { return null; }
+        }
+
+        function setSession(nickname) {
+            sessionStorage.setItem(AUTH_KEY, JSON.stringify({ nickname, timestamp: Date.now() }));
+        }
+
+        function clearSession() {
+            sessionStorage.removeItem(AUTH_KEY);
+        }
+
+        function isLoggedIn() {
+            return !!getSession();
+        }
+
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('form-login');
+            const registerForm = document.getElementById('form-register');
+            const loginTab = document.getElementById('tab-login');
+            const registerTab = document.getElementById('tab-register');
+            const msg = document.getElementById('auth-message');
+            msg.classList.add('hidden');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                loginTab.classList.remove('active');
+                registerTab.classList.add('active');
+            }
+        }
+
+        function showAuthMessage(text, type = 'info') {
+            const msg = document.getElementById('auth-message');
+            msg.textContent = text;
+            msg.classList.remove('hidden');
+            if (type === 'error') {
+                msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-magenta';
+            } else if (type === 'success') {
+                msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-lime';
+            } else {
+                msg.className = 'mt-6 text-center text-xs font-mono uppercase tracking-wider text-neon-cyan';
+            }
+        }
+
+        function handleRegister() {
+            const nickname = document.getElementById('reg-nickname').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-password-confirm').value;
+
+            if (!nickname) { showAuthMessage('Nickname required.', 'error'); return; }
+            if (!password) { showAuthMessage('Access key required.', 'error'); return; }
+            if (password.length < 6) { showAuthMessage('Access key must be at least 6 characters.', 'error'); return; }
+            if (password !== confirm) { showAuthMessage('Keys do not match.', 'error'); return; }
+
+            const users = getUsers();
+            if (users[nickname]) { showAuthMessage('Callsign already registered.', 'error'); return; }
+
+            // Simple hash for storage (not cryptographically secure but sufficient for client-side)
+            const hash = btoa(password).split('').reverse().join('') + 'exinia';
+            users[nickname] = { hash, created: new Date().toISOString() };
+            saveUsers(users);
+
+            showAuthMessage('Operator registered. Authenticate to continue.', 'success');
+            document.getElementById('reg-nickname').value = '';
+            document.getElementById('reg-password').value = '';
+            document.getElementById('reg-password-confirm').value = '';
+            setTimeout(() => switchAuthTab('login'), 1500);
+        }
+
+        function handleLogin() {
+            const nickname = document.getElementById('login-nickname').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!nickname) { showAuthMessage('Enter your callsign.', 'error'); return; }
+            if (!password) { showAuthMessage('Enter your access key.', 'error'); return; }
+
+            const users = getUsers();
+            const user = users[nickname];
+            if (!user) { showAuthMessage('Operator not found.', 'error'); return; }
+
+            const hash = btoa(password).split('').reverse().join('') + 'exinia';
+            if (user.hash !== hash) { showAuthMessage('Invalid access key.', 'error'); return; }
+
+            setSession(nickname);
+            showAuthMessage(`Authentication successful. Welcome, ${nickname}.`, 'success');
+            document.getElementById('login-nickname').value = '';
+            document.getElementById('login-password').value = '';
+            renderAuthStatus();
+            updateHeroButton();
+        }
+
+        function handleLogout() {
+            clearSession();
+            renderAuthStatus();
+            updateHeroButton();
+        }
+
+        function renderAuthStatus() {
+            const navAuth = document.getElementById('nav-auth');
+            const session = getSession();
+            if (session) {
+                navAuth.innerHTML = `
+                    <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${session.nickname}</span>
+                    <button onclick="handleLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                        <i class="ph ph-sign-out text-lg"></i> Logout
+                    </button>
+                `;
+            } else {
+                navAuth.innerHTML = `
+                    <a href="#auth-terminal" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                        <i class="ph ph-key text-lg"></i> Login
+                    </a>
+                `;
+            }
+        }
+
+        function handleNewTransmissionClick() {
+            if (isLoggedIn()) {
+                openComposer();
+            } else {
+                document.getElementById('auth-terminal').scrollIntoView({ behavior: 'smooth' });
+                showAuthMessage('Authentication required. Please login below.', 'error');
+                switchAuthTab('login');
+            }
+        }
+
+        function updateHeroButton() {
+            const btn = document.getElementById('hero-compose-btn');
+            if (!btn) return;
+            if (isLoggedIn()) {
+                btn.innerHTML = `<i class="ph ph-broadcast text-xl"></i> New Transmission`;
+                btn.classList.remove('border-slate-600', 'text-slate-500');
+                btn.classList.add('border-slate-700', 'text-white');
+            } else {
+                btn.innerHTML = `<i class="ph ph-lock-key text-xl"></i> New Transmission`;
+            }
+        }
+
+        // ─── LIVE CLOCK ───
         function updateClock() {
             const now = new Date();
             const timeStr = now.toISOString().split('T')[1].split('.')[0];
@@ -433,14 +673,13 @@
             });
         }
 
-        // State
+        // ─── BLOG STATE ───
         let allPosts = [];
         let allTags = new Set();
         let activeTag = null;
         let searchQuery = '';
         let generatedPayload = null;
 
-        // Fetch blog data
         async function loadPosts() {
             try {
                 const res = await fetch('blog-data.json?t=' + Date.now());
@@ -723,7 +962,11 @@
         });
 
         // Initialize
-        window.addEventListener('DOMContentLoaded', loadPosts);
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPosts();
+            renderAuthStatus();
+            updateHeroButton();
+        });
     </script>
 </body>
 </html>

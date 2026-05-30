@@ -125,18 +125,18 @@
                             <div class="mb-4">
                                 <div class="flex justify-between mb-1">
                                     <label class="text-xs text-slate-500">Min. Geschwindigkeit <span class="text-slate-400">v<sub>min</sub></span> [m/s]</label>
-                                    <span id="val-vmin" class="text-xs text-neon-cyan font-mono">0.001</span>
+                                    <span id="val-vmin" class="text-xs text-neon-cyan font-mono">0.010</span>
                                 </div>
-                                <input type="range" id="slider-vmin" min="0.0001" max="0.05" step="0.0001" value="0.001" class="w-full">
+                                <input type="range" id="slider-vmin" min="0.001" max="5.0" step="0.001" value="0.01" class="w-full">
                                 <p class="text-[10px] text-slate-600 mt-1">In der Grenzschicht, nahe der Oberfläche</p>
                             </div>
 
                             <div class="mb-4">
                                 <div class="flex justify-between mb-1">
                                     <label class="text-xs text-slate-500">Max. Geschwindigkeit <span class="text-slate-400">v<sub>peak</sub></span> [m/s]</label>
-                                    <span id="val-vpeak" class="text-xs text-neon-cyan font-mono">0.10</span>
+                                    <span id="val-vpeak" class="text-xs text-neon-cyan font-mono">1.00</span>
                                 </div>
-                                <input type="range" id="slider-vpeak" min="0.001" max="0.5" step="0.001" value="0.10" class="w-full">
+                                <input type="range" id="slider-vpeak" min="0.01" max="5.0" step="0.01" value="1.0" class="w-full">
                                 <p class="text-[10px] text-slate-600 mt-1">Außerhalb der Grenzschicht, am Peak</p>
                             </div>
 

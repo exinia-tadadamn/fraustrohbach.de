@@ -37,8 +37,8 @@ const SIGMA = 1; // fixed narrow bell-curve width (µm)
 let state = {
   density: 1000,
   efficiency: 0.5,
-  v_min: 0.001,
-  v_peak: 0.10,
+  v_min: 0.01,
+  v_peak: 1.0,
   l_opt: 15,
   demand_base: 1e-15,
   demand_slope: 2.86e-15, // W/µm so that at L=35 µm demand ≈ 1e-13 W
