@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // personalData: Hydrothermal Vent simulation configurations per user
+    match /personalData/{appId}/users/{uid}/simulations/{docId} {
+      allow get: if uid == request.auth.uid;
+      allow list: if uid == request.auth.uid && request.query.limit <= 100;
+      allow write: if uid == request.auth.uid;
+    }
+
+    // publicData: Public simulation gallery / shared results
+    match /publicData/{appId}/gallery/{docId} {
+      allow get: if true;
+      allow list: if request.query.limit <= 100;
+      allow write: if request.auth != null;
+    }
+  }
+}
