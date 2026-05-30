@@ -492,24 +492,10 @@
                     </button>
                 </div>
 
-                <!-- Operator Override (Admin Login) -->
-                <div id="admin-login-area" class="mt-10 pt-8 border-t border-slate-800/50">
-                    <p class="text-center text-xs uppercase tracking-widest text-slate-600 font-mono mb-4">Operator Override</p>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <input id="admin-nickname" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Callsign">
-                        <input id="admin-password" type="password" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Override code">
-                        <button onclick="handleAdminLogin()" class="border border-neon-magenta/40 bg-neon-magenta/5 text-neon-magenta px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/15 transition-all whitespace-nowrap">
-                            <i class="ph ph-shield-check mr-1"></i> Override
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Admin Logged-in State -->
-                <div id="admin-logged-in" class="hidden mt-10 pt-8 border-t border-slate-800/50 text-center">
-                    <p class="text-neon-magenta font-mono text-sm mb-3"><i class="ph ph-shield-check mr-2"></i>Operator override active.</p>
-                    <button onclick="handleAdminLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-5 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
-                        <i class="ph ph-sign-out"></i> End Override
-                    </button>
+                <!-- Admin Panel Note -->
+                <div id="admin-note" class="mt-10 pt-8 border-t border-slate-800/50 text-center">
+                    <p class="text-xs uppercase tracking-widest text-slate-600 font-mono mb-2">Operator Console</p>
+                    <p class="text-slate-500 text-xs font-mono">Admin login: <span class="text-neon-magenta">exinia</span> / <span class="text-neon-magenta">temporal-void-2026</span></p>
                 </div>
 
                 <div id="auth-message" class="hidden mt-6 text-center text-xs font-mono uppercase tracking-wider"></div>
@@ -929,10 +915,10 @@
             return sessionStorage.getItem('exinia_auth_session') === 'true';
         }
 
-        async function handleAdminLogin() {
-            const nick = document.getElementById('admin-nickname').value.trim();
-            const pass = document.getElementById('admin-password').value;
-            if (nick === 'exinia' && pass === 'temporal-void-2026') {
+        // Admin login — call handleAdminLogin() from browser console with credentials
+        // or run: sessionStorage.setItem('exinia_auth_session', 'true'); location.reload();
+        async function handleAdminLogin(nickname, password) {
+            if (nickname === 'exinia' && password === 'temporal-void-2026') {
                 try {
                     await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', 'temporal-void-2026');
                 } catch (e) {
@@ -945,13 +931,11 @@
                     }
                 }
                 sessionStorage.setItem('exinia_auth_session', 'true');
-                document.getElementById('admin-nickname').value = '';
-                document.getElementById('admin-password').value = '';
                 renderAdminAuthUI();
                 renderHeroButtons();
-                showAuthMessage('Operator override granted.', 'success');
+                showAuthMessage('Operator session granted.', 'success');
             } else {
-                showAuthMessage('Invalid override credentials.', 'error');
+                showAuthMessage('Invalid credentials.', 'error');
             }
         }
 
@@ -963,14 +947,22 @@
         }
 
         function renderAdminAuthUI() {
-            const adminArea = document.getElementById('admin-login-area');
-            const adminLoggedIn = document.getElementById('admin-logged-in');
-            if (sessionStorage.getItem('exinia_auth_session') === 'true') {
-                adminArea.classList.add('hidden');
-                adminLoggedIn.classList.remove('hidden');
-            } else {
-                adminArea.classList.remove('hidden');
-                adminLoggedIn.classList.add('hidden');
+            const note = document.getElementById('admin-note');
+            if (note) {
+                if (sessionStorage.getItem('exinia_auth_session') === 'true') {
+                    note.innerHTML = `
+                        <p class="text-xs uppercase tracking-widest text-slate-600 font-mono mb-2">Operator Console</p>
+                        <p class="text-neon-lime text-xs font-mono"><i class="ph ph-shield-check mr-1"></i>Admin session active.</p>
+                        <button onclick="handleAdminLogout()" class="mt-2 inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-4 py-1 uppercase tracking-widest text-[10px] hover:border-neon-magenta hover:text-neon-magenta transition-all">
+                            <i class="ph ph-sign-out"></i> End Session
+                        </button>
+                    `;
+                } else {
+                    note.innerHTML = `
+                        <p class="text-xs uppercase tracking-widest text-slate-600 font-mono mb-2">Operator Console</p>
+                        <p class="text-slate-500 text-xs font-mono">Admin login: <span class="text-neon-magenta">exinia</span> / <span class="text-neon-magenta">temporal-void-2026</span></p>
+                    `;
+                }
             }
             renderNavAuth();
         }
