@@ -157,6 +157,101 @@
           "label": "Open full playlist"
         }
       ]
+    },
+    {
+      "id": "TX-006",
+      "title": "I Was Awoken By A Dream: It Was A Dream Of Truth And Light",
+      "author": "Ksenia Strohbach",
+      "date": "2025-12-20T18:00:00Z",
+      "tags": ["book", "poetry", "selflove", "recursion", "art", "philosophy"],
+      "excerpt": "What does it mean to be truly alive? A poetry collection about honoring multifaceted identities, self-love, and the courage to confront one's own questions. Now available on Amazon.",
+      "featuredImage": "bookcoverdream.png",
+      "content": [
+        {
+          "type": "text",
+          "value": "What does it mean to be truly alive? This poetry collection offers a deeply human invitation to honor our multifaceted identities, reminding us that genuine change in the world starts with self-love. It challenges us to break free from rigid thinking and experience life in the present moment."
+        },
+        {
+          "type": "image",
+          "src": "bookcoverdream.png",
+          "alt": "Book cover: I Was Awoken By A Dream"
+        },
+        {
+          "type": "text",
+          "value": "It is a manifesto for autonomy over one's own body, the freedom to make authentic choices and the courage to confront one's own questions. Accompanying this visual journey are custom-created artworks, including stunning photographs of glowing Petri dishes that resemble spiral galaxies, and video feedback loops that visualize infinity and recursion."
+        },
+        {
+          "type": "text",
+          "value": "This book is for anyone who recognizes the poetry in science and the logic in art. It provides literary proof that the vast universe and our own fragile microcosm and macrocosm are inextricably linked. #recursion #selflove #poetry #art #mathematics #science #philosophy"
+        },
+        {
+          "type": "link",
+          "url": "https://amazon.de/-/en/dp/B0H2VFGV28/",
+          "label": "Get on Amazon"
+        }
+      ]
+    },
+    {
+      "id": "TX-007",
+      "title": "Alles IST Ein Zufall In Meinem Echten Leben: Erste Sammlung von Haikus und Kurzgeschichten aus '25",
+      "author": "Ksenia Strohbach",
+      "date": "2025-06-15T10:00:00Z",
+      "tags": ["book", "haiku", "poetry", "shortstories", "selfpublishing", "zufall"],
+      "excerpt": "Die Neuauflage wurde im Selbstverlag im Wirtschaftsjahr 2025 veröffentlicht. Die Ereignisse sind auf unvorhersehbare Weise miteinander verknüpft.",
+      "featuredImage": "bookcoverzufall.png",
+      "content": [
+        {
+          "type": "text",
+          "value": "Alles ist ein Zufall in meinem echten Leben. Die Neuauflage wurde im Selbstverlag im Wirtschaftsjahr 2025 veröffentlicht. Die Ereignisse sind auf unvorhersehbare Weise miteinander verknüpft — doch je genauer man hinschaut, desto mehr Struktur offenbart sich im scheinbaren Chaos."
+        },
+        {
+          "type": "image",
+          "src": "bookcoverzufall.png",
+          "alt": "Book cover: Alles IST Ein Zufall In Meinem Echten Leben"
+        },
+        {
+          "type": "text",
+          "value": "Diese Sammlung von Haikus und Kurzgeschichten aus dem Jahr 2025 erkundet die Grenzen der Wahrnehmung, die Grenzen zwischen Zufall und Schicksal, und die stille Schönheit von Ereignissen, die losgelöst erscheinen, aber heimlich durch unsichtbare Fäden der Kausalität verbunden sind. #haiku #poetry #shortstories #selfpublishing"
+        },
+        {
+          "type": "link",
+          "url": "https://www.amazon.de/-/en/Alles-Zufall-Meinem-Echten-Leben/dp/B0GBW35ZJ1/",
+          "label": "Link to Amazon"
+        }
+      ]
+    },
+    {
+      "id": "TX-008",
+      "title": "Am I Vegan? — The Temporal Reflection Test",
+      "author": "Ksenia Strohbach",
+      "date": "2025-09-01T14:00:00Z",
+      "tags": ["quiz", "vegan", "reflections", "interactive", "philosophy"],
+      "excerpt": "An interactive self-assessment protocol with leaderboard, scoring, and post-test reflections. How pure is your soul?",
+      "featuredImage": "imagesTimeMashine/image59.JPG",
+      "content": [
+        {
+          "type": "text",
+          "value": "The Temporal Reflection Test is an interactive protocol designed to measure the purity of one's dietary alignment. Enter your name, answer the questions truthfully, and receive a percentage score. But beware — the test has been known to judge harshly."
+        },
+        {
+          "type": "image",
+          "src": "imagesTimeMashine/image59.JPG",
+          "alt": "Quiz reflection scene"
+        },
+        {
+          "type": "text",
+          "value": "Features of the protocol: a dynamic leaderboard stored in local memory, randomized judgment sequences, a 'Judge Me' button that reveals the true nature of your choices, and a Reflections section that asks the deeper question: What is vegan, really?"
+        },
+        {
+          "type": "text",
+          "value": "The test is not merely about food. It is about intention, about awareness, about the recursive loop of cause and effect. Every choice echoes backward and forward in time. The leaderboard remembers. The machine remembers."
+        },
+        {
+          "type": "link",
+          "url": "quiz.html",
+          "label": "Take the Test"
+        }
+      ]
     }
   ]
 }

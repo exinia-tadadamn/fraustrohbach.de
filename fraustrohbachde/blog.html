@@ -39,41 +39,12 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
         .glow-text { text-shadow: 0 0 20px rgba(6, 182, 212, 0.35); }
-        .glow-border {
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.15), inset 0 0 20px rgba(6, 182, 212, 0.05);
-        }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        /* Holographic card border animation */
-        .holo-card {
-            position: relative;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(6, 182, 212, 0.25);
-            overflow: hidden;
-            transition: all 0.4s ease;
-        }
-        .holo-card::before {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            background: linear-gradient(45deg, transparent, rgba(6,182,212,0.3), transparent, rgba(217,70,239,0.2), transparent);
-            z-index: 0;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
-        .holo-card:hover::before { opacity: 1; }
-        .holo-card:hover {
-            border-color: rgba(6, 182, 212, 0.6);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.15);
-        }
-        .holo-card > * { position: relative; z-index: 1; }
 
         /* Glitch text on hover */
         .glitch-hover:hover {
@@ -104,15 +75,6 @@
             pointer-events: none;
             z-index: 2;
         }
-
-        /* Typing cursor */
-        .cursor-blink::after {
-            content: '▋';
-            animation: blink 1s step-end infinite;
-            color: #06b6d4;
-            margin-left: 2px;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
 
         /* Tag pill glow */
         .tag-pill {
@@ -192,33 +154,32 @@
             line-height: 1.5;
         }
 
-        /* Decode animation for cards entering */
+        /* Substack-style list item */
+        .list-entry {
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            transition: background 0.3s ease;
+        }
+        .list-entry:hover {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .list-entry:last-child {
+            border-bottom: none;
+        }
+
+        /* Decode animation */
         .decode-in {
-            animation: decodeIn 0.6s ease-out forwards;
+            animation: decodeIn 0.5s ease-out forwards;
             opacity: 0;
         }
         @keyframes decodeIn {
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(4px); }
-            50% { filter: blur(2px); }
-            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         /* Auth terminal panel */
         .auth-terminal {
             background: rgba(6, 182, 212, 0.03);
             border: 1px solid rgba(6, 182, 212, 0.15);
-        }
-        .auth-tab {
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-        .auth-tab.active {
-            border-bottom-color: #06b6d4;
-            color: #06b6d4;
-        }
-        .auth-tab:not(.active):hover {
-            border-bottom-color: #334155;
-            color: #94a3b8;
         }
     </style>
 </head>
@@ -282,22 +243,15 @@
             <p class="text-xl text-slate-400 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
                 Decoded chronicles from the temporal archive. Browse transmissions, filter by classification tags, or broadcast a new signal into the stream.
             </p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <button id="hero-compose-btn" onclick="handleNewTransmissionClick()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
-                    <i class="ph ph-broadcast text-xl"></i>
-                    New Transmission
-                </button>
-                <button onclick="document.getElementById('stream').scrollIntoView({behavior:'smooth'})" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-magenta hover:bg-neon-magenta/10 transition-all duration-300">
-                    <i class="ph ph-scroll text-xl"></i>
-                    View Stream
-                </button>
+            <div id="hero-buttons" class="flex flex-wrap justify-center gap-4">
+                <!-- Buttons injected via JS based on auth status -->
             </div>
         </div>
     </section>
 
     <!-- Filter & Search Bar -->
     <section id="stream" class="py-12 border-t border-slate-800/50 relative">
-        <div class="max-w-7xl mx-auto px-6">
+        <div class="max-w-4xl mx-auto px-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 <div class="flex items-center gap-3">
                     <i class="ph ph-funnel text-neon-cyan text-xl"></i>
@@ -315,13 +269,13 @@
             </div>
 
             <!-- Stats line -->
-            <div class="flex items-center gap-3 text-xs font-mono text-slate-500 border-b border-slate-800 pb-4 mb-8">
+            <div class="flex items-center gap-3 text-xs font-mono text-slate-500 border-b border-slate-800 pb-4 mb-0">
                 <span class="w-2 h-2 rounded-full bg-neon-cyan animate-pulse"></span>
                 <span id="stream-stats">Initializing archive...</span>
             </div>
 
-            <!-- Posts Grid -->
-            <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Posts List (Substack style) -->
+            <div id="posts-list" class="divide-y divide-slate-800/40">
                 <!-- Posts injected via JS -->
             </div>
 
@@ -368,7 +322,7 @@
 
     <!-- Post Detail Modal -->
     <div id="post-modal" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
-        <div class="w-full max-w-4xl mx-auto p-4 md:p-8 min-h-screen">
+        <div class="w-full max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
             <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
                 <!-- Modal top bar -->
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
@@ -470,7 +424,6 @@
 
     <script>
         // ─── AUTHENTICATION SYSTEM ───
-        // Hardcoded admin credentials (client-side only)
         const ADMIN_NICKNAME = 'exinia';
         const ADMIN_PASSWORD = 'temporal-void-2026';
         const AUTH_KEY = 'exinia_auth_session';
@@ -523,13 +476,13 @@
             document.getElementById('login-nickname').value = '';
             document.getElementById('login-password').value = '';
             renderAuthStatus();
-            updateHeroButton();
+            renderHeroButtons();
         }
 
         function handleLogout() {
             clearSession();
             renderAuthStatus();
-            updateHeroButton();
+            renderHeroButtons();
         }
 
         function renderAuthStatus() {
@@ -557,19 +510,23 @@
             } else {
                 document.getElementById('auth-terminal').scrollIntoView({ behavior: 'smooth' });
                 showAuthMessage('Authentication required. Please login below.', 'error');
-                switchAuthTab('login');
             }
         }
 
-        function updateHeroButton() {
-            const btn = document.getElementById('hero-compose-btn');
-            if (!btn) return;
+        function renderHeroButtons() {
+            const container = document.getElementById('hero-buttons');
+            if (!container) return;
             if (isLoggedIn()) {
-                btn.innerHTML = `<i class="ph ph-broadcast text-xl"></i> New Transmission`;
-                btn.classList.remove('border-slate-600', 'text-slate-500');
-                btn.classList.add('border-slate-700', 'text-white');
+                container.innerHTML = `
+                    <button onclick="openComposer()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
+                        <i class="ph ph-broadcast text-xl"></i> New Transmission
+                    </button>
+                    <button onclick="document.getElementById('stream').scrollIntoView({behavior:'smooth'})" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-magenta hover:bg-neon-magenta/10 transition-all duration-300">
+                        <i class="ph ph-scroll text-xl"></i> View Stream
+                    </button>
+                `;
             } else {
-                btn.innerHTML = `<i class="ph ph-lock-key text-xl"></i> New Transmission`;
+                container.innerHTML = '';
             }
         }
 
@@ -656,7 +613,7 @@
         }
 
         function renderPosts() {
-            const grid = document.getElementById('posts-grid');
+            const list = document.getElementById('posts-list');
             const empty = document.getElementById('empty-state');
             const stats = document.getElementById('stream-stats');
             const posts = getFilteredPosts();
@@ -664,40 +621,52 @@
             if (stats) stats.textContent = `Displaying ${posts.length} of ${allPosts.length} transmissions`;
 
             if (posts.length === 0) {
-                grid.innerHTML = '';
+                list.innerHTML = '';
                 empty.classList.remove('hidden');
                 return;
             }
             empty.classList.add('hidden');
 
-            grid.innerHTML = posts.map((post, idx) => {
+            list.innerHTML = posts.map((post, idx) => {
                 const dateStr = post.date ? formatDate(post.date) : 'DATE_UNKNOWN';
-                const tagsHtml = (post.tags || []).slice(0, 3).map(t =>
+                const tagsHtml = (post.tags || []).slice(0, 4).map(t =>
                     `<span class="text-[10px] uppercase tracking-wider text-neon-cyan/70 border border-neon-cyan/20 px-2 py-0.5 rounded font-mono">${escapeHtml(t)}</span>`
                 ).join(' ');
-                const featuredImg = post.featuredImage || (post.content || []).find(c => c.type === 'image')?.src || '';
+                const featuredImg = post.featuredImage || '';
 
                 return `
-                <article class="holo-card rounded decode-in cursor-pointer" style="animation-delay: ${idx * 60}ms" onclick="openPostModal('${post.id}')">
-                    <div class="scanline-wrap h-48 bg-slate-900/80 relative">
-                        ${featuredImg ? `<img src="${escapeHtml(featuredImg)}" alt="${escapeHtml(post.title || '')}" class="w-full h-full object-cover opacity-80">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">NO_VISUAL_DATA</div>`}
-                        <div class="absolute top-3 left-3 font-mono text-[10px] text-neon-cyan/60 bg-black/50 px-2 py-1 rounded backdrop-blur">
-                            TX // ${post.id || '???'}
+                <article class="list-entry py-8 md:py-10 decode-in flex flex-col md:flex-row gap-6 md:gap-8 items-start" style="animation-delay: ${idx * 50}ms">
+                    <!-- Thumbnail -->
+                    <div class="w-full md:w-56 flex-shrink-0">
+                        <div class="scanline-wrap aspect-[4/3] bg-slate-900/80 rounded border border-slate-800 overflow-hidden relative">
+                            ${featuredImg ? `<img src="${escapeHtml(featuredImg)}" alt="${escapeHtml(post.title || '')}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">NO_VISUAL_DATA</div>`}
                         </div>
                     </div>
-                    <div class="p-6">
+
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-3 text-xs font-mono text-slate-500 uppercase tracking-wider">
                             <i class="ph ph-calendar-blank text-neon-cyan/60"></i>
                             ${dateStr}
+                            <span class="mx-2 text-slate-700">|</span>
+                            <i class="ph ph-user text-neon-cyan/60"></i>
+                            ${escapeHtml(post.author || 'Unknown Operator')}
                         </div>
-                        <h3 class="text-xl font-display font-bold text-white mb-3 leading-snug hover:text-neon-cyan transition-colors">
+
+                        <h3 class="text-xl md:text-2xl font-display font-bold text-white mb-3 leading-snug hover:text-neon-cyan transition-colors">
                             ${escapeHtml(post.title || 'Untitled Transmission')}
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-4 line-clamp-3">
+
+                        <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-4">
                             ${escapeHtml(post.excerpt || '')}
                         </p>
-                        <div class="flex flex-wrap gap-2">
-                            ${tagsHtml}
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex flex-wrap gap-2">${tagsHtml}</div>
+                            <button onclick="openPostModal('${post.id}')" class="ml-auto inline-flex items-center gap-1 text-neon-cyan text-xs uppercase tracking-widest font-mono hover:text-white transition-colors group">
+                                <span>mehr</span>
+                                <i class="ph ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </button>
                         </div>
                     </div>
                 </article>
@@ -773,7 +742,7 @@
                             <i class="ph ph-user"></i> ${escapeHtml(post.author || 'Unknown Operator')}
                         </span>
                     </div>
-                    <h2 class="text-3xl md:text-5xl font-display font-bold text-white mb-6 glow-text leading-tight">${escapeHtml(post.title || 'Untitled')}</h2>
+                    <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-6 glow-text leading-tight">${escapeHtml(post.title || 'Untitled')}</h2>
                     <div class="flex flex-wrap gap-2">${tagsHtml}</div>
                 </div>
                 ${post.featuredImage ? `
@@ -884,7 +853,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadPosts();
             renderAuthStatus();
-            updateHeroButton();
+            renderHeroButtons();
         });
     </script>
 </body>
