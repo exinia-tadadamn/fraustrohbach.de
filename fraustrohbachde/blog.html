@@ -333,7 +333,7 @@
         </div>
     </section>
 
-    <!-- Section: Secure Access Terminal (Login/Register) -->
+    <!-- Section: Secure Access Terminal (Admin Login Only) -->
     <section id="auth-terminal" class="py-24 border-t border-slate-800/50 relative">
         <div class="max-w-xl mx-auto px-6">
             <div class="auth-terminal rounded p-8 md:p-10">
@@ -342,16 +342,10 @@
                         <i class="ph ph-lock-key text-3xl text-neon-cyan"></i>
                     </div>
                     <h2 class="text-2xl font-display font-bold text-white glow-text mb-2">Secure Access Terminal</h2>
-                    <p class="text-slate-500 text-sm font-mono">Authentication required to broadcast new transmissions.</p>
+                    <p class="text-slate-500 text-sm font-mono">Admin authentication required to broadcast new transmissions.</p>
                 </div>
 
-                <!-- Auth Tabs -->
-                <div class="flex justify-center gap-8 mb-8 text-sm uppercase tracking-widest font-medium">
-                    <button id="tab-login" onclick="switchAuthTab('login')" class="auth-tab active pb-2 text-slate-400">Login</button>
-                    <button id="tab-register" onclick="switchAuthTab('register')" class="auth-tab pb-2 text-slate-400">Register</button>
-                </div>
-
-                <!-- Login Form -->
+                <!-- Admin Login Form -->
                 <div id="form-login" class="space-y-5">
                     <div>
                         <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Operator Nickname</label>
@@ -363,25 +357,6 @@
                     </div>
                     <button onclick="handleLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
                         <i class="ph ph-key mr-2"></i> Authenticate
-                    </button>
-                </div>
-
-                <!-- Register Form -->
-                <div id="form-register" class="space-y-5 hidden">
-                    <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Choose Nickname</label>
-                        <input id="reg-nickname" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Your callsign">
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Access Key</label>
-                        <input id="reg-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Min. 6 characters">
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Confirm Access Key</label>
-                        <input id="reg-password-confirm" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Repeat key">
-                    </div>
-                    <button onclick="handleRegister()" class="w-full border border-neon-magenta bg-neon-magenta/10 text-neon-magenta py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/20 transition-all">
-                        <i class="ph ph-user-plus mr-2"></i> Register Operator
                     </button>
                 </div>
 
@@ -495,18 +470,10 @@
 
     <script>
         // ─── AUTHENTICATION SYSTEM ───
+        // Hardcoded admin credentials (client-side only)
+        const ADMIN_NICKNAME = 'exinia';
+        const ADMIN_PASSWORD = 'temporal-void-2026';
         const AUTH_KEY = 'exinia_auth_session';
-        const USERS_KEY = 'exinia_auth_users';
-
-        function getUsers() {
-            try {
-                return JSON.parse(localStorage.getItem(USERS_KEY)) || {};
-            } catch { return {}; }
-        }
-
-        function saveUsers(users) {
-            localStorage.setItem(USERS_KEY, JSON.stringify(users));
-        }
 
         function getSession() {
             try {
@@ -526,27 +493,6 @@
             return !!getSession();
         }
 
-        function switchAuthTab(tab) {
-            const loginForm = document.getElementById('form-login');
-            const registerForm = document.getElementById('form-register');
-            const loginTab = document.getElementById('tab-login');
-            const registerTab = document.getElementById('tab-register');
-            const msg = document.getElementById('auth-message');
-            msg.classList.add('hidden');
-
-            if (tab === 'login') {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-                loginTab.classList.add('active');
-                registerTab.classList.remove('active');
-            } else {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                loginTab.classList.remove('active');
-                registerTab.classList.add('active');
-            }
-        }
-
         function showAuthMessage(text, type = 'info') {
             const msg = document.getElementById('auth-message');
             msg.textContent = text;
@@ -560,31 +506,6 @@
             }
         }
 
-        function handleRegister() {
-            const nickname = document.getElementById('reg-nickname').value.trim();
-            const password = document.getElementById('reg-password').value;
-            const confirm = document.getElementById('reg-password-confirm').value;
-
-            if (!nickname) { showAuthMessage('Nickname required.', 'error'); return; }
-            if (!password) { showAuthMessage('Access key required.', 'error'); return; }
-            if (password.length < 6) { showAuthMessage('Access key must be at least 6 characters.', 'error'); return; }
-            if (password !== confirm) { showAuthMessage('Keys do not match.', 'error'); return; }
-
-            const users = getUsers();
-            if (users[nickname]) { showAuthMessage('Callsign already registered.', 'error'); return; }
-
-            // Simple hash for storage (not cryptographically secure but sufficient for client-side)
-            const hash = btoa(password).split('').reverse().join('') + 'exinia';
-            users[nickname] = { hash, created: new Date().toISOString() };
-            saveUsers(users);
-
-            showAuthMessage('Operator registered. Authenticate to continue.', 'success');
-            document.getElementById('reg-nickname').value = '';
-            document.getElementById('reg-password').value = '';
-            document.getElementById('reg-password-confirm').value = '';
-            setTimeout(() => switchAuthTab('login'), 1500);
-        }
-
         function handleLogin() {
             const nickname = document.getElementById('login-nickname').value.trim();
             const password = document.getElementById('login-password').value;
@@ -592,15 +513,13 @@
             if (!nickname) { showAuthMessage('Enter your callsign.', 'error'); return; }
             if (!password) { showAuthMessage('Enter your access key.', 'error'); return; }
 
-            const users = getUsers();
-            const user = users[nickname];
-            if (!user) { showAuthMessage('Operator not found.', 'error'); return; }
-
-            const hash = btoa(password).split('').reverse().join('') + 'exinia';
-            if (user.hash !== hash) { showAuthMessage('Invalid access key.', 'error'); return; }
+            if (nickname !== ADMIN_NICKNAME || password !== ADMIN_PASSWORD) {
+                showAuthMessage('Access denied. Invalid credentials.', 'error');
+                return;
+            }
 
             setSession(nickname);
-            showAuthMessage(`Authentication successful. Welcome, ${nickname}.`, 'success');
+            showAuthMessage('Authentication successful. Welcome, Operator.', 'success');
             document.getElementById('login-nickname').value = '';
             document.getElementById('login-password').value = '';
             renderAuthStatus();
