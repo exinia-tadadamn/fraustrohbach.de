@@ -1,0 +1,13 @@
+{
+  "name": "instagram-scraper",
+  "version": "1.0.0",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.0",
+    "firebase-functions": "^4.5.0",
+    "puppeteer-core": "^21.6.0",
+    "@sparticuz/chromium": "^119.0.0"
+  }
+}
