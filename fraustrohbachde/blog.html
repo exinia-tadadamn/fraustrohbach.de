@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exinia | Transmission Log</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        neon: {
+                            cyan: '#06b6d4',
+                            blue: '#3b82f6',
+                            magenta: '#d946ef',
+                            lime: '#84cc16'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #020617; }
+        .fade-in { animation: fadeIn 1.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glow-text { text-shadow: 0 0 20px rgba(6, 182, 212, 0.35); }
+        .glow-border {
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.15), inset 0 0 20px rgba(6, 182, 212, 0.05);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Holographic card border animation */
+        .holo-card {
+            position: relative;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .holo-card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(6,182,212,0.3), transparent, rgba(217,70,239,0.2), transparent);
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .holo-card:hover::before { opacity: 1; }
+        .holo-card:hover {
+            border-color: rgba(6, 182, 212, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.15);
+        }
+        .holo-card > * { position: relative; z-index: 1; }
+
+        /* Glitch text on hover */
+        .glitch-hover:hover {
+            animation: glitchText 0.35s ease-in-out;
+        }
+        @keyframes glitchText {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-1px, 1px); }
+            80% { transform: translate(1px, -1px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Scanline overlay for images */
+        .scanline-wrap { position: relative; overflow: hidden; }
+        .scanline-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 2px,
+                rgba(6, 182, 212, 0.03) 2px,
+                rgba(6, 182, 212, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Typing cursor */
+        .cursor-blink::after {
+            content: '▋';
+            animation: blink 1s step-end infinite;
+            color: #06b6d4;
+            margin-left: 2px;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Tag pill glow */
+        .tag-pill {
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: #22d3ee;
+            transition: all 0.2s ease;
+        }
+        .tag-pill:hover, .tag-pill.active {
+            background: rgba(6, 182, 212, 0.2);
+            border-color: #22d3ee;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+        }
+
+        /* Terminal input */
+        .terminal-input {
+            background: rgba(6, 182, 212, 0.05);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: #e2e8f0;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .terminal-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+        }
+
+        /* Modal backdrop blur */
+        .modal-backdrop {
+            background: rgba(2, 6, 23, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        /* Video container viewfinder */
+        .viewfinder {
+            position: relative;
+        }
+        .viewfinder::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 8px solid rgba(0,0,0,0.4);
+            pointer-events: none;
+            z-index: 10;
+        }
+        .viewfinder .rec-badge {
+            position: absolute;
+            top: 12px; left: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: rgba(6, 182, 212, 0.6);
+            z-index: 11;
+            pointer-events: none;
+        }
+
+        /* Compose modal textarea */
+        .compose-area {
+            background: #0b1221;
+            border: 1px solid #1e293b;
+            color: #e2e8f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .compose-area:focus {
+            outline: none;
+            border-color: #06b6d4;
+        }
+
+        /* JSON output block */
+        .json-block {
+            background: #050914;
+            border: 1px solid #1e293b;
+            color: #84cc16;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* Decode animation for cards entering */
+        .decode-in {
+            animation: decodeIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes decodeIn {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(4px); }
+            50% { filter: blur(2px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
+
+    <!-- Ambient Background Glow -->
+    <div class="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#020617] to-black opacity-80"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-[#020617]/80 backdrop-blur-lg z-50 border-b border-slate-800/50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center h-20">
+                <a href="index.html" class="text-2xl font-display font-bold text-white tracking-widest glow-text">
+                    EXINIA.
+                </a>
+                <div class="hidden md:flex space-x-8 text-sm font-medium uppercase tracking-widest">
+                    <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors">The Lenses</a>
+                    <a href="index.html#videos" class="text-slate-400 hover:text-neon-cyan transition-colors">Recordings</a>
+                    <a href="index.html#books" class="text-slate-400 hover:text-neon-cyan transition-colors">Fragments</a>
+                    <a href="blog.html" class="text-neon-cyan transition-colors">Blog</a>
+                    <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
+                    <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
+                </div>
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-neon-cyan">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#020617]/95 border-b border-slate-800/50 px-6 pb-6">
+            <div class="flex flex-col space-y-4 text-sm font-medium uppercase tracking-widest">
+                <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors">The Lenses</a>
+                <a href="index.html#videos" class="text-slate-400 hover:text-neon-cyan transition-colors">Recordings</a>
+                <a href="index.html#books" class="text-slate-400 hover:text-neon-cyan transition-colors">Fragments</a>
+                <a href="blog.html" class="text-neon-cyan transition-colors">Blog</a>
+                <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
+                <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-[60vh] flex items-center justify-center pt-20 fade-in relative overflow-hidden">
+        <div class="absolute w-[500px] h-[500px] border border-slate-800/30 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute w-[700px] h-[700px] border border-slate-800/20 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+
+        <div class="text-center px-4 max-w-4xl relative z-10">
+            <p class="text-neon-cyan uppercase tracking-[0.4em] mb-6 text-xs md:text-sm font-mono">
+                <span class="inline-block w-2 h-2 rounded-full bg-neon-cyan animate-pulse mr-2"></span>
+                Datastream Active // <span id="live-clock">--:--:--</span>
+            </p>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-8 leading-tight tracking-tight glow-text glitch-hover cursor-default">
+                Transmission<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">Log.</span>
+            </h1>
+            <p class="text-xl text-slate-400 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
+                Decoded chronicles from the temporal archive. Browse transmissions, filter by classification tags, or broadcast a new signal into the stream.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="openComposer()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
+                    <i class="ph ph-broadcast text-xl"></i>
+                    New Transmission
+                </button>
+                <button onclick="document.getElementById('stream').scrollIntoView({behavior:'smooth'})" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-magenta hover:bg-neon-magenta/10 transition-all duration-300">
+                    <i class="ph ph-scroll text-xl"></i>
+                    View Stream
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter & Search Bar -->
+    <section id="stream" class="py-12 border-t border-slate-800/50 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                <div class="flex items-center gap-3">
+                    <i class="ph ph-funnel text-neon-cyan text-xl"></i>
+                    <span class="text-sm uppercase tracking-widest text-slate-500">Filters</span>
+                </div>
+                <div class="relative flex-1 max-w-md">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input id="search-input" type="text" placeholder="Search transmissions..." class="terminal-input w-full pl-10 pr-4 py-3 rounded text-sm">
+                </div>
+            </div>
+
+            <!-- Tags container -->
+            <div id="tags-container" class="flex flex-wrap gap-2 mb-8">
+                <!-- Tags injected via JS -->
+            </div>
+
+            <!-- Stats line -->
+            <div class="flex items-center gap-3 text-xs font-mono text-slate-500 border-b border-slate-800 pb-4 mb-8">
+                <span class="w-2 h-2 rounded-full bg-neon-cyan animate-pulse"></span>
+                <span id="stream-stats">Initializing archive...</span>
+            </div>
+
+            <!-- Posts Grid -->
+            <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Posts injected via JS -->
+            </div>
+
+            <!-- Empty state -->
+            <div id="empty-state" class="hidden text-center py-24">
+                <i class="ph ph-radio text-5xl text-slate-700 mb-4"></i>
+                <p class="text-slate-500 font-mono text-sm uppercase tracking-widest">No transmissions found.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Post Detail Modal -->
+    <div id="post-modal" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
+        <div class="w-full max-w-4xl mx-auto p-4 md:p-8 min-h-screen">
+            <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
+                <!-- Modal top bar -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-aperture text-neon-cyan text-xl"></i>
+                        <span class="font-mono text-xs text-neon-cyan uppercase tracking-widest">Transmission Detail</span>
+                    </div>
+                    <button onclick="closePostModal()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-xs uppercase tracking-widest">
+                        <i class="ph ph-x text-xl"></i> Close
+                    </button>
+                </div>
+
+                <div id="modal-content" class="p-6 md:p-10">
+                    <!-- Content injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Composer Modal -->
+    <div id="composer-modal" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
+        <div class="w-full max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
+            <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-pencil-simple-line text-neon-magenta text-xl"></i>
+                        <span class="font-mono text-xs text-neon-magenta uppercase tracking-widest">Compose Transmission</span>
+                    </div>
+                    <button onclick="closeComposer()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-xs uppercase tracking-widest">
+                        <i class="ph ph-x text-xl"></i> Close
+                    </button>
+                </div>
+
+                <div class="p-6 md:p-10 space-y-6">
+                    <p class="text-slate-400 text-sm">Fill in the fields below to compose a new transmission. When done, click "Encode JSON" to generate the data block. Copy it into <code class="text-neon-cyan font-mono text-xs">blog-data.json</code> and save the file.</p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Transmission Title</label>
+                            <input id="compose-title" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="e.g. First Contact with the Void">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Author / Operator</label>
+                            <input id="compose-author" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" value="Ksenia Strohbach">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Tags (comma separated)</label>
+                            <input id="compose-tags" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="poetry, temporal, visual">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Excerpt / Summary</label>
+                            <input id="compose-excerpt" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Short preview text...">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Featured Image URL</label>
+                            <input id="compose-image" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="https://... or imagesTimeMashine/image1.JPG">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Content Blocks (JSON array)</label>
+                            <textarea id="compose-content" rows="10" class="compose-area w-full px-4 py-3 rounded" placeholder='[
+  {"type":"text","value":"Your paragraph here."},
+  {"type":"image","src":"imagesTimeMashine/image1.JPG","alt":"Description"},
+  {"type":"video","src":"https://www.youtube.com/embed/VIDEO_ID","title":"Video Title"},
+  {"type":"link","url":"https://example.com","label":"Link Text"}
+]'></textarea>
+                            <p class="text-xs text-slate-600 mt-2 font-mono">Supported types: text, image, video (YouTube embed URL), link</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 pt-4 border-t border-slate-800">
+                        <button onclick="encodeTransmission()" class="inline-flex items-center gap-2 border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-6 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                            <i class="ph ph-file-code text-lg"></i>
+                            Encode JSON
+                        </button>
+                        <button onclick="downloadJSON()" id="download-btn" class="hidden inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-6 py-3 uppercase tracking-widest text-xs hover:border-neon-lime hover:text-neon-lime transition-all">
+                            <i class="ph ph-download-simple text-lg"></i>
+                            Download JSON
+                        </button>
+                    </div>
+
+                    <div id="json-output-wrap" class="hidden">
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Generated Data Block</label>
+                        <pre id="json-output" class="json-block w-full p-4 rounded overflow-x-auto whitespace-pre-wrap"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-slate-800 py-12 text-center text-slate-500 text-sm">
+        <p>&copy; 2026 Exinia [Null.Null] / Ksenia Strohbach. Transmission ended.</p>
+        <div class="flex justify-center gap-8 mt-6">
+            <a href="https://www.instagram.com/exinia0.0" target="_blank" rel="noopener noreferrer" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-instagram-logo text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Visuals</span></a>
+            <a href="https://www.youtube.com/@exinia0.0" target="_blank" rel="noopener noreferrer" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-youtube-logo text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Broadcasts</span></a>
+            <a href="mailto:author@fraustrohbach.de" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-envelope-simple text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Communicate</span></a>
+        </div>
+    </footer>
+
+    <script>
+        // Live clock
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toISOString().split('T')[1].split('.')[0];
+            const el = document.getElementById('live-clock');
+            if (el) el.textContent = timeStr + ' UTC';
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Mobile menu
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileBtn && mobileMenu) {
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // State
+        let allPosts = [];
+        let allTags = new Set();
+        let activeTag = null;
+        let searchQuery = '';
+        let generatedPayload = null;
+
+        // Fetch blog data
+        async function loadPosts() {
+            try {
+                const res = await fetch('blog-data.json?t=' + Date.now());
+                if (!res.ok) throw new Error('Failed to load');
+                const data = await res.json();
+                allPosts = data.posts || [];
+                extractTags();
+                renderTags();
+                renderPosts();
+            } catch (e) {
+                console.warn('Could not load blog-data.json, using empty archive.', e);
+                allPosts = [];
+                renderPosts();
+            }
+        }
+
+        function extractTags() {
+            allTags.clear();
+            allPosts.forEach(p => {
+                (p.tags || []).forEach(t => allTags.add(t));
+            });
+        }
+
+        function renderTags() {
+            const container = document.getElementById('tags-container');
+            if (!container) return;
+            let html = `<button onclick="filterByTag(null)" class="tag-pill px-3 py-1 rounded text-xs uppercase tracking-widest font-mono ${!activeTag ? 'active' : ''}">All</button>`;
+            Array.from(allTags).sort().forEach(tag => {
+                const isActive = activeTag === tag;
+                html += `<button onclick="filterByTag('${tag}')" class="tag-pill px-3 py-1 rounded text-xs uppercase tracking-widest font-mono ${isActive ? 'active' : ''}">${escapeHtml(tag)}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterByTag(tag) {
+            activeTag = tag;
+            renderTags();
+            renderPosts();
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            renderPosts();
+        });
+
+        function getFilteredPosts() {
+            return allPosts.filter(p => {
+                const matchesTag = !activeTag || (p.tags || []).includes(activeTag);
+                const matchesSearch = !searchQuery ||
+                    (p.title || '').toLowerCase().includes(searchQuery) ||
+                    (p.excerpt || '').toLowerCase().includes(searchQuery) ||
+                    (p.tags || []).some(t => t.toLowerCase().includes(searchQuery));
+                return matchesTag && matchesSearch;
+            }).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        }
+
+        function renderPosts() {
+            const grid = document.getElementById('posts-grid');
+            const empty = document.getElementById('empty-state');
+            const stats = document.getElementById('stream-stats');
+            const posts = getFilteredPosts();
+
+            if (stats) stats.textContent = `Displaying ${posts.length} of ${allPosts.length} transmissions`;
+
+            if (posts.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            grid.innerHTML = posts.map((post, idx) => {
+                const dateStr = post.date ? formatDate(post.date) : 'DATE_UNKNOWN';
+                const tagsHtml = (post.tags || []).slice(0, 3).map(t =>
+                    `<span class="text-[10px] uppercase tracking-wider text-neon-cyan/70 border border-neon-cyan/20 px-2 py-0.5 rounded font-mono">${escapeHtml(t)}</span>`
+                ).join(' ');
+                const featuredImg = post.featuredImage || (post.content || []).find(c => c.type === 'image')?.src || '';
+
+                return `
+                <article class="holo-card rounded decode-in cursor-pointer" style="animation-delay: ${idx * 60}ms" onclick="openPostModal('${post.id}')">
+                    <div class="scanline-wrap h-48 bg-slate-900/80 relative">
+                        ${featuredImg ? `<img src="${escapeHtml(featuredImg)}" alt="${escapeHtml(post.title || '')}" class="w-full h-full object-cover opacity-80">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">NO_VISUAL_DATA</div>`}
+                        <div class="absolute top-3 left-3 font-mono text-[10px] text-neon-cyan/60 bg-black/50 px-2 py-1 rounded backdrop-blur">
+                            TX // ${post.id || '???'}
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-3 text-xs font-mono text-slate-500 uppercase tracking-wider">
+                            <i class="ph ph-calendar-blank text-neon-cyan/60"></i>
+                            ${dateStr}
+                        </div>
+                        <h3 class="text-xl font-display font-bold text-white mb-3 leading-snug hover:text-neon-cyan transition-colors">
+                            ${escapeHtml(post.title || 'Untitled Transmission')}
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4 line-clamp-3">
+                            ${escapeHtml(post.excerpt || '')}
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            ${tagsHtml}
+                        </div>
+                    </div>
+                </article>
+                `;
+            }).join('');
+        }
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            if (isNaN(d)) return iso;
+            return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }).toUpperCase();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Post Modal
+        function openPostModal(id) {
+            const post = allPosts.find(p => p.id === id);
+            if (!post) return;
+            const modal = document.getElementById('post-modal');
+            const content = document.getElementById('modal-content');
+
+            const dateStr = post.date ? formatDate(post.date) : 'DATE_UNKNOWN';
+            const tagsHtml = (post.tags || []).map(t =>
+                `<span class="text-xs uppercase tracking-wider text-neon-cyan border border-neon-cyan/30 px-3 py-1 rounded font-mono">${escapeHtml(t)}</span>`
+            ).join(' ');
+
+            let bodyHtml = '';
+            if (post.content && Array.isArray(post.content)) {
+                bodyHtml = post.content.map(block => {
+                    if (block.type === 'text') {
+                        return `<p class="text-slate-300 text-base md:text-lg leading-relaxed mb-6">${escapeHtml(block.value || '')}</p>`;
+                    }
+                    if (block.type === 'image') {
+                        return `
+                        <div class="scanline-wrap rounded border border-slate-800 my-8 overflow-hidden">
+                            <img src="${escapeHtml(block.src || '')}" alt="${escapeHtml(block.alt || '')}" class="w-full object-cover">
+                        </div>`;
+                    }
+                    if (block.type === 'video') {
+                        return `
+                        <div class="viewfinder aspect-video bg-slate-900 border border-slate-800 my-8 relative overflow-hidden rounded">
+                            <iframe class="absolute inset-0 w-full h-full" src="${escapeHtml(block.src || '')}" title="${escapeHtml(block.title || 'Video')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            <div class="rec-badge">REC // VISUAL_FEED</div>
+                        </div>`;
+                    }
+                    if (block.type === 'link') {
+                        return `
+                        <div class="my-6">
+                            <a href="${escapeHtml(block.url || '#')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 border border-neon-cyan/40 bg-neon-cyan/5 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/15 transition-all">
+                                <i class="ph ph-link-simple text-lg"></i>
+                                ${escapeHtml(block.label || block.url)}
+                            </a>
+                        </div>`;
+                    }
+                    return '';
+                }).join('');
+            }
+
+            content.innerHTML = `
+                <div class="mb-6">
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <span class="font-mono text-[10px] text-neon-cyan uppercase tracking-widest border border-neon-cyan/30 px-2 py-1 rounded">ID: ${escapeHtml(post.id || '???')}</span>
+                        <span class="font-mono text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="ph ph-calendar-blank"></i> ${dateStr}
+                        </span>
+                        <span class="font-mono text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="ph ph-user"></i> ${escapeHtml(post.author || 'Unknown Operator')}
+                        </span>
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-display font-bold text-white mb-6 glow-text leading-tight">${escapeHtml(post.title || 'Untitled')}</h2>
+                    <div class="flex flex-wrap gap-2">${tagsHtml}</div>
+                </div>
+                ${post.featuredImage ? `
+                <div class="scanline-wrap rounded border border-slate-800 mb-10 overflow-hidden max-h-[500px]">
+                    <img src="${escapeHtml(post.featuredImage)}" alt="Featured" class="w-full object-cover">
+                </div>` : ''}
+                <div class="border-t border-slate-800 pt-8">
+                    ${bodyHtml || `<p class="text-slate-500 font-mono text-sm">No decoded content available.</p>`}
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePostModal() {
+            const modal = document.getElementById('post-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        // Composer
+        function openComposer() {
+            const modal = document.getElementById('composer-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeComposer() {
+            const modal = document.getElementById('composer-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function encodeTransmission() {
+            const title = document.getElementById('compose-title').value.trim();
+            const author = document.getElementById('compose-author').value.trim();
+            const tagsRaw = document.getElementById('compose-tags').value;
+            const excerpt = document.getElementById('compose-excerpt').value.trim();
+            const image = document.getElementById('compose-image').value.trim();
+            const contentRaw = document.getElementById('compose-content').value.trim();
+
+            if (!title) { alert('Title is required.'); return; }
+
+            let content = [];
+            if (contentRaw) {
+                try {
+                    content = JSON.parse(contentRaw);
+                } catch (e) {
+                    alert('Content blocks JSON is invalid: ' + e.message);
+                    return;
+                }
+            }
+
+            const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+            const id = 'tx-' + Date.now().toString(36).slice(-6).toUpperCase();
+            const date = new Date().toISOString();
+
+            const payload = {
+                id,
+                title,
+                author,
+                date,
+                tags,
+                excerpt,
+                featuredImage: image || undefined,
+                content
+            };
+
+            generatedPayload = payload;
+            const out = document.getElementById('json-output');
+            const wrap = document.getElementById('json-output-wrap');
+            const dlBtn = document.getElementById('download-btn');
+
+            out.textContent = JSON.stringify(payload, null, 2);
+            wrap.classList.remove('hidden');
+            dlBtn.classList.remove('hidden');
+        }
+
+        function downloadJSON() {
+            if (!generatedPayload) return;
+            const blob = new Blob([JSON.stringify(generatedPayload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = generatedPayload.id + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePostModal();
+                closeComposer();
+            }
+        });
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', loadPosts);
+    </script>
+</body>
+</html>
