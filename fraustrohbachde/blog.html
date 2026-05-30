@@ -233,6 +233,100 @@
         .auth-tab-btn:hover {
             color: #e2e8f0;
         }
+
+        /* Admin toolbar on post entries */
+        .admin-toolbar {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .list-entry:hover .admin-toolbar {
+            opacity: 1;
+        }
+        .admin-btn {
+            padding: 4px 8px;
+            font-size: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.1);
+            color: #22d3ee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .admin-btn:hover {
+            background: rgba(6, 182, 212, 0.25);
+            border-color: #22d3ee;
+        }
+        .admin-btn.archive {
+            border-color: rgba(217, 70, 239, 0.3);
+            background: rgba(217, 70, 239, 0.1);
+            color: #e879f9;
+        }
+        .admin-btn.archive:hover {
+            background: rgba(217, 70, 239, 0.25);
+            border-color: #e879f9;
+        }
+        .admin-btn.danger {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+        }
+        .admin-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: #fca5a5;
+        }
+
+        /* Drag handle */
+        .drag-handle {
+            cursor: grab;
+            color: #475569;
+            transition: color 0.2s ease;
+        }
+        .drag-handle:hover {
+            color: #06b6d4;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .dragging {
+            opacity: 0.5;
+            border: 1px dashed #06b6d4;
+        }
+        .drag-over {
+            border-top: 2px solid #06b6d4;
+        }
+
+        /* Post status badges */
+        .status-badge {
+            font-size: 9px;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        .status-badge.scheduled {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fcd34d;
+        }
+        .status-badge.archived {
+            background: rgba(217, 70, 239, 0.1);
+            border: 1px solid rgba(217, 70, 239, 0.3);
+            color: #e879f9;
+        }
+        .status-badge.private {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
     </style>
 </head>
 <body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
@@ -493,7 +587,7 @@
                 </div>
 
                 <div class="p-6 md:p-10 space-y-6">
-                    <p class="text-slate-400 text-sm">Fill in the fields below to compose a new transmission. When done, click "Encode JSON" to generate the data block. Copy it into <code class="text-neon-cyan font-mono text-xs">blog-data.json</code> and save the file.</p>
+                    <p class="text-slate-400 text-sm">Fill in the fields below to compose or edit a transmission. Click <strong class="text-neon-cyan">Save to Database</strong> to publish directly.</p>
 
                     <div class="space-y-4">
                         <div>
@@ -516,6 +610,28 @@
                             <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Featured Image URL</label>
                             <input id="compose-image" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="https://... or imagesTimeMashine/image1.JPG">
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Visibility</label>
+                                <select id="compose-visibility" class="terminal-input w-full px-4 py-3 rounded text-sm">
+                                    <option value="true">Public</option>
+                                    <option value="false">Private</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Status</label>
+                                <select id="compose-status" class="terminal-input w-full px-4 py-3 rounded text-sm">
+                                    <option value="active">Active</option>
+                                    <option value="archived">Archived</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Schedule (optional)</label>
+                                <input id="compose-scheduled" type="datetime-local" class="terminal-input w-full px-4 py-3 rounded text-sm">
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Content Blocks (JSON array)</label>
                             <textarea id="compose-content" rows="10" class="compose-area w-full px-4 py-3 rounded" placeholder='[
@@ -529,13 +645,13 @@
                     </div>
 
                     <div class="flex flex-wrap gap-4 pt-4 border-t border-slate-800">
-                        <button onclick="encodeTransmission()" class="inline-flex items-center gap-2 border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-6 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
-                            <i class="ph ph-file-code text-lg"></i>
-                            Encode JSON
+                        <button onclick="saveTransmission()" id="save-btn" class="inline-flex items-center gap-2 border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-6 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                            <i class="ph ph-floppy-disk text-lg"></i>
+                            Save to Database
                         </button>
-                        <button onclick="downloadJSON()" id="download-btn" class="hidden inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-6 py-3 uppercase tracking-widest text-xs hover:border-neon-lime hover:text-neon-lime transition-all">
-                            <i class="ph ph-download-simple text-lg"></i>
-                            Download JSON
+                        <button onclick="encodeJSON()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-6 py-3 uppercase tracking-widest text-xs hover:border-neon-lime hover:text-neon-lime transition-all">
+                            <i class="ph ph-file-code text-lg"></i>
+                            Export JSON
                         </button>
                     </div>
 
@@ -583,6 +699,7 @@
         let generatedPayload = null;
         let commentsUnsub = null;
         let currentPage = 1;
+        let editingPostId = null;
         const POSTS_PER_PAGE = 10;
 
         // ─── AUTH LISTENER ───
@@ -732,8 +849,11 @@
         // ─── LOGOUT ───
         async function handleLogout() {
             await auth.signOut();
+            sessionStorage.removeItem('exinia_auth_session');
             currentPostId = null;
             if (commentsUnsub) { commentsUnsub(); commentsUnsub = null; }
+            renderHeroButtons();
+            renderNavAuth();
         }
 
         // ─── AUTH UI RENDERING ───
@@ -809,10 +929,21 @@
             return sessionStorage.getItem('exinia_auth_session') === 'true';
         }
 
-        function handleAdminLogin() {
+        async function handleAdminLogin() {
             const nick = document.getElementById('admin-nickname').value.trim();
             const pass = document.getElementById('admin-password').value;
             if (nick === 'exinia' && pass === 'temporal-void-2026') {
+                try {
+                    await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', 'temporal-void-2026');
+                } catch (e) {
+                    if (e.code === 'auth/user-not-found') {
+                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', 'temporal-void-2026');
+                        await auth.currentUser.updateProfile({ displayName: 'exinia' });
+                    } else {
+                        showAuthMessage('Firebase auth error: ' + e.message, 'error');
+                        return;
+                    }
+                }
                 sessionStorage.setItem('exinia_auth_session', 'true');
                 document.getElementById('admin-nickname').value = '';
                 document.getElementById('admin-password').value = '';
@@ -824,8 +955,9 @@
             }
         }
 
-        function handleAdminLogout() {
+        async function handleAdminLogout() {
             sessionStorage.removeItem('exinia_auth_session');
+            await auth.signOut();
             renderAdminAuthUI();
             renderHeroButtons();
         }
@@ -864,6 +996,29 @@
 
         // ─── BLOG POSTS ───
         async function loadPosts() {
+            // Try Firestore first
+            try {
+                const snapshot = await db.collection('blogPosts').orderBy('order', 'desc').get();
+                if (!snapshot.empty) {
+                    allPosts = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            ...data,
+                            date: data.date?.toDate ? data.date.toDate().toISOString() : (data.date || ''),
+                            scheduledAt: data.scheduledAt?.toDate ? data.scheduledAt.toDate().toISOString() : (data.scheduledAt || null)
+                        };
+                    });
+                    extractTags();
+                    renderTags();
+                    renderPosts();
+                    return;
+                }
+            } catch (e) {
+                console.warn('Firestore load failed, falling back to JSON', e);
+            }
+
+            // Fallback to JSON
             try {
                 const res = await fetch('blog-data.json?t=' + Date.now());
                 if (!res.ok) throw new Error('Failed to load');
@@ -914,8 +1069,19 @@
                     (p.title || '').toLowerCase().includes(searchQuery) ||
                     (p.excerpt || '').toLowerCase().includes(searchQuery) ||
                     (p.tags || []).some(t => t.toLowerCase().includes(searchQuery));
-                return matchesTag && matchesSearch;
-            }).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+                if (!matchesTag || !matchesSearch) return false;
+
+                // Non-admins only see public, non-archived, non-future posts
+                if (!isAdmin()) {
+                    if (p.isPublic === false) return false;
+                    if (p.isArchived === true) return false;
+                    if (p.scheduledAt) {
+                        const scheduled = new Date(p.scheduledAt);
+                        if (scheduled > new Date()) return false;
+                    }
+                }
+                return true;
+            }).sort((a, b) => (b.order || 0) - (a.order || 0));
         }
 
         function renderPosts() {
@@ -944,9 +1110,33 @@
                     `<span class="text-[10px] uppercase tracking-wider text-neon-cyan/70 border border-neon-cyan/20 px-2 py-0.5 rounded font-mono">${escapeHtml(t)}</span>`
                 ).join(' ');
                 const featuredImg = post.featuredImage || '';
+                const isAdminUser = isAdmin();
+
+                // Status badges
+                let statusBadges = '';
+                if (post.scheduledAt) {
+                    const sched = new Date(post.scheduledAt);
+                    if (sched > new Date()) {
+                        statusBadges += `<span class="status-badge scheduled mr-2">Scheduled: ${formatDate(post.scheduledAt)}</span>`;
+                    }
+                }
+                if (post.isArchived) statusBadges += `<span class="status-badge archived mr-2">Archived</span>`;
+                if (post.isPublic === false) statusBadges += `<span class="status-badge private mr-2">Private</span>`;
+
+                // Admin toolbar
+                const adminToolbar = isAdminUser ? `
+                    <div class="admin-toolbar">
+                        <button onclick="event.stopPropagation(); editPost('${post.id}')" class="admin-btn" title="Edit"><i class="ph ph-pencil-simple"></i> Edit</button>
+                        <button onclick="event.stopPropagation(); toggleVisibility('${post.id}')" class="admin-btn" title="Toggle Visibility">${post.isPublic === false ? '<i class="ph ph-eye"></i> Show' : '<i class="ph ph-eye-slash"></i> Hide'}</button>
+                        <button onclick="event.stopPropagation(); toggleArchive('${post.id}')" class="admin-btn archive" title="Toggle Archive">${post.isArchived ? '<i class="ph ph-arrow-u-up-left"></i> Restore' : '<i class="ph ph-archive"></i> Archive'}</button>
+                    </div>
+                ` : '';
+
+                const dragAttrs = isAdminUser ? `draggable="true" ondragstart="dragStart(event, '${post.id}')" ondragover="dragOver(event)" ondrop="dragDrop(event, '${post.id}')" ondragend="dragEnd(event)"` : '';
 
                 return `
-                <article class="list-entry py-8 md:py-10 decode-in flex flex-col md:flex-row gap-6 md:gap-8 items-start" style="animation-delay: ${idx * 50}ms">
+                <article ${dragAttrs} class="list-entry py-8 md:py-10 decode-in flex flex-col md:flex-row gap-6 md:gap-8 items-start relative" style="animation-delay: ${idx * 50}ms">
+                    ${adminToolbar}
                     <div class="w-full md:w-56 flex-shrink-0">
                         <div class="scanline-wrap aspect-[4/3] bg-slate-900/80 rounded border border-slate-800 overflow-hidden relative">
                             ${featuredImg ? `<img src="${escapeHtml(featuredImg)}" alt="${escapeHtml(post.title || '')}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">NO_VISUAL_DATA</div>`}
@@ -954,9 +1144,11 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-3 text-xs font-mono text-slate-500 uppercase tracking-wider">
+                            ${isAdminUser ? `<i class="ph ph-dots-six-vertical drag-handle mr-1" title="Drag to reorder"></i>` : ''}
                             <i class="ph ph-calendar-blank text-neon-cyan/60"></i> ${dateStr}
                             <span class="mx-2 text-slate-700">|</span>
                             <i class="ph ph-user text-neon-cyan/60"></i> ${escapeHtml(post.author || 'Unknown Operator')}
+                            ${statusBadges}
                         </div>
                         <h3 onclick="openPostModal('${post.id}')" class="text-xl md:text-2xl font-display font-bold text-white mb-3 leading-snug hover:text-neon-cyan transition-colors cursor-pointer">
                             ${escapeHtml(post.title || 'Untitled Transmission')}
@@ -1168,6 +1360,8 @@
 
         // ─── COMPOSER (Admin only) ───
         function openComposer() {
+            editingPostId = null;
+            resetComposer();
             const modal = document.getElementById('composer-modal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -1178,9 +1372,89 @@
             const modal = document.getElementById('composer-modal');
             modal.classList.add('opacity-0');
             setTimeout(() => { modal.style.display = 'none'; document.body.style.overflow = ''; }, 300);
+            editingPostId = null;
         }
 
-        function encodeTransmission() {
+        function resetComposer() {
+            document.getElementById('compose-title').value = '';
+            document.getElementById('compose-author').value = 'Ksenia Strohbach';
+            document.getElementById('compose-tags').value = '';
+            document.getElementById('compose-excerpt').value = '';
+            document.getElementById('compose-image').value = '';
+            document.getElementById('compose-content').value = '';
+            document.getElementById('compose-visibility').value = 'true';
+            document.getElementById('compose-status').value = 'active';
+            document.getElementById('compose-scheduled').value = '';
+            document.getElementById('json-output-wrap').classList.add('hidden');
+        }
+
+        function populateComposer(post) {
+            document.getElementById('compose-title').value = post.title || '';
+            document.getElementById('compose-author').value = post.author || 'Ksenia Strohbach';
+            document.getElementById('compose-tags').value = (post.tags || []).join(', ');
+            document.getElementById('compose-excerpt').value = post.excerpt || '';
+            document.getElementById('compose-image').value = post.featuredImage || '';
+            document.getElementById('compose-content').value = post.content ? JSON.stringify(post.content, null, 2) : '';
+            document.getElementById('compose-visibility').value = post.isPublic === false ? 'false' : 'true';
+            document.getElementById('compose-status').value = post.isArchived ? 'archived' : 'active';
+            document.getElementById('compose-scheduled').value = post.scheduledAt ? new Date(post.scheduledAt).toISOString().slice(0, 16) : '';
+        }
+
+        async function saveTransmission() {
+            const title = document.getElementById('compose-title').value.trim();
+            const author = document.getElementById('compose-author').value.trim();
+            const tagsRaw = document.getElementById('compose-tags').value;
+            const excerpt = document.getElementById('compose-excerpt').value.trim();
+            const image = document.getElementById('compose-image').value.trim();
+            const contentRaw = document.getElementById('compose-content').value.trim();
+            const isPublic = document.getElementById('compose-visibility').value === 'true';
+            const isArchived = document.getElementById('compose-status').value === 'archived';
+            const scheduledRaw = document.getElementById('compose-scheduled').value;
+
+            if (!title) { alert('Title is required.'); return; }
+
+            let content = [];
+            if (contentRaw) {
+                try { content = JSON.parse(contentRaw); }
+                catch (e) { alert('Content blocks JSON is invalid: ' + e.message); return; }
+            }
+
+            const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+            const date = new Date().toISOString();
+            const scheduledAt = scheduledRaw ? new Date(scheduledRaw).toISOString() : null;
+
+            try {
+                if (editingPostId) {
+                    // Update existing
+                    await db.collection('blogPosts').doc(editingPostId).update({
+                        title, author, tags, excerpt, featuredImage: image || '', content,
+                        isPublic, isArchived, scheduledAt,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showAuthMessage('Transmission updated.', 'success');
+                } else {
+                    // Create new
+                    const maxOrder = allPosts.length > 0 ? Math.max(...allPosts.map(p => p.order || 0)) : 0;
+                    const newDoc = db.collection('blogPosts').doc();
+                    await newDoc.set({
+                        id: newDoc.id,
+                        title, author, date, tags, excerpt, featuredImage: image || '', content,
+                        isPublic, isArchived, scheduledAt,
+                        order: maxOrder + 10,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showAuthMessage('Transmission broadcast to database.', 'success');
+                }
+                closeComposer();
+                await loadPosts();
+            } catch (e) {
+                console.error(e);
+                alert('Failed to save: ' + e.message);
+            }
+        }
+
+        function encodeJSON() {
             const title = document.getElementById('compose-title').value.trim();
             const author = document.getElementById('compose-author').value.trim();
             const tagsRaw = document.getElementById('compose-tags').value;
@@ -1197,25 +1471,110 @@
             }
 
             const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
-            const id = 'tx-' + Date.now().toString(36).slice(-6).toUpperCase();
+            const id = editingPostId || 'tx-' + Date.now().toString(36).slice(-6).toUpperCase();
             const date = new Date().toISOString();
 
             const payload = { id, title, author, date, tags, excerpt, featuredImage: image || undefined, content };
-            generatedPayload = payload;
             document.getElementById('json-output').textContent = JSON.stringify(payload, null, 2);
             document.getElementById('json-output-wrap').classList.remove('hidden');
-            document.getElementById('download-btn').classList.remove('hidden');
         }
 
         function downloadJSON() {
-            if (!generatedPayload) return;
-            const blob = new Blob([JSON.stringify(generatedPayload, null, 2)], { type: 'application/json' });
+            const text = document.getElementById('json-output').textContent;
+            if (!text) return;
+            const blob = new Blob([text], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = generatedPayload.id + '.json';
+            a.download = 'transmission.json';
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        // ─── EDIT / ARCHIVE / VISIBILITY ───
+        async function editPost(id) {
+            const post = allPosts.find(p => p.id === id);
+            if (!post) return;
+            editingPostId = id;
+            populateComposer(post);
+            openComposer();
+        }
+
+        async function toggleArchive(id) {
+            const post = allPosts.find(p => p.id === id);
+            if (!post) return;
+            const newStatus = !post.isArchived;
+            try {
+                await db.collection('blogPosts').doc(id).update({ isArchived: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                await loadPosts();
+            } catch (e) {
+                alert('Failed to update: ' + e.message);
+            }
+        }
+
+        async function toggleVisibility(id) {
+            const post = allPosts.find(p => p.id === id);
+            if (!post) return;
+            const newVis = post.isPublic === false ? true : false;
+            try {
+                await db.collection('blogPosts').doc(id).update({ isPublic: newVis, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                await loadPosts();
+            } catch (e) {
+                alert('Failed to update: ' + e.message);
+            }
+        }
+
+        // ─── DRAG AND DROP ───
+        let draggedId = null;
+
+        function dragStart(e, id) {
+            if (!isAdmin()) return;
+            draggedId = id;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function dragOver(e) {
+            if (!isAdmin()) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const article = e.target.closest('article');
+            if (article) article.classList.add('drag-over');
+        }
+
+        function dragDrop(e, targetId) {
+            if (!isAdmin()) return;
+            e.preventDefault();
+            const article = e.target.closest('article');
+            if (article) article.classList.remove('drag-over');
+            if (!draggedId || draggedId === targetId) return;
+            reorderPosts(draggedId, targetId);
+            draggedId = null;
+        }
+
+        function dragEnd(e) {
+            const article = e.target.closest('article');
+            if (article) article.classList.remove('dragging');
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        async function reorderPosts(draggedId, targetId) {
+            const posts = [...allPosts].sort((a, b) => (b.order || 0) - (a.order || 0));
+            const dragIdx = posts.findIndex(p => p.id === draggedId);
+            const targetIdx = posts.findIndex(p => p.id === targetId);
+            if (dragIdx === -1 || targetIdx === -1) return;
+
+            // Swap order values
+            const dragOrder = posts[dragIdx].order || 0;
+            const targetOrder = posts[targetIdx].order || 0;
+
+            try {
+                await db.collection('blogPosts').doc(draggedId).update({ order: targetOrder, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                await db.collection('blogPosts').doc(targetId).update({ order: dragOrder, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                await loadPosts();
+            } catch (e) {
+                alert('Failed to reorder: ' + e.message);
+            }
         }
 
         // Keyboard shortcuts

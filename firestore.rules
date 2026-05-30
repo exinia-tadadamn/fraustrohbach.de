@@ -31,6 +31,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // blogPosts: Blog post content and metadata
+    match /blogPosts/{docId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null
+        && request.auth.token.email == 'exinia@fraustrohbach.de';
+    }
+
     // comments: Anyone can read; authenticated users can create
     match /comments/{docId} {
       allow read: if true;
