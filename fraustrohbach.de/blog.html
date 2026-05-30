@@ -366,30 +366,6 @@
                     <button onclick="handleEmailLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
                         <i class="ph ph-key mr-2"></i> Authenticate
                     </button>
-
-                    <div class="relative my-6">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
-                        <div class="relative flex justify-center text-xs uppercase tracking-widest text-slate-600 font-mono"><span class="px-2 bg-[#020617]">or</span></div>
-                    </div>
-
-                    <!-- Pikabu Login -->
-                    <button onclick="handlePikabuLogin()" class="w-full border border-orange-500/40 bg-orange-500/10 text-orange-400 py-3 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-orange-500/20">
-                        <i class="ph ph-chat-centered-text text-lg"></i>
-                        Login with Pikabu.ru
-                    </button>
-
-                    <!-- Commented out social logins -->
-                    <!--
-                    <button onclick="handleGoogleLogin()" class="w-full btn-google py-3 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                        Continue with Google
-                    </button>
-                    <button onclick="handleAppleLogin()" class="w-full btn-apple py-3 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all">
-                        <i class="ph ph-apple-logo text-lg"></i>
-                        Continue with Apple
-                    </button>
-                    <p class="text-[10px] text-slate-600 text-center font-mono">Apple Sign-In requires Firebase Console setup.</p>
-                    -->
                 </div>
 
                 <!-- Register Form -->
@@ -419,26 +395,6 @@
                     <p class="text-white font-mono text-sm">Authenticated as <span id="logged-in-name" class="text-neon-cyan"></span></p>
                     <button onclick="handleLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-6 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
                         <i class="ph ph-sign-out"></i> Logout
-                    </button>
-                </div>
-
-                <!-- Operator Override (Admin Login) -->
-                <div id="admin-login-area" class="mt-10 pt-8 border-t border-slate-800/50">
-                    <p class="text-center text-xs uppercase tracking-widest text-slate-600 font-mono mb-4">Operator Override</p>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <input id="admin-nickname" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Callsign">
-                        <input id="admin-password" type="password" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Override code">
-                        <button onclick="handleAdminLogin()" class="border border-neon-magenta/40 bg-neon-magenta/5 text-neon-magenta px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/15 transition-all whitespace-nowrap">
-                            <i class="ph ph-shield-check mr-1"></i> Override
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Admin Logged-in State -->
-                <div id="admin-logged-in" class="hidden mt-10 pt-8 border-t border-slate-800/50 text-center">
-                    <p class="text-neon-magenta font-mono text-sm mb-3"><i class="ph ph-shield-check mr-2"></i>Operator override active.</p>
-                    <button onclick="handleAdminLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-5 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
-                        <i class="ph ph-sign-out"></i> End Override
                     </button>
                 </div>
 
@@ -597,10 +553,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ─── ADMIN CREDENTIALS ───
-        const ADMIN_NICKNAME = 'exinia';
-        const ADMIN_PASSWORD = 'temporal-void-2026';
-
         // ─── STATE ───
         let currentUser = null;
         let currentPostId = null;
@@ -677,12 +629,6 @@
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
 
-            // Check for hardcoded admin
-            if (email === ADMIN_NICKNAME || email === 'exinia') {
-                showAuthMessage('Use social login or the hardcoded admin flow is not supported via email. Please contact the operator.', 'error');
-                return;
-            }
-
             if (!email || !password) {
                 showAuthMessage('Email and password required.', 'error');
                 return;
@@ -696,11 +642,6 @@
             } catch (e) {
                 showAuthMessage(e.message, 'error');
             }
-        }
-
-        // ─── PIKABU LOGIN (placeholder — requires custom backend proxy) ───
-        async function handlePikabuLogin() {
-            showAuthMessage('Pikabu.ru OAuth requires a custom backend proxy with Firebase Auth. Please configure a custom token endpoint.', 'error');
         }
 
         /*
@@ -781,7 +722,6 @@
                 document.getElementById('tab-login').parentElement.classList.remove('hidden');
                 switchAuthTab('login');
             }
-            renderAdminAuthUI();
         }
 
         function getUserDisplayName(user) {
@@ -791,18 +731,10 @@
 
         function renderNavAuth() {
             const navAuth = document.getElementById('nav-auth');
-            const isAdminSession = sessionStorage.getItem('exinia_auth_session') === 'true';
             if (currentUser) {
                 navAuth.innerHTML = `
                     <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${getUserDisplayName(currentUser)}</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
-                        <i class="ph ph-sign-out text-lg"></i> Logout
-                    </button>
-                `;
-            } else if (isAdminSession) {
-                navAuth.innerHTML = `
-                    <span class="text-neon-magenta font-mono text-xs hidden lg:inline"><i class="ph ph-shield-check mr-1"></i>Operator</span>
-                    <button onclick="handleAdminLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-sign-out text-lg"></i> Logout
                     </button>
                 `;
@@ -817,63 +749,7 @@
 
         function renderHeroButtons() {
             const container = document.getElementById('hero-buttons');
-            if (!container) return;
-            if (isAdmin()) {
-                container.innerHTML = `
-                    <button onclick="openComposer()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
-                        <i class="ph ph-broadcast text-xl"></i> New Transmission
-                    </button>
-                `;
-            } else {
-                container.innerHTML = '';
-            }
-        }
-
-        function isAdmin() {
-            return sessionStorage.getItem('exinia_auth_session') === 'true';
-        }
-
-        function handleAdminLogin() {
-            const nick = document.getElementById('admin-nickname').value.trim();
-            const pass = document.getElementById('admin-password').value;
-            if (nick === ADMIN_NICKNAME && pass === ADMIN_PASSWORD) {
-                sessionStorage.setItem('exinia_auth_session', 'true');
-                document.getElementById('admin-nickname').value = '';
-                document.getElementById('admin-password').value = '';
-                renderAdminAuthUI();
-                renderHeroButtons();
-                showAuthMessage('Operator override granted.', 'success');
-            } else {
-                showAuthMessage('Invalid override credentials.', 'error');
-            }
-        }
-
-        function handleAdminLogout() {
-            sessionStorage.removeItem('exinia_auth_session');
-            renderAdminAuthUI();
-            renderHeroButtons();
-        }
-
-        function renderAdminAuthUI() {
-            const adminArea = document.getElementById('admin-login-area');
-            const adminLoggedIn = document.getElementById('admin-logged-in');
-            if (sessionStorage.getItem('exinia_auth_session') === 'true') {
-                adminArea.classList.add('hidden');
-                adminLoggedIn.classList.remove('hidden');
-            } else {
-                adminArea.classList.remove('hidden');
-                adminLoggedIn.classList.add('hidden');
-            }
-            renderNavAuth();
-        }
-
-        function handleNewTransmissionClick() {
-            if (isAdmin()) {
-                openComposer();
-            } else {
-                document.getElementById('auth-terminal').scrollIntoView({ behavior: 'smooth' });
-                showAuthMessage('Admin authentication required.', 'error');
-            }
+            if (container) container.innerHTML = '';
         }
 
         // ─── LIVE CLOCK ───
@@ -1260,7 +1136,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadPosts();
             renderAuthUI();
-            renderAdminAuthUI();
             renderHeroButtons();
             renderNavAuth();
         });
