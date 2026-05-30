@@ -14,6 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-functions-compat.js"></script>
 
     <script>
         tailwind.config = {
@@ -597,6 +598,18 @@
                             <input id="compose-image" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="https://... or imagesTimeMashine/image1.JPG">
                         </div>
 
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Instagram Import</label>
+                            <div class="flex gap-2">
+                                <input id="compose-instagram-url" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="https://www.instagram.com/p/POST_ID/">
+                                <button onclick="importFromInstagram()" id="import-insta-btn" class="inline-flex items-center gap-2 border border-neon-magenta bg-neon-magenta/10 text-neon-magenta px-4 py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/20 transition-all whitespace-nowrap">
+                                    <i class="ph ph-instagram-logo text-lg"></i>
+                                    Import
+                                </button>
+                            </div>
+                            <p id="import-insta-status" class="text-xs mt-2 font-mono hidden"></p>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Visibility</label>
@@ -674,6 +687,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const functions = firebase.functions();
 
         // ─── STATE ───
         let currentUser = null;
@@ -1390,6 +1404,65 @@
             document.getElementById('compose-visibility').value = post.isPublic === false ? 'false' : 'true';
             document.getElementById('compose-status').value = post.isArchived ? 'archived' : 'active';
             document.getElementById('compose-scheduled').value = post.scheduledAt ? new Date(post.scheduledAt).toISOString().slice(0, 16) : '';
+        }
+
+        async function importFromInstagram() {
+            const urlInput = document.getElementById('compose-instagram-url');
+            const statusEl = document.getElementById('import-insta-status');
+            const btn = document.getElementById('import-insta-btn');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                statusEl.textContent = 'Please paste an Instagram post URL.';
+                statusEl.className = 'text-xs mt-2 font-mono text-neon-magenta';
+                statusEl.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Scanning...';
+            statusEl.textContent = 'Initiating neural scan of target node...';
+            statusEl.className = 'text-xs mt-2 font-mono text-neon-cyan';
+            statusEl.classList.remove('hidden');
+
+            try {
+                const scrapeInstagram = functions.httpsCallable('scrapeInstagram');
+                const result = await scrapeInstagram({ url });
+                const data = result.data;
+
+                if (!data || !data.images || data.images.length === 0) {
+                    statusEl.textContent = 'No visual data extracted. The target may be shielded or private.';
+                    statusEl.className = 'text-xs mt-2 font-mono text-neon-magenta';
+                    return;
+                }
+
+                // Populate fields
+                document.getElementById('compose-title').value = data.caption ? data.caption.split('\n')[0].substring(0, 100) : 'Instagram Transmission';
+                document.getElementById('compose-excerpt').value = data.caption ? data.caption.substring(0, 200) : '';
+                document.getElementById('compose-image').value = data.images[0];
+                document.getElementById('compose-author').value = data.username ? data.username : 'Ksenia Strohbach';
+
+                const contentBlocks = data.images.map((img, i) => ({
+                    type: 'image',
+                    src: img,
+                    alt: data.caption ? data.caption.split('\n')[0] : 'Image ' + (i + 1)
+                }));
+                if (data.caption) {
+                    contentBlocks.unshift({ type: 'text', value: data.caption });
+                }
+                document.getElementById('compose-content').value = JSON.stringify(contentBlocks, null, 2);
+
+                statusEl.textContent = 'Extraction complete. ' + data.images.length + ' image(s) captured. Review and Save.';
+                statusEl.className = 'text-xs mt-2 font-mono text-neon-lime';
+                urlInput.value = '';
+            } catch (err) {
+                console.error('Instagram import error:', err);
+                statusEl.textContent = 'Scan failed: ' + (err.message || 'Unknown interference');
+                statusEl.className = 'text-xs mt-2 font-mono text-neon-magenta';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ph ph-instagram-logo text-lg"></i> Import';
+            }
         }
 
         async function saveTransmission() {
