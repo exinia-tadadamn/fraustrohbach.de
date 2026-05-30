@@ -23,6 +23,14 @@ service cloud.firestore {
       allow update: if request.auth.uid == uid;
     }
 
+    // nicknames: Public lookup from nickname to email (for login)
+    match /nicknames/{nickname} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.email is string;
+      allow update: if false;
+      allow delete: if false;
+    }
+
     // comments: Anyone can read; authenticated users can create
     match /comments/{docId} {
       allow read: if true;

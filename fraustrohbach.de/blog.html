@@ -356,14 +356,14 @@
                 <!-- Login Form -->
                 <div id="form-login" class="space-y-5">
                     <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Email</label>
-                        <input id="login-email" type="email" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="operator@exinia.null">
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Nickname / Callsign</label>
+                        <input id="login-nickname" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Your callsign">
                     </div>
                     <div>
                         <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Password</label>
                         <input id="login-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="••••••••">
                     </div>
-                    <button onclick="handleEmailLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                    <button onclick="handleNicknameLogin()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
                         <i class="ph ph-key mr-2"></i> Authenticate
                     </button>
                 </div>
@@ -395,6 +395,26 @@
                     <p class="text-white font-mono text-sm">Authenticated as <span id="logged-in-name" class="text-neon-cyan"></span></p>
                     <button onclick="handleLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-6 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
                         <i class="ph ph-sign-out"></i> Logout
+                    </button>
+                </div>
+
+                <!-- Operator Override (Admin Login) -->
+                <div id="admin-login-area" class="mt-10 pt-8 border-t border-slate-800/50">
+                    <p class="text-center text-xs uppercase tracking-widest text-slate-600 font-mono mb-4">Operator Override</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input id="admin-nickname" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Callsign">
+                        <input id="admin-password" type="password" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Override code">
+                        <button onclick="handleAdminLogin()" class="border border-neon-magenta/40 bg-neon-magenta/5 text-neon-magenta px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/15 transition-all whitespace-nowrap">
+                            <i class="ph ph-shield-check mr-1"></i> Override
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Logged-in State -->
+                <div id="admin-logged-in" class="hidden mt-10 pt-8 border-t border-slate-800/50 text-center">
+                    <p class="text-neon-magenta font-mono text-sm mb-3"><i class="ph ph-shield-check mr-2"></i>Operator override active.</p>
+                    <button onclick="handleAdminLogout()" class="inline-flex items-center gap-2 border border-slate-700 text-slate-400 px-5 py-2 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
+                        <i class="ph ph-sign-out"></i> End Override
                     </button>
                 </div>
 
@@ -609,12 +629,21 @@
             if (password.length < 6) { showAuthMessage('Password must be at least 6 characters.', 'error'); return; }
 
             try {
+                const existingNick = await db.collection('nicknames').doc(nickname.toLowerCase()).get();
+                if (existingNick.exists) {
+                    showAuthMessage('Callsign already taken.', 'error');
+                    return;
+                }
                 const cred = await auth.createUserWithEmailAndPassword(email, password);
                 await cred.user.updateProfile({ displayName: nickname });
                 await db.collection('userProfiles').doc(cred.user.uid).set({
                     nickname,
                     email,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                await db.collection('nicknames').doc(nickname.toLowerCase()).set({
+                    email,
+                    uid: cred.user.uid
                 });
                 showAuthMessage('Operator registered successfully.', 'success');
                 document.getElementById('reg-nickname').value = '';
@@ -625,19 +654,25 @@
             }
         }
 
-        async function handleEmailLogin() {
-            const email = document.getElementById('login-email').value.trim();
+        async function handleNicknameLogin() {
+            const nickname = document.getElementById('login-nickname').value.trim();
             const password = document.getElementById('login-password').value;
 
-            if (!email || !password) {
-                showAuthMessage('Email and password required.', 'error');
+            if (!nickname || !password) {
+                showAuthMessage('Nickname and password required.', 'error');
                 return;
             }
 
             try {
+                const nickDoc = await db.collection('nicknames').doc(nickname.toLowerCase()).get();
+                if (!nickDoc.exists) {
+                    showAuthMessage('Callsign not found in registry.', 'error');
+                    return;
+                }
+                const email = nickDoc.data().email;
                 await auth.signInWithEmailAndPassword(email, password);
                 showAuthMessage('Authentication successful.', 'success');
-                document.getElementById('login-email').value = '';
+                document.getElementById('login-nickname').value = '';
                 document.getElementById('login-password').value = '';
             } catch (e) {
                 showAuthMessage(e.message, 'error');
@@ -722,6 +757,7 @@
                 document.getElementById('tab-login').parentElement.classList.remove('hidden');
                 switchAuthTab('login');
             }
+            renderAdminAuthUI();
         }
 
         function getUserDisplayName(user) {
@@ -731,10 +767,18 @@
 
         function renderNavAuth() {
             const navAuth = document.getElementById('nav-auth');
+            const isAdminSession = sessionStorage.getItem('exinia_auth_session') === 'true';
             if (currentUser) {
                 navAuth.innerHTML = `
                     <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${getUserDisplayName(currentUser)}</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                        <i class="ph ph-sign-out text-lg"></i> Logout
+                    </button>
+                `;
+            } else if (isAdminSession) {
+                navAuth.innerHTML = `
+                    <span class="text-neon-magenta font-mono text-xs hidden lg:inline"><i class="ph ph-shield-check mr-1"></i>Operator</span>
+                    <button onclick="handleAdminLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-sign-out text-lg"></i> Logout
                     </button>
                 `;
@@ -749,7 +793,54 @@
 
         function renderHeroButtons() {
             const container = document.getElementById('hero-buttons');
-            if (container) container.innerHTML = '';
+            if (!container) return;
+            if (isAdmin()) {
+                container.innerHTML = `
+                    <button onclick="openComposer()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
+                        <i class="ph ph-broadcast text-xl"></i> New Transmission
+                    </button>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        function isAdmin() {
+            return sessionStorage.getItem('exinia_auth_session') === 'true';
+        }
+
+        function handleAdminLogin() {
+            const nick = document.getElementById('admin-nickname').value.trim();
+            const pass = document.getElementById('admin-password').value;
+            if (nick === 'exinia' && pass === 'temporal-void-2026') {
+                sessionStorage.setItem('exinia_auth_session', 'true');
+                document.getElementById('admin-nickname').value = '';
+                document.getElementById('admin-password').value = '';
+                renderAdminAuthUI();
+                renderHeroButtons();
+                showAuthMessage('Operator override granted.', 'success');
+            } else {
+                showAuthMessage('Invalid override credentials.', 'error');
+            }
+        }
+
+        function handleAdminLogout() {
+            sessionStorage.removeItem('exinia_auth_session');
+            renderAdminAuthUI();
+            renderHeroButtons();
+        }
+
+        function renderAdminAuthUI() {
+            const adminArea = document.getElementById('admin-login-area');
+            const adminLoggedIn = document.getElementById('admin-logged-in');
+            if (sessionStorage.getItem('exinia_auth_session') === 'true') {
+                adminArea.classList.add('hidden');
+                adminLoggedIn.classList.remove('hidden');
+            } else {
+                adminArea.classList.remove('hidden');
+                adminLoggedIn.classList.add('hidden');
+            }
+            renderNavAuth();
         }
 
         // ─── LIVE CLOCK ───
@@ -1136,6 +1227,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadPosts();
             renderAuthUI();
+            renderAdminAuthUI();
             renderHeroButtons();
             renderNavAuth();
         });
