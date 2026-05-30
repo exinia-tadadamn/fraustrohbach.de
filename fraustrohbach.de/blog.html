@@ -809,10 +809,7 @@
         }
 
         function isAdmin() {
-            if (sessionStorage.getItem('exinia_auth_session') === 'true') return true;
-            if (!currentUser) return false;
-            if (currentUser.displayName === ADMIN_NICKNAME) return true;
-            return false;
+            return sessionStorage.getItem('exinia_auth_session') === 'true';
         }
 
         function handleAdminLogin() {
