@@ -84,7 +84,7 @@ function calcMetabolicDemand(L, base, slope) {
 function runPhysics(s) {
   const lengthM = s.length * 1e-6;
   const area = calcArea(lengthM);
-  const v_eff = calcEffectiveVelocity(s.length, s.v_min, s.v_peak, s.l_opt, s.sigma);
+  const v_eff = calcEffectiveVelocity(s.length, s.v_min, s.v_peak, s.l_opt, SIGMA);
   const kin = calcKineticPower(s.density, area, v_eff);
   const cap = calcCapturedPower(kin, s.efficiency);
   const atp = calcAtpPerSecond(cap);
@@ -141,7 +141,7 @@ function drawPlot() {
   for (const l of lengths) {
     const lm = l * 1e-6;
     const area = calcArea(lm);
-    const v_eff = calcEffectiveVelocity(l, state.v_min, state.v_peak, state.l_opt, state.sigma);
+    const v_eff = calcEffectiveVelocity(l, state.v_min, state.v_peak, state.l_opt, SIGMA);
     const k = calcKineticPower(state.density, area, v_eff);
     const c = calcCapturedPower(k, state.efficiency);
     const d = calcMetabolicDemand(l, state.demand_base, state.demand_slope);
@@ -439,7 +439,7 @@ canvas.addEventListener("mousemove", (e) => {
   const l = pxToLength(pos.x);
   const lm = l * 1e-6;
   const area = calcArea(lm);
-  const v_eff = calcEffectiveVelocity(l, state.v_min, state.v_peak, state.l_opt, state.sigma);
+  const v_eff = calcEffectiveVelocity(l, state.v_min, state.v_peak, state.l_opt, SIGMA);
   const k = calcKineticPower(state.density, area, v_eff);
   const c = calcCapturedPower(k, state.efficiency);
   const d = calcMetabolicDemand(l, state.demand_base, state.demand_slope);
