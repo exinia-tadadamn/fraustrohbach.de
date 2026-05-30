@@ -706,6 +706,7 @@
                         return `<p class="text-slate-300 text-base md:text-lg leading-relaxed mb-6">${escapeHtml(block.value || '')}</p>`;
                     }
                     if (block.type === 'image') {
+                        if (block.src && block.src === post.featuredImage) return '';
                         return `
                         <div class="scanline-wrap rounded border border-slate-800 my-8 overflow-hidden">
                             <img src="${escapeHtml(block.src || '')}" alt="${escapeHtml(block.alt || '')}" class="w-full object-cover">
@@ -745,10 +746,6 @@
                     <h2 class="text-3xl md:text-4xl font-display font-bold text-white mb-6 glow-text leading-tight">${escapeHtml(post.title || 'Untitled')}</h2>
                     <div class="flex flex-wrap gap-2">${tagsHtml}</div>
                 </div>
-                ${post.featuredImage ? `
-                <div class="scanline-wrap rounded border border-slate-800 mb-10 overflow-hidden max-h-[500px]">
-                    <img src="${escapeHtml(post.featuredImage)}" alt="Featured" class="w-full object-cover">
-                </div>` : ''}
                 <div class="border-t border-slate-800 pt-8">
                     ${bodyHtml || `<p class="text-slate-500 font-mono text-sm">No decoded content available.</p>`}
                 </div>
