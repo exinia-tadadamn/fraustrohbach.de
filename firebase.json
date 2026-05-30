@@ -3,17 +3,11 @@
     "public": "fraustrohbach.de",
     "ignore": [
       "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
+      ".*",
+      "node_modules/**"
     ]
   },
   "firestore": {
     "rules": "firestore.rules"
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default"
-    }
-  ]
+  }
 }
