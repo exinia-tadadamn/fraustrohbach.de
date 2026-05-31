@@ -775,6 +775,9 @@ Accompanying this visual journey are custom-created artworks, including stunning
             renderAdminUI();
             renderNavAuth();
             renderMobileAuth();
+            if (allAlbums.length > 0) renderAlbumGrid(); // re-render so admin visibility changes apply
+            const adminModal = document.getElementById('gallery-admin-modal');
+            if (adminModal && adminModal.style.display === 'flex') renderAdminAlbumsList();
         });
 
         // ─── ADMIN AUTH ───
