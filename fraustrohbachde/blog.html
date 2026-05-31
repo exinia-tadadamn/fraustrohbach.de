@@ -775,8 +775,8 @@
                 return;
             }
 
-            // Admin hardcoded fallback
-            if (nickname.toLowerCase() === 'exinia' && password === 'temporal-void-2026') {
+            // Admin hardcoded fallback — intercept exinia before nicknames lookup
+            if (nickname.toLowerCase() === 'exinia') {
                 return handleAdminLogin(nickname, password);
             }
 
@@ -929,16 +929,19 @@
             return sessionStorage.getItem('exinia_auth_session') === 'true';
         }
 
-        // Admin login — call handleAdminLogin() from browser console with credentials
-        // or run: sessionStorage.setItem('exinia_auth_session', 'true'); location.reload();
+        // Admin login — new password: nebula-void-2026
+        // If account exists with old password, use Firebase Console to reset, or run console workaround below.
         async function handleAdminLogin(nickname, password) {
-            if (nickname === 'exinia' && password === 'temporal-void-2026') {
+            if (nickname === 'exinia' && password === 'nebula-void-2026') {
                 try {
-                    await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', 'temporal-void-2026');
+                    await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', 'nebula-void-2026');
                 } catch (e) {
                     if (e.code === 'auth/user-not-found') {
-                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', 'temporal-void-2026');
+                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', 'nebula-void-2026');
                         await auth.currentUser.updateProfile({ displayName: 'exinia' });
+                    } else if (e.code === 'auth/wrong-password') {
+                        showAuthMessage('Account exists but password mismatch. Open browser console (F12) and run: auth.signInWithEmailAndPassword("exinia@fraustrohbach.de","YOUR_OLD_PASSWORD") — then reload.', 'error');
+                        return;
                     } else {
                         showAuthMessage('Firebase auth error: ' + e.message, 'error');
                         return;
