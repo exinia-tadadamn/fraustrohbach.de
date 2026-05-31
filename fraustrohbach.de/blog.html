@@ -16,6 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 
     <script>
         tailwind.config = {
@@ -361,12 +362,15 @@
         </div>
         <div id="mobile-menu" class="hidden md:hidden bg-[#020617]/95 border-b border-slate-800/50 px-6 pb-6">
             <div class="flex flex-col space-y-4 text-sm font-medium uppercase tracking-widest">
-                <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors">The Lenses</a>
+                <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors pt-2">The Lenses</a>
                 <a href="index.html#videos" class="text-slate-400 hover:text-neon-cyan transition-colors">Recordings</a>
                 <a href="index.html#books" class="text-slate-400 hover:text-neon-cyan transition-colors">Fragments</a>
                 <a href="blog.html" class="text-neon-cyan transition-colors">Blog</a>
                 <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
                 <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
+                <div id="mobile-auth-links" class="pt-4 border-t border-slate-800 flex flex-col gap-3">
+                    <!-- Injected via JS -->
+                </div>
             </div>
         </div>
     </nav>
@@ -662,6 +666,86 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profile-modal" onclick="if(event.target === this) closeProfileModal()" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
+        <div class="w-full max-w-xl mx-auto p-4 md:p-8 min-h-screen">
+            <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-user-circle text-neon-cyan text-xl"></i>
+                        <span class="font-mono text-xs text-neon-cyan uppercase tracking-widest">Operator Profile</span>
+                    </div>
+                    <button onclick="closeProfileModal()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-xs uppercase tracking-widest">
+                        <i class="ph ph-x text-xl"></i> Close
+                    </button>
+                </div>
+
+                <div id="profile-content" class="p-6 md:p-10 space-y-8">
+                    <!-- Avatar -->
+                    <div class="flex items-center gap-6">
+                        <div class="relative">
+                            <img id="profile-avatar-preview" src="" alt="Avatar" class="w-20 h-20 rounded-full object-cover border-2 border-slate-700 bg-slate-800">
+                            <label class="absolute -bottom-1 -right-1 bg-neon-cyan text-black rounded-full p-1 cursor-pointer hover:bg-cyan-300 transition-colors">
+                                <i class="ph ph-camera text-sm"></i>
+                                <input type="file" id="profile-avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                            </label>
+                        </div>
+                        <div>
+                            <p class="text-white font-display font-bold text-lg" id="profile-display-name">Operator</p>
+                            <p class="text-slate-500 text-xs font-mono" id="profile-email"></p>
+                        </div>
+                    </div>
+
+                    <!-- Profile Info -->
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Display Name</label>
+                            <input id="profile-name-input" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Your name...">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Short Bio</label>
+                            <textarea id="profile-bio-input" rows="3" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="A few words about yourself..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Nickname</label>
+                            <div class="flex gap-2">
+                                <input id="profile-nickname-input" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Your callsign">
+                                <button onclick="checkNicknameAvailability()" class="border border-slate-700 bg-slate-900/50 text-slate-400 px-4 py-3 uppercase tracking-widest text-xs hover:border-neon-cyan hover:text-neon-cyan transition-all whitespace-nowrap">Check</button>
+                            </div>
+                            <p id="nickname-status" class="text-xs font-mono mt-1 hidden"></p>
+                        </div>
+                        <button onclick="saveProfileInfo()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                            <i class="ph ph-floppy-disk mr-2"></i> Save Profile
+                        </button>
+                    </div>
+
+                    <!-- Password Change -->
+                    <div class="border-t border-slate-800 pt-6 space-y-5">
+                        <h4 class="text-white font-display text-sm uppercase tracking-widest flex items-center gap-2">
+                            <i class="ph ph-lock-key text-neon-magenta"></i> Change Password
+                        </h4>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Current Password</label>
+                            <input id="profile-old-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="••••••••">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">New Password</label>
+                            <input id="profile-new-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Min. 6 characters">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Confirm New Password</label>
+                            <input id="profile-confirm-password" type="password" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Retype new password">
+                        </div>
+                        <button onclick="changePassword()" class="w-full border border-neon-magenta bg-neon-magenta/10 text-neon-magenta py-3 uppercase tracking-widest text-xs hover:bg-neon-magenta/20 transition-all">
+                            <i class="ph ph-key mr-2"></i> Update Password
+                        </button>
+                        <p id="password-status" class="text-xs font-mono mt-2 hidden text-center"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-black border-t border-slate-800 py-12 text-center text-slate-500 text-sm">
         <p>&copy; 2026 Exinia [Null.Null] / Ksenia Strohbach. Transmission ended.</p>
@@ -687,6 +771,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         const functions = firebase.functions();
+        const storage = firebase.storage();
 
         // ─── STATE ───
         let currentUser = null;
@@ -707,6 +792,7 @@
             renderAuthUI();
             renderHeroButtons();
             renderNavAuth();
+            renderMobileAuth();
             if (currentPostId) {
                 renderCommentForm();
             }
@@ -895,6 +981,9 @@
             const isAdminSession = sessionStorage.getItem('exinia_auth_session') === 'true';
             if (currentUser) {
                 navAuth.innerHTML = `
+                    <button onclick="openProfileModal()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                        <i class="ph ph-user-circle text-lg"></i> Profile
+                    </button>
                     <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${getUserDisplayName(currentUser)}</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-sign-out text-lg"></i> Logout
@@ -992,6 +1081,210 @@
 
         function renderAdminAuthUI() {
             renderNavAuth();
+        }
+
+        function renderMobileAuth() {
+            const container = document.getElementById('mobile-auth-links');
+            if (!container) return;
+            if (currentUser) {
+                container.innerHTML = `
+                    <button onclick="openProfileModal(); closeMobileMenu();" class="text-slate-400 hover:text-neon-cyan transition-colors text-left flex items-center gap-2">
+                        <i class="ph ph-user-circle text-lg"></i> Profile
+                    </button>
+                    <button onclick="handleLogout(); closeMobileMenu();" class="text-slate-400 hover:text-neon-magenta transition-colors text-left flex items-center gap-2">
+                        <i class="ph ph-sign-out text-lg"></i> Logout
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <a href="#auth-terminal" onclick="closeMobileMenu();" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2">
+                        <i class="ph ph-key text-lg"></i> Login
+                    </a>
+                `;
+            }
+        }
+
+        function closeMobileMenu() {
+            const m = document.getElementById('mobile-menu');
+            if (m) m.classList.add('hidden');
+        }
+
+        // ─── PROFILE MODAL ───
+        let currentProfileData = null;
+
+        async function openProfileModal() {
+            const m = document.getElementById('profile-modal');
+            if (!m || !currentUser) return;
+            m.classList.remove('hidden');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+            await loadProfileData();
+        }
+
+        function closeProfileModal() {
+            const m = document.getElementById('profile-modal');
+            if (!m) return;
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        }
+
+        async function loadProfileData() {
+            if (!currentUser) return;
+            document.getElementById('profile-display-name').textContent = getUserDisplayName(currentUser);
+            document.getElementById('profile-email').textContent = currentUser.email || '';
+            document.getElementById('profile-name-input').value = currentUser.displayName || '';
+            document.getElementById('profile-avatar-preview').src = currentUser.photoURL || '';
+
+            try {
+                const doc = await db.collection('userProfiles').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    currentProfileData = doc.data();
+                    document.getElementById('profile-bio-input').value = currentProfileData.bio || '';
+                    document.getElementById('profile-nickname-input').value = currentProfileData.nickname || '';
+                    if (currentProfileData.avatarURL) {
+                        document.getElementById('profile-avatar-preview').src = currentProfileData.avatarURL;
+                    }
+                } else {
+                    currentProfileData = {};
+                    document.getElementById('profile-bio-input').value = '';
+                    document.getElementById('profile-nickname-input').value = '';
+                }
+            } catch (e) {
+                console.error('Failed to load profile', e);
+                currentProfileData = {};
+            }
+        }
+
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !currentUser) return;
+            if (!file.type.startsWith('image/')) { alert('Please upload an image.'); return; }
+            const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+            const ref = storage.ref(`avatars/${currentUser.uid}/${safeName}`);
+            try {
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
+                await db.collection('userProfiles').doc(currentUser.uid).update({ avatarURL: url });
+                await currentUser.updateProfile({ photoURL: url });
+                document.getElementById('profile-avatar-preview').src = url;
+            } catch (e) {
+                alert('Avatar upload failed: ' + e.message);
+            }
+        }
+
+        async function saveProfileInfo() {
+            if (!currentUser) return;
+            const displayName = document.getElementById('profile-name-input').value.trim();
+            const bio = document.getElementById('profile-bio-input').value.trim();
+            const nickname = document.getElementById('profile-nickname-input').value.trim();
+            const updates = {};
+            if (displayName) updates.displayName = displayName;
+            if (bio) updates.bio = bio;
+
+            const currentNick = currentProfileData && currentProfileData.nickname;
+            if (nickname && nickname !== currentNick) {
+                const nickStatus = document.getElementById('nickname-status');
+                try {
+                    const existing = await db.collection('nicknames').doc(nickname.toLowerCase()).get();
+                    if (existing.exists && existing.data().uid !== currentUser.uid) {
+                        nickStatus.textContent = 'Callsign already taken.';
+                        nickStatus.className = 'text-xs font-mono mt-1 text-neon-magenta';
+                        nickStatus.classList.remove('hidden');
+                        return;
+                    }
+                    if (currentNick) {
+                        await db.collection('nicknames').doc(currentNick.toLowerCase()).delete();
+                    }
+                    await db.collection('nicknames').doc(nickname.toLowerCase()).set({
+                        email: currentUser.email,
+                        uid: currentUser.uid
+                    });
+                    updates.nickname = nickname;
+                } catch (e) {
+                    nickStatus.textContent = 'Nickname update failed: ' + e.message;
+                    nickStatus.className = 'text-xs font-mono mt-1 text-neon-magenta';
+                    nickStatus.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            try {
+                await db.collection('userProfiles').doc(currentUser.uid).set(updates, { merge: true });
+                if (displayName) await currentUser.updateProfile({ displayName });
+                currentProfileData = { ...currentProfileData, ...updates };
+                document.getElementById('profile-display-name').textContent = displayName || getUserDisplayName(currentUser);
+                const status = document.getElementById('nickname-status');
+                status.textContent = 'Profile saved.';
+                status.className = 'text-xs font-mono mt-1 text-neon-lime';
+                status.classList.remove('hidden');
+                renderNavAuth();
+                renderMobileAuth();
+            } catch (e) {
+                alert('Failed to save profile: ' + e.message);
+            }
+        }
+
+        async function checkNicknameAvailability() {
+            const input = document.getElementById('profile-nickname-input');
+            const status = document.getElementById('nickname-status');
+            const nick = input.value.trim().toLowerCase();
+            if (!nick) { status.classList.add('hidden'); return; }
+            try {
+                const doc = await db.collection('nicknames').doc(nick).get();
+                if (doc.exists && doc.data().uid !== currentUser.uid) {
+                    status.textContent = 'Unavailable';
+                    status.className = 'text-xs font-mono mt-1 text-neon-magenta';
+                } else {
+                    status.textContent = 'Available';
+                    status.className = 'text-xs font-mono mt-1 text-neon-lime';
+                }
+                status.classList.remove('hidden');
+            } catch (e) {
+                status.textContent = 'Error checking';
+                status.className = 'text-xs font-mono mt-1 text-neon-magenta';
+                status.classList.remove('hidden');
+            }
+        }
+
+        async function changePassword() {
+            const oldPw = document.getElementById('profile-old-password').value;
+            const newPw = document.getElementById('profile-new-password').value;
+            const confirmPw = document.getElementById('profile-confirm-password').value;
+            const status = document.getElementById('password-status');
+
+            if (!oldPw || !newPw || !confirmPw) {
+                status.textContent = 'All password fields are required.';
+                status.className = 'text-xs font-mono mt-2 text-center text-neon-magenta';
+                status.classList.remove('hidden');
+                return;
+            }
+            if (newPw.length < 6) {
+                status.textContent = 'New password must be at least 6 characters.';
+                status.className = 'text-xs font-mono mt-2 text-center text-neon-magenta';
+                status.classList.remove('hidden');
+                return;
+            }
+            if (newPw !== confirmPw) {
+                status.textContent = 'New passwords do not match.';
+                status.className = 'text-xs font-mono mt-2 text-center text-neon-magenta';
+                status.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, oldPw);
+                await currentUser.reauthenticateWithCredential(credential);
+                await currentUser.updatePassword(newPw);
+                status.textContent = 'Password updated successfully.';
+                status.className = 'text-xs font-mono mt-2 text-center text-neon-lime';
+                status.classList.remove('hidden');
+                document.getElementById('profile-old-password').value = '';
+                document.getElementById('profile-new-password').value = '';
+                document.getElementById('profile-confirm-password').value = '';
+            } catch (e) {
+                status.textContent = e.code === 'auth/wrong-password' ? 'Current password is incorrect.' : 'Failed: ' + e.message;
+                status.className = 'text-xs font-mono mt-2 text-center text-neon-magenta';
+                status.classList.remove('hidden');
+            }
         }
 
         // ─── LIVE CLOCK ───
