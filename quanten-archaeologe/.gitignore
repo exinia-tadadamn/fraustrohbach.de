@@ -1,0 +1,35 @@
+# Swift Package Manager
+.build/
+Package.resolved
+*.xcodeproj
+*.xcworkspace
+
+# Xcode
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.moved-aside
+*.xcscmblueprint
+*.xccheckout
+
+# macOS
+.DS_Store
+
+# App signing
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# Archives
+*.ipa
+*.app
+*.dSYM.zip
+*.dSYM
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# SwiftPM binary artifacts
+.checkouts/

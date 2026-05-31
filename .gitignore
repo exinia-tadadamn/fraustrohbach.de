@@ -68,6 +68,15 @@ node_modules/
 # dataconnect generated files
 .dataconnect
 
+# Swift / Xcode
+.build/
+Package.resolved
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
 # macOS
 .DS_Store
 
@@ -86,3 +95,6 @@ dist/
 playwright-report/
 test-results/
 playwright/.cache/
+
+# Git backups
+.git-backup/
