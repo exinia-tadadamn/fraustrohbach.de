@@ -500,7 +500,7 @@
     </section>
 
     <!-- Post Detail Modal -->
-    <div id="post-modal" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
+    <div id="post-modal" onclick="if(event.target === this) closePostModal()" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
         <div class="w-full max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
             <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
@@ -555,7 +555,7 @@
     </div>
 
     <!-- Composer Modal -->
-    <div id="composer-modal" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
+    <div id="composer-modal" onclick="if(event.target === this) closeComposer()" class="fixed inset-0 z-[100] modal-backdrop hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
         <div class="w-full max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
             <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
@@ -929,50 +929,48 @@
             return sessionStorage.getItem('exinia_auth_session') === 'true';
         }
 
-        // Admin login — accepts both old (temporal-void-2026) and new (nebula-void-2026) passwords
+        // Admin login — hardcoded credentials, Firebase v10 safe
         async function handleAdminLogin(nickname, password) {
             if (nickname !== 'exinia') {
                 showAuthMessage('Invalid credentials.', 'error');
                 return;
             }
 
-            const tryLogin = async (pwd) => {
-                try {
-                    await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', pwd);
-                    return true;
-                } catch (e) {
-                    if (e.code === 'auth/user-not-found') {
-                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', pwd);
-                        await auth.currentUser.updateProfile({ displayName: 'exinia' });
-                        return true;
-                    }
-                    return false;
-                }
-            };
-
-            // Try the password the user typed first
-            if (await tryLogin(password)) {
-                sessionStorage.setItem('exinia_auth_session', 'true');
-                renderAdminAuthUI();
-                renderHeroButtons();
-                showAuthMessage('Operator session granted.', 'success');
+            // Only these passwords are ever valid
+            const validPasswords = ['temporal-void-2026', 'nebula-void-2026'];
+            if (!validPasswords.includes(password)) {
+                showAuthMessage('Invalid credentials.', 'error');
                 return;
             }
 
-            // If direct password failed, try the other known passwords as fallback
-            const fallbackPasswords = ['nebula-void-2026', 'temporal-void-2026'];
-            for (const fallback of fallbackPasswords) {
-                if (fallback === password) continue; // already tried
-                if (await tryLogin(fallback)) {
-                    sessionStorage.setItem('exinia_auth_session', 'true');
-                    renderAdminAuthUI();
-                    renderHeroButtons();
-                    showAuthMessage('Operator session granted.', 'success');
+            try {
+                await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', password);
+            } catch (e) {
+                // Firebase v10+ lumps user-not-found + wrong-password into invalid-credential
+                if (e.code === 'auth/invalid-credential') {
+                    // We don't know if account exists with wrong password or doesn't exist at all.
+                    // Try creating it. If email-already-in-use, the password was wrong.
+                    try {
+                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', password);
+                        await auth.currentUser.updateProfile({ displayName: 'exinia' });
+                    } catch (createErr) {
+                        if (createErr.code === 'auth/email-already-in-use') {
+                            showAuthMessage('Invalid credentials.', 'error');
+                        } else {
+                            showAuthMessage('Firebase auth error: ' + createErr.message, 'error');
+                        }
+                        return;
+                    }
+                } else {
+                    showAuthMessage('Firebase auth error: ' + e.message, 'error');
                     return;
                 }
             }
 
-            showAuthMessage('Invalid credentials.', 'error');
+            sessionStorage.setItem('exinia_auth_session', 'true');
+            renderAdminAuthUI();
+            renderHeroButtons();
+            showAuthMessage('Operator session granted.', 'success');
         }
 
         async function handleAdminLogout() {
