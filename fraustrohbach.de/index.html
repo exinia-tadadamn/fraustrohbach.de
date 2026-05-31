@@ -1162,12 +1162,14 @@ Accompanying this visual journey are custom-created artworks, including stunning
             }
         }
 
-        async function setAlbumCover(imageSrc) {
+        async function setAlbumCover(imageIdx) {
             if (!editingAlbumId) return;
+            const album = allAlbums.find(a => a.id === editingAlbumId);
+            if (!album || !album.images || imageIdx < 0 || imageIdx >= album.images.length) return;
+            const imageSrc = album.images[imageIdx].src;
             try {
                 await db.collection('galleryAlbums').doc(editingAlbumId).update({ coverImage: imageSrc });
-                const album = allAlbums.find(a => a.id === editingAlbumId);
-                if (album) album.coverImage = imageSrc;
+                album.coverImage = imageSrc;
                 renderAdminAlbumsList();
                 renderAlbumGrid();
                 renderEditAlbumImages(album);
@@ -1176,12 +1178,15 @@ Accompanying this visual journey are custom-created artworks, including stunning
             }
         }
 
-        async function deleteAlbumImage(imageSrc) {
+        async function deleteAlbumImage(imageIdx) {
             if (!editingAlbumId) return;
             if (!confirm('Remove this image from the album?')) return;
             const album = allAlbums.find(a => a.id === editingAlbumId);
             if (!album) return;
-            const newImages = (album.images || []).filter(img => img.src !== imageSrc);
+            const newImages = [...(album.images || [])];
+            if (imageIdx >= 0 && imageIdx < newImages.length) {
+                newImages.splice(imageIdx, 1);
+            }
             try {
                 await db.collection('galleryAlbums').doc(editingAlbumId).update({ images: newImages });
                 album.images = newImages;
@@ -1219,11 +1224,11 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 const isCover = album.coverImage === img.src;
                 return `
                 <div class="relative group bg-slate-900 border ${isCover ? 'border-neon-cyan' : 'border-slate-800'} overflow-hidden rounded cursor-pointer"
-                     onclick="setAlbumCover('${escapeHtml(img.src)}')">
+                     onclick="setAlbumCover(${idx})">
                     <img src="${escapeHtml(img.src)}" class="w-full aspect-video object-cover" onerror="this.parentElement.innerHTML='<div class=\\'aspect-video flex items-center justify-center text-slate-600 text-xs\\'>Error</div>'">
                     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         ${isCover ? '<span class="bg-neon-cyan text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded">Cover</span>' : ''}
-                        <button onclick="event.stopPropagation(); deleteAlbumImage('${escapeHtml(img.src)}')" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">Del</button>
+                        <button onclick="event.stopPropagation(); deleteAlbumImage(${idx})" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">Del</button>
                     </div>
                     <div class="absolute bottom-0 inset-x-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-center">
                         <span class="text-white text-[10px] font-mono">Set cover</span>
