@@ -37,6 +37,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Google Fonts for a cinematic/sci-fi feel -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
     
     <script>
         tailwind.config = {
@@ -91,6 +96,37 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
         .gallery-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #67e8f9;
+        }
+
+        /* Terminal input (admin panels) */
+        .terminal-input {
+            background: rgba(6, 182, 212, 0.05);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: #e2e8f0;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .terminal-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+        }
+
+        /* Admin button (album manager) */
+        .admin-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.1);
+            color: #22d3ee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .admin-btn:hover {
+            background: rgba(6, 182, 212, 0.25);
+            border-color: #22d3ee;
         }
     </style>
 </head>
@@ -433,27 +469,127 @@ Accompanying this visual journey are custom-created artworks, including stunning
     <div id="gallery-modal" class="fixed inset-0 z-[100] bg-[#020617]/95 backdrop-blur-xl flex-col opacity-0 transition-opacity duration-500" style="display: none; overflow: hidden;">
         <!-- Modal Header -->
         <div class="flex justify-between items-center p-6 border-b border-slate-800 bg-[#020617] flex-shrink-0">
-            <div class="font-display text-white text-xl tracking-widest flex items-center gap-3">
-                <i class="ph ph-aperture text-neon-cyan"></i> VISUAL ARCHIVE
+            <div id="gallery-header-left" class="font-display text-white text-xl tracking-widest flex items-center gap-3">
+                <i class="ph ph-aperture text-neon-cyan"></i> <span id="gallery-header-title">VISUAL ARCHIVE</span>
             </div>
-            <button onclick="closeGallery()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
-                <i class="ph ph-x text-2xl"></i> Close
-            </button>
+            <div class="flex items-center gap-4">
+                <button id="gallery-admin-btn" onclick="openGalleryAdmin()" class="hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+                    <i class="ph ph-gear text-xl"></i> Manage
+                </button>
+                <button id="gallery-back-btn" onclick="showAlbumGrid()" class="hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+                    <i class="ph ph-arrow-left text-xl"></i> Albums
+                </button>
+                <button onclick="closeGallery()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+                    <i class="ph ph-x text-2xl"></i> Close
+                </button>
+            </div>
         </div>
-        
-        <!-- Modal Grid Container -->
-        <div id="gallery-scroll-container" class="flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
+
+        <!-- Album Grid View -->
+        <div id="album-grid-view" class="flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
             <div class="p-6 md:p-12">
-                <div id="modal-lenses-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-screen-2xl mx-auto">
-                    <!-- Images will be inserted here by JavaScript -->
+                <div id="albums-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-screen-2xl mx-auto">
+                    <!-- Albums inserted here by JavaScript -->
                 </div>
             </div>
         </div>
-        
+
+        <!-- Album Detail View -->
+        <div id="album-detail-view" class="hidden flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
+            <div class="p-6 md:p-12">
+                <div id="album-detail-meta" class="max-w-screen-2xl mx-auto mb-8"></div>
+                <div id="album-images-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-screen-2xl mx-auto">
+                    <!-- Images inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
         <!-- Scroll to top button -->
         <button id="scroll-to-top-btn" onclick="scrollGalleryToTop()" class="fixed bottom-8 right-8 z-50 opacity-0 transition-opacity duration-300 pointer-events-none inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/95 text-slate-300 hover:border-neon-cyan hover:text-neon-cyan focus:outline-none" style="display: none;">
             <span class="text-lg">↑</span>
         </button>
+    </div>
+
+    <!-- Gallery Admin Modal -->
+    <div id="gallery-admin-modal" class="fixed inset-0 z-[120] bg-[#020617]/95 backdrop-blur-xl flex-col opacity-0 transition-opacity duration-300" style="display: none; overflow: hidden;">
+        <div class="flex justify-between items-center p-6 border-b border-slate-800 bg-[#020617] flex-shrink-0">
+            <div class="font-display text-white text-xl tracking-widest flex items-center gap-3">
+                <i class="ph ph-gear text-neon-cyan"></i> Archive Manager
+            </div>
+            <button onclick="closeGalleryAdmin()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+                <i class="ph ph-x text-2xl"></i> Close
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto gallery-scrollbar p-6 md:p-12">
+            <div class="max-w-screen-2xl mx-auto space-y-8">
+                <!-- Create Album -->
+                <div class="border border-slate-800 bg-slate-900/40 p-6 rounded">
+                    <h3 class="text-white font-display text-lg mb-4 flex items-center gap-2"><i class="ph ph-folder-plus text-neon-cyan"></i> Create Album</h3>
+                    <div class="flex gap-3">
+                        <input id="new-album-name" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Album name...">
+                        <button onclick="createAlbum()" class="border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                            <i class="ph ph-plus mr-1"></i> Create
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Manage Albums -->
+                <div id="admin-albums-list" class="space-y-6">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Album Edit Modal (upload + cover + rename + reorder) -->
+    <div id="album-edit-modal" class="fixed inset-0 z-[130] bg-[#020617]/95 backdrop-blur-xl flex-col opacity-0 transition-opacity duration-300" style="display: none; overflow: hidden;">
+        <div class="flex justify-between items-center p-6 border-b border-slate-800 bg-[#020617] flex-shrink-0">
+            <div class="font-display text-white text-xl tracking-widest flex items-center gap-3">
+                <i class="ph ph-pencil-simple text-neon-magenta"></i> <span id="edit-album-title">Edit Album</span>
+            </div>
+            <button onclick="closeAlbumEdit()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+                <i class="ph ph-x text-2xl"></i> Close
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto gallery-scrollbar p-6 md:p-12">
+            <div class="max-w-screen-2xl mx-auto space-y-8">
+                <!-- Rename -->
+                <div class="flex gap-3 items-center">
+                    <input id="edit-album-name" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Album name...">
+                    <button onclick="saveAlbumName()" class="border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+                        <i class="ph ph-check mr-1"></i> Rename
+                    </button>
+                </div>
+
+                <!-- Drag & Drop Upload -->
+                <div id="album-dropzone" class="border-2 border-dashed border-slate-700 bg-slate-900/20 rounded-lg p-10 text-center transition-colors hover:border-neon-cyan/50 hover:bg-slate-900/40"
+                     ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    <i class="ph ph-upload-simple text-4xl text-slate-600 mb-3 block"></i>
+                    <p class="text-slate-400 text-sm font-mono uppercase tracking-widest">Drop photos here to upload</p>
+                    <p class="text-slate-600 text-xs mt-1">Supports JPG, PNG, WebP</p>
+                    <input type="file" id="album-file-input" multiple accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                    <button onclick="document.getElementById('album-file-input').click()" class="mt-4 text-neon-cyan text-xs uppercase tracking-widest hover:underline">or click to browse</button>
+                </div>
+
+                <!-- Upload Progress -->
+                <div id="upload-progress-area" class="hidden space-y-2"></div>
+
+                <!-- Cover Selection -->
+                <div>
+                    <h4 class="text-white font-display text-sm uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph ph-image text-neon-cyan"></i> Click any image to set as cover</h4>
+                    <div id="edit-album-images" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        <!-- Images injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Delete Album -->
+                <div class="border-t border-slate-800 pt-6">
+                    <button onclick="deleteCurrentAlbum()" class="border border-red-500/30 bg-red-500/10 text-red-400 px-5 py-3 uppercase tracking-widest text-xs hover:bg-red-500/20 transition-all">
+                        <i class="ph ph-trash mr-1"></i> Delete Album
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Fullscreen Image Viewer -->
@@ -464,9 +600,87 @@ Accompanying this visual journey are custom-created artworks, including stunning
         <img id="image-viewer-img" alt="Temporal capture fullscreen" class="max-w-[95vw] max-h-[95vh] object-contain" />
     </div>
 
-    <!-- JavaScript to load images dynamically -->
+    <!-- JavaScript -->
     <script>
-        // Gallery Preview Setup
+        // ─── FIREBASE INIT ───
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzS5TxVpbnxOruWWIVpxnz9SPQ1uZ0B2w",
+            authDomain: "website-7c871.firebaseapp.com",
+            projectId: "website-7c871",
+            storageBucket: "website-7c871.firebasestorage.app",
+            messagingSenderId: "371207772629",
+            appId: "1:371207772629:web:b1b7782d37df9b72a3055c",
+            measurementId: "G-STDL59VZFS"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // ─── STATE ───
+        let currentUser = null;
+        let allAlbums = [];
+        let currentAlbumId = null;
+        let albumsLoaded = false;
+
+        // ─── AUTH LISTENER ───
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            renderAdminUI();
+        });
+
+        // ─── ADMIN AUTH ───
+        function isAdmin() {
+            return sessionStorage.getItem('exinia_auth_session') === 'true';
+        }
+
+        function renderAdminUI() {
+            const btn = document.getElementById('gallery-admin-btn');
+            if (btn) btn.classList.toggle('hidden', !isAdmin());
+        }
+
+        // Admin login — hardcoded credentials, Firebase v10 safe
+        async function handleAdminLogin(nickname, password) {
+            const lowerNick = nickname.toLowerCase();
+            if (lowerNick !== 'exinia' && lowerNick !== 'katadvaya') {
+                return { success: false, message: 'Invalid credentials.' };
+            }
+            const validPasswords = ['temporal-void-2026', 'nebula-void-2026'];
+            if (!validPasswords.includes(password)) {
+                return { success: false, message: 'Invalid credentials.' };
+            }
+            const adminEmail = lowerNick === 'exinia'
+                ? 'exinia@fraustrohbach.de'
+                : 'katadvaya@fraustrohbach.de';
+            try {
+                await auth.signInWithEmailAndPassword(adminEmail, password);
+            } catch (e) {
+                if (e.code === 'auth/invalid-credential') {
+                    try {
+                        await auth.createUserWithEmailAndPassword(adminEmail, password);
+                        await auth.currentUser.updateProfile({ displayName: lowerNick });
+                    } catch (createErr) {
+                        if (createErr.code === 'auth/email-already-in-use') {
+                            return { success: false, message: 'Invalid credentials.' };
+                        }
+                        return { success: false, message: 'Firebase auth error: ' + createErr.message };
+                    }
+                } else {
+                    return { success: false, message: 'Firebase auth error: ' + e.message };
+                }
+            }
+            sessionStorage.setItem('exinia_auth_session', 'true');
+            renderAdminUI();
+            return { success: true, message: 'Operator session granted.' };
+        }
+
+        async function handleAdminLogout() {
+            sessionStorage.removeItem('exinia_auth_session');
+            await auth.signOut();
+            renderAdminUI();
+        }
+
+        // ─── GALLERY PREVIEW (homepage teaser) ───
         const imageExtensions = ['.JPG', '.jpeg', '.jpg', '.JPEG'];
         const imageFolder = 'imagesTimeMashine/';
         const totalImages = 87;
@@ -478,10 +692,7 @@ Accompanying this visual journey are custom-created artworks, including stunning
 
         function findImageSrc(index, callback, failure) {
             const tryExtension = (extIndex) => {
-                if (extIndex >= imageExtensions.length) {
-                    failure();
-                    return;
-                }
+                if (extIndex >= imageExtensions.length) { failure(); return; }
                 const ext = imageExtensions[extIndex];
                 const candidate = `${imageFolder}image${index}${ext}`;
                 const testImg = new Image();
@@ -496,70 +707,136 @@ Accompanying this visual journey are custom-created artworks, including stunning
             const preview1 = document.getElementById('gallery-preview-1');
             const preview2 = document.getElementById('gallery-preview-2');
             if (!preview1 || !preview2) return;
-
-            findImageSrc(getRandomImageIndex(), (src) => {
-                preview1.src = src;
-            }, () => {
-                updateGalleryPreviews();
-            });
-
-            findImageSrc(getRandomImageIndex(), (src) => {
-                preview2.src = src;
-            }, () => {
-                updateGalleryPreviews();
-            });
+            findImageSrc(getRandomImageIndex(), (src) => { preview1.src = src; }, () => updateGalleryPreviews());
+            findImageSrc(getRandomImageIndex(), (src) => { preview2.src = src; }, () => updateGalleryPreviews());
         }
 
-        // Initialize previews on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            updateGalleryPreviews();
-            previewInterval = setInterval(updateGalleryPreviews, 2000);
-        });
+        // ─── ALBUM LOGIC ───
+        async function loadAlbums() {
+            try {
+                const snapshot = await db.collection('galleryAlbums').orderBy('order', 'asc').get();
+                if (!snapshot.empty) {
+                    allAlbums = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderAlbumGrid();
+                    return;
+                }
+            } catch (e) {
+                console.warn('Firestore albums load failed, using legacy', e);
+            }
+            // Fallback: create legacy album from static images (resolve extensions)
+            const legacyImages = [];
+            for (let i = 1; i <= totalImages; i++) {
+                const src = await new Promise(resolve => {
+                    findImageSrc(i, resolve, () => resolve(null));
+                });
+                if (src) legacyImages.push({ src, filename: `image${i}`, order: i });
+            }
+            const cover = legacyImages.length > 0 ? legacyImages[0].src : '';
+            allAlbums = [{
+                id: 'legacy-archive',
+                name: 'Legacy Archive',
+                coverImage: cover,
+                images: legacyImages,
+                order: 0,
+                createdAt: new Date().toISOString()
+            }];
+            renderAlbumGrid();
+        }
 
-        // Clean up interval if needed
-        window.addEventListener('beforeunload', () => {
-            if (previewInterval) clearInterval(previewInterval);
-        });
+        function renderAlbumGrid() {
+            const grid = document.getElementById('albums-grid');
+            if (!grid) return;
+            if (allAlbums.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-24"><i class="ph ph-aperture text-5xl text-slate-700 mb-4"></i><p class="text-slate-500 font-mono text-sm uppercase tracking-widest">No albums found.</p></div>`;
+                return;
+            }
+            grid.innerHTML = allAlbums.map(album => {
+                const cover = album.coverImage || (album.images && album.images[0] ? album.images[0].src : '');
+                const count = album.images ? album.images.length : 0;
+                return `
+                <div onclick="openAlbum('${album.id}')" class="group cursor-pointer bg-slate-900 border border-slate-800 hover:border-neon-cyan/50 transition-colors overflow-hidden rounded-sm">
+                    <div class="aspect-[4/3] overflow-hidden relative">
+                        ${cover ? `<img src="${escapeHtml(cover)}" alt="${escapeHtml(album.name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">` : `<div class="w-full h-full flex items-center justify-center text-slate-700 font-mono text-xs">NO_VISUAL_DATA</div>`}
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <span class="text-white text-xs font-mono uppercase tracking-widest border border-white/30 px-3 py-1 rounded">Open</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-white font-display font-bold text-lg mb-1 truncate">${escapeHtml(album.name || 'Untitled')}</h3>
+                        <p class="text-slate-500 text-xs font-mono uppercase tracking-wider">${count} capture${count !== 1 ? 's' : ''}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
 
-        // Gallery logic
+        function openAlbum(albumId) {
+            currentAlbumId = albumId;
+            const album = allAlbums.find(a => a.id === albumId);
+            if (!album) return;
+
+            document.getElementById('gallery-header-title').textContent = album.name || 'Album';
+            document.getElementById('album-grid-view').classList.add('hidden');
+            document.getElementById('album-detail-view').classList.remove('hidden');
+            document.getElementById('gallery-back-btn').classList.remove('hidden');
+            document.getElementById('gallery-admin-btn').classList.toggle('hidden', !isAdmin());
+
+            const meta = document.getElementById('album-detail-meta');
+            meta.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <h2 class="text-2xl md:text-3xl font-display font-bold text-white glow-text">${escapeHtml(album.name || 'Untitled')}</h2>
+                    <span class="text-slate-500 text-xs font-mono uppercase tracking-wider">${album.images ? album.images.length : 0} captures</span>
+                </div>
+            `;
+
+            const grid = document.getElementById('album-images-grid');
+            const images = (album.images || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+            if (images.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-600 font-mono text-sm">No images in this album.</div>`;
+            } else {
+                grid.innerHTML = images.map((img, idx) => `
+                    <div onclick="openImageViewer('${escapeHtml(img.src)}')" class="group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer">
+                        <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\\'>Not found</div>'">
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                            <span class="text-white text-[10px] font-mono uppercase tracking-wider">${escapeHtml(img.filename || '')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function showAlbumGrid() {
+            currentAlbumId = null;
+            document.getElementById('gallery-header-title').textContent = 'VISUAL ARCHIVE';
+            document.getElementById('album-grid-view').classList.remove('hidden');
+            document.getElementById('album-detail-view').classList.add('hidden');
+            document.getElementById('gallery-back-btn').classList.add('hidden');
+            renderAdminUI();
+        }
+
+        // ─── GALLERY MODAL ───
         const modal = document.getElementById('gallery-modal');
-        let imagesLoaded = false;
         let galleryKeyboardActive = false;
         let scrollListenerAttached = false;
 
         function openGallery() {
             modal.style.display = 'flex';
-            // small delay to allow display to apply before animating opacity
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-            }, 10);
-            
-            // Prevent body scroll behind the modal
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
             document.body.style.overflow = 'hidden';
 
-            // Attach scroll listener only once
-            const scrollContainer = document.getElementById('gallery-scroll-container');
+            const scrollContainer = document.getElementById('album-grid-view');
             if (scrollContainer && !scrollListenerAttached) {
                 scrollContainer.addEventListener('scroll', handleGalleryScroll);
                 scrollListenerAttached = true;
             }
-
-            // Add keyboard navigation (only once)
             if (!galleryKeyboardActive) {
                 galleryKeyboardActive = true;
                 document.addEventListener('keydown', handleGalleryKeyboard);
             }
-
-            // Load images only once to save performance
-            if (!imagesLoaded) {
-                loadImages();
-                imagesLoaded = true;
+            if (!albumsLoaded) {
+                loadAlbums();
+                albumsLoaded = true;
             }
-
-            // Focus scroll container to ensure keyboard events work
-            if (scrollContainer) {
-                scrollContainer.focus();
-            }
+            showAlbumGrid();
         }
 
         function handleGalleryKeyboard(e) {
@@ -568,38 +845,13 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 galleryKeyboardActive = false;
                 return;
             }
-
-            const scrollContainer = document.getElementById('gallery-scroll-container');
-            if (!scrollContainer) return;
-
             if (isImageViewerOpen()) {
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    closeImageViewer();
-                }
+                if (e.key === 'Escape') { e.preventDefault(); closeImageViewer(); }
                 return;
             }
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                scrollContainer.scrollBy({ top: 200, behavior: 'smooth' });
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                scrollContainer.scrollBy({ top: -200, behavior: 'smooth' });
-            } else if (e.key === 'PageDown') {
-                e.preventDefault();
-                scrollContainer.scrollBy({ top: scrollContainer.clientHeight * 0.8, behavior: 'smooth' });
-            } else if (e.key === 'PageUp') {
-                e.preventDefault();
-                scrollContainer.scrollBy({ top: -scrollContainer.clientHeight * 0.8, behavior: 'smooth' });
-            } else if (e.key === 'Home') {
-                e.preventDefault();
-                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            } else if (e.key === 'End') {
-                e.preventDefault();
-                scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
-            } else if (e.key === 'Escape') {
-                closeGallery();
+            if (e.key === 'Escape') {
+                if (currentAlbumId) showAlbumGrid();
+                else closeGallery();
             }
         }
 
@@ -609,97 +861,34 @@ Accompanying this visual journey are custom-created artworks, including stunning
             galleryKeyboardActive = false;
             setTimeout(() => {
                 modal.style.display = 'none';
-                document.body.style.overflow = ''; // Restore body scroll
+                document.body.style.overflow = '';
                 const scrollBtn = document.getElementById('scroll-to-top-btn');
-                if (scrollBtn) {
-                    scrollBtn.style.display = 'none';
-                    scrollBtn.classList.add('opacity-0');
-                }
-            }, 500); // match duration-500
+                if (scrollBtn) { scrollBtn.style.display = 'none'; scrollBtn.classList.add('opacity-0'); }
+            }, 500);
         }
 
         function scrollGalleryToTop() {
-            const scrollContainer = document.getElementById('gallery-scroll-container');
-            if (scrollContainer) {
-                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            const c = document.getElementById('album-grid-view') || document.getElementById('album-detail-view');
+            if (c) c.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function handleGalleryScroll() {
-            const scrollContainer = document.getElementById('gallery-scroll-container');
+            const containers = [document.getElementById('album-grid-view'), document.getElementById('album-detail-view')];
             const scrollBtn = document.getElementById('scroll-to-top-btn');
-            if (!scrollContainer || !scrollBtn) return;
-
-            if (scrollContainer.scrollTop > 300) {
+            if (!scrollBtn) return;
+            const scrollTop = containers.find(c => c && !c.classList.contains('hidden'))?.scrollTop || 0;
+            if (scrollTop > 300) {
                 scrollBtn.style.display = 'block';
                 setTimeout(() => scrollBtn.classList.remove('opacity-0'), 10);
                 scrollBtn.classList.remove('pointer-events-none');
             } else {
                 scrollBtn.classList.add('opacity-0');
                 setTimeout(() => {
-                    if (scrollContainer.scrollTop <= 300) {
+                    if ((containers.find(c => c && !c.classList.contains('hidden'))?.scrollTop || 0) <= 300) {
                         scrollBtn.classList.add('pointer-events-none');
                         scrollBtn.style.display = 'none';
                     }
                 }, 300);
-            }
-        }
-
-        function loadImages() {
-            const gridContainer = document.getElementById('modal-lenses-grid');
-            const imageFolder = 'imagesTimeMashine/';
-            const totalImages = 87;
-            const imageExtensions = ['.JPG', '.jpeg', '.jpg', '.JPEG'];
-
-            function findImageSrc(index, callback, failure) {
-                const tryExtension = (extIndex) => {
-                    if (extIndex >= imageExtensions.length) {
-                        failure();
-                        return;
-                    }
-
-                    const ext = imageExtensions[extIndex];
-                    const candidate = `${imageFolder}image${index}${ext}`;
-                    const testImg = new Image();
-                    testImg.onload = () => callback(candidate);
-                    testImg.onerror = () => tryExtension(extIndex + 1);
-                    testImg.src = candidate;
-                };
-
-                tryExtension(0);
-            }
-
-            for (let i = 1; i <= totalImages; i++) {
-                const imageCard = document.createElement('div');
-                imageCard.className = 'group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer';
-                const captureId = i.toString().padStart(3, '0');
-
-                const imageElem = document.createElement('img');
-                imageElem.alt = `Temporal Capture ${i}`;
-                imageElem.className = 'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105';
-
-                imageElem.onerror = () => {
-                    imageCard.innerHTML = `<div class='absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs'>Image not found: image${i}</div>`;
-                };
-
-                findImageSrc(i, (src) => {
-                    imageElem.src = src;
-                }, () => {
-                    imageElem.onerror();
-                });
-
-                imageCard.appendChild(imageElem);
-
-                const overlay = document.createElement('div');
-                overlay.className = 'absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4';
-                overlay.innerHTML = '';
-                imageCard.appendChild(overlay);
-
-                imageCard.addEventListener('click', () => {
-                    if (imageElem.src) openImageViewer(imageElem.src);
-                });
-
-                gridContainer.appendChild(imageCard);
             }
         }
 
@@ -729,45 +918,273 @@ Accompanying this visual journey are custom-created artworks, including stunning
             return viewer && viewer.style.display !== 'none';
         }
 
-        function scrollArchivePreview(direction) {
-            const strip = document.getElementById('archive-preview-strip');
-            if (!strip) return;
-            strip.scrollBy({ left: direction * 240, behavior: 'smooth' });
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
-        function autoScrollPreviewStrip() {
-            const strip = document.getElementById('archive-preview-strip');
-            if (!strip) return;
+        // ─── ADMIN PANEL ───
+        function openGalleryAdmin() {
+            const m = document.getElementById('gallery-admin-modal');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+            renderAdminAlbumsList();
+        }
 
-            let direction = 1;
-            const speed = 0.2;
-            let paused = false;
+        function closeGalleryAdmin() {
+            const m = document.getElementById('gallery-admin-modal');
+            m.classList.add('opacity-0');
+            setTimeout(() => m.style.display = 'none', 300);
+        }
 
-            strip.addEventListener('mouseenter', () => paused = true);
-            strip.addEventListener('mouseleave', () => paused = false);
-            strip.addEventListener('pointerdown', () => paused = true);
-            strip.addEventListener('pointerup', () => paused = false);
+        function renderAdminAlbumsList() {
+            const container = document.getElementById('admin-albums-list');
+            if (!container) return;
+            if (allAlbums.length === 0) {
+                container.innerHTML = '<p class="text-slate-600 text-sm font-mono">No albums yet.</p>';
+                return;
+            }
+            container.innerHTML = allAlbums.map(album => `
+                <div class="border border-slate-800 bg-slate-900/40 p-5 rounded flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-12 bg-slate-800 overflow-hidden rounded">
+                            ${album.coverImage ? `<img src="${escapeHtml(album.coverImage)}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-slate-600 text-xs">—</div>`}
+                        </div>
+                        <div>
+                            <h4 class="text-white font-display font-bold text-sm">${escapeHtml(album.name || 'Untitled')}</h4>
+                            <p class="text-slate-500 text-xs font-mono">${album.images ? album.images.length : 0} images</p>
+                        </div>
+                    </div>
+                    <button onclick="openAlbumEdit('${album.id}')" class="admin-btn">
+                        <i class="ph ph-pencil-simple"></i> Edit
+                    </button>
+                </div>
+            `).join('');
+        }
 
-            const animate = () => {
-                if (!strip) return;
-                const maxScroll = strip.scrollWidth - strip.clientWidth;
-                if (maxScroll > 0 && !paused) {
-                    strip.scrollLeft += direction * speed;
-
-                    if (strip.scrollLeft >= maxScroll - 1) {
-                        direction = -1;
-                    } else if (strip.scrollLeft <= 0) {
-                        direction = 1;
-                    }
-                }
-
-                requestAnimationFrame(animate);
+        async function createAlbum() {
+            const nameInput = document.getElementById('new-album-name');
+            const name = nameInput.value.trim();
+            if (!name) { alert('Album name required.'); return; }
+            const maxOrder = allAlbums.length > 0 ? Math.max(...allAlbums.map(a => a.order || 0)) : -1;
+            const newDoc = db.collection('galleryAlbums').doc();
+            const albumData = {
+                id: newDoc.id,
+                name,
+                coverImage: '',
+                images: [],
+                order: maxOrder + 1,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdBy: auth.currentUser ? auth.currentUser.uid : 'admin'
             };
-
-            requestAnimationFrame(animate);
+            try {
+                await newDoc.set(albumData);
+                allAlbums.push({ ...albumData, id: newDoc.id });
+                nameInput.value = '';
+                renderAdminAlbumsList();
+                renderAlbumGrid();
+            } catch (e) {
+                alert('Failed to create album: ' + e.message);
+            }
         }
 
-        window.addEventListener('DOMContentLoaded', autoScrollPreviewStrip);
+        // ─── ALBUM EDIT (upload, cover, rename, delete) ───
+        let editingAlbumId = null;
+
+        function openAlbumEdit(albumId) {
+            editingAlbumId = albumId;
+            const album = allAlbums.find(a => a.id === albumId);
+            if (!album) return;
+            document.getElementById('edit-album-title').textContent = album.name || 'Edit Album';
+            document.getElementById('edit-album-name').value = album.name || '';
+            renderEditAlbumImages(album);
+            const m = document.getElementById('album-edit-modal');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+
+        function closeAlbumEdit() {
+            const m = document.getElementById('album-edit-modal');
+            m.classList.add('opacity-0');
+            setTimeout(() => m.style.display = 'none', 300);
+            editingAlbumId = null;
+            document.getElementById('upload-progress-area').classList.add('hidden');
+        }
+
+        async function saveAlbumName() {
+            if (!editingAlbumId) return;
+            const name = document.getElementById('edit-album-name').value.trim();
+            if (!name) return;
+            try {
+                await db.collection('galleryAlbums').doc(editingAlbumId).update({ name });
+                const album = allAlbums.find(a => a.id === editingAlbumId);
+                if (album) album.name = name;
+                document.getElementById('edit-album-title').textContent = name;
+                renderAdminAlbumsList();
+                renderAlbumGrid();
+            } catch (e) {
+                alert('Failed to rename: ' + e.message);
+            }
+        }
+
+        async function setAlbumCover(imageSrc) {
+            if (!editingAlbumId) return;
+            try {
+                await db.collection('galleryAlbums').doc(editingAlbumId).update({ coverImage: imageSrc });
+                const album = allAlbums.find(a => a.id === editingAlbumId);
+                if (album) album.coverImage = imageSrc;
+                renderAdminAlbumsList();
+                renderAlbumGrid();
+                renderEditAlbumImages(album);
+            } catch (e) {
+                alert('Failed to set cover: ' + e.message);
+            }
+        }
+
+        async function deleteAlbumImage(imageSrc) {
+            if (!editingAlbumId) return;
+            if (!confirm('Remove this image from the album?')) return;
+            const album = allAlbums.find(a => a.id === editingAlbumId);
+            if (!album) return;
+            const newImages = (album.images || []).filter(img => img.src !== imageSrc);
+            try {
+                await db.collection('galleryAlbums').doc(editingAlbumId).update({ images: newImages });
+                album.images = newImages;
+                renderEditAlbumImages(album);
+                renderAdminAlbumsList();
+                renderAlbumGrid();
+            } catch (e) {
+                alert('Failed to remove image: ' + e.message);
+            }
+        }
+
+        async function deleteCurrentAlbum() {
+            if (!editingAlbumId) return;
+            const album = allAlbums.find(a => a.id === editingAlbumId);
+            if (!confirm(`Permanently delete album "${album?.name || ''}"? This cannot be undone.`)) return;
+            try {
+                await db.collection('galleryAlbums').doc(editingAlbumId).delete();
+                allAlbums = allAlbums.filter(a => a.id !== editingAlbumId);
+                closeAlbumEdit();
+                renderAdminAlbumsList();
+                renderAlbumGrid();
+            } catch (e) {
+                alert('Failed to delete album: ' + e.message);
+            }
+        }
+
+        function renderEditAlbumImages(album) {
+            const container = document.getElementById('edit-album-images');
+            const images = (album.images || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+            if (images.length === 0) {
+                container.innerHTML = '<p class="text-slate-600 text-sm font-mono col-span-full">No images yet. Drop files above to upload.</p>';
+                return;
+            }
+            container.innerHTML = images.map((img, idx) => {
+                const isCover = album.coverImage === img.src;
+                return `
+                <div class="relative group bg-slate-900 border ${isCover ? 'border-neon-cyan' : 'border-slate-800'} overflow-hidden rounded cursor-pointer"
+                     onclick="setAlbumCover('${escapeHtml(img.src)}')">
+                    <img src="${escapeHtml(img.src)}" class="w-full aspect-video object-cover" onerror="this.parentElement.innerHTML='<div class=\\'aspect-video flex items-center justify-center text-slate-600 text-xs\\'>Error</div>'">
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        ${isCover ? '<span class="bg-neon-cyan text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded">Cover</span>' : ''}
+                        <button onclick="event.stopPropagation(); deleteAlbumImage('${escapeHtml(img.src)}')" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">Del</button>
+                    </div>
+                    <div class="absolute bottom-0 inset-x-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-center">
+                        <span class="text-white text-[10px] font-mono">Set cover</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ─── DRAG & DROP UPLOAD ───
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.add('border-neon-cyan', 'bg-slate-900/60');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('border-neon-cyan', 'bg-slate-900/60');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('border-neon-cyan', 'bg-slate-900/60');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (files.length) uploadImages(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            if (files.length) uploadImages(files);
+            e.target.value = '';
+        }
+
+        async function uploadImages(files) {
+            if (!editingAlbumId) return;
+            const album = allAlbums.find(a => a.id === editingAlbumId);
+            if (!album) return;
+
+            const progressArea = document.getElementById('upload-progress-area');
+            progressArea.classList.remove('hidden');
+            progressArea.innerHTML = files.map((f, i) => `
+                <div id="upload-row-${i}" class="flex items-center gap-3 text-xs font-mono text-slate-400">
+                    <span class="text-neon-cyan">◈</span> ${escapeHtml(f.name)} <span id="upload-status-${i}" class="text-slate-500">uploading...</span>
+                </div>
+            `).join('');
+
+            const uploaded = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+                const ref = storage.ref(`gallery/${editingAlbumId}/${safeName}`);
+                try {
+                    await ref.put(file);
+                    const url = await ref.getDownloadURL();
+                    uploaded.push({ src: url, filename: file.name, order: (album.images ? album.images.length : 0) + i });
+                    document.getElementById(`upload-status-${i}`).textContent = 'done';
+                    document.getElementById(`upload-status-${i}`).classList.add('text-neon-lime');
+                } catch (err) {
+                    console.error('Upload failed', err);
+                    document.getElementById(`upload-status-${i}`).textContent = 'failed';
+                    document.getElementById(`upload-status-${i}`).classList.add('text-red-400');
+                }
+            }
+
+            if (uploaded.length) {
+                const newImages = [...(album.images || []), ...uploaded];
+                try {
+                    await db.collection('galleryAlbums').doc(editingAlbumId).update({ images: newImages });
+                    album.images = newImages;
+                    if (!album.coverImage && uploaded[0]) {
+                        album.coverImage = uploaded[0].src;
+                        await db.collection('galleryAlbums').doc(editingAlbumId).update({ coverImage: uploaded[0].src });
+                    }
+                    renderEditAlbumImages(album);
+                    renderAdminAlbumsList();
+                    renderAlbumGrid();
+                } catch (e) {
+                    alert('Failed to save uploaded images: ' + e.message);
+                }
+            }
+        }
+
+        // ─── INIT ───
+        window.addEventListener('DOMContentLoaded', () => {
+            updateGalleryPreviews();
+            previewInterval = setInterval(updateGalleryPreviews, 2000);
+            renderAdminUI();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (previewInterval) clearInterval(previewInterval);
+        });
     </script>
 
 </body>
