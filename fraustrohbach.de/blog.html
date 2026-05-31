@@ -779,8 +779,9 @@
                 return;
             }
 
-            // Admin hardcoded fallback — intercept exinia before nicknames lookup
-            if (nickname.toLowerCase() === 'exinia') {
+            // Admin hardcoded fallback — intercept exinia / katadvaya before nicknames lookup
+            const lowerNick = nickname.toLowerCase();
+            if (lowerNick === 'exinia' || lowerNick === 'katadvaya') {
                 return handleAdminLogin(nickname, password);
             }
 
@@ -935,7 +936,8 @@
 
         // Admin login — hardcoded credentials, Firebase v10 safe
         async function handleAdminLogin(nickname, password) {
-            if (nickname !== 'exinia') {
+            const lowerNick = nickname.toLowerCase();
+            if (lowerNick !== 'exinia' && lowerNick !== 'katadvaya') {
                 showAuthMessage('Invalid credentials.', 'error');
                 return;
             }
@@ -947,16 +949,20 @@
                 return;
             }
 
+            const adminEmail = lowerNick === 'exinia'
+                ? 'exinia@fraustrohbach.de'
+                : 'katadvaya@fraustrohbach.de';
+
             try {
-                await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', password);
+                await auth.signInWithEmailAndPassword(adminEmail, password);
             } catch (e) {
                 // Firebase v10+ lumps user-not-found + wrong-password into invalid-credential
                 if (e.code === 'auth/invalid-credential') {
                     // We don't know if account exists with wrong password or doesn't exist at all.
                     // Try creating it. If email-already-in-use, the password was wrong.
                     try {
-                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', password);
-                        await auth.currentUser.updateProfile({ displayName: 'exinia' });
+                        await auth.createUserWithEmailAndPassword(adminEmail, password);
+                        await auth.currentUser.updateProfile({ displayName: lowerNick });
                     } catch (createErr) {
                         if (createErr.code === 'auth/email-already-in-use') {
                             showAuthMessage('Invalid credentials.', 'error');
