@@ -648,8 +648,10 @@ Accompanying this visual journey are custom-created artworks, including stunning
         <div id="viewer-meta" class="absolute bottom-0 inset-x-0 bg-black/70 backdrop-blur-sm p-4 md:p-6 border-t border-slate-800/50 transform translate-y-full transition-transform duration-300">
             <div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div class="flex-1">
-                    <p id="viewer-filename" class="text-white font-mono text-sm mb-1"></p>
-                    <p id="viewer-album-name" class="text-neon-cyan text-xs font-mono uppercase tracking-wider mb-2"></p>
+                    <div id="viewer-author" class="flex items-center gap-2 mb-2">
+                        <img id="viewer-author-avatar" src="" alt="" class="w-6 h-6 rounded-full object-cover border border-slate-700 hidden">
+                        <span id="viewer-author-name" class="text-neon-cyan text-xs font-mono uppercase tracking-wider"></span>
+                    </div>
                     <p id="viewer-description" class="text-slate-400 text-sm leading-relaxed"></p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -837,10 +839,11 @@ Accompanying this visual journey are custom-created artworks, including stunning
         function renderNavAuth() {
             const navAuth = document.getElementById('nav-auth');
             if (!navAuth) return;
-            const isAdminSession = isAdmin();
             if (currentUser) {
+                const displayName = getUserDisplayName(currentUser);
                 navAuth.innerHTML = `
-                    <button onclick="openProfileModal()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                    <span onclick="openProfileModal()" class="text-neon-cyan font-mono text-xs hidden lg:inline glow-text cursor-pointer hover:text-white transition-colors">${escapeHtml(displayName)}</span>
+                    <button onclick="openProfileModal()" class="lg:hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-user-circle text-lg"></i> Profile
                     </button>
                     <button onclick="handleAdminLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
@@ -860,9 +863,10 @@ Accompanying this visual journey are custom-created artworks, including stunning
             const container = document.getElementById('mobile-auth-links');
             if (!container) return;
             if (currentUser) {
+                const displayName = getUserDisplayName(currentUser);
                 container.innerHTML = `
-                    <button onclick="openProfileModal(); closeMobileMenu();" class="text-slate-400 hover:text-neon-cyan transition-colors text-left flex items-center gap-2">
-                        <i class="ph ph-user-circle text-lg"></i> Profile
+                    <button onclick="openProfileModal(); closeMobileMenu();" class="text-neon-cyan glow-text hover:text-white transition-colors text-left flex items-center gap-2 font-mono text-xs uppercase tracking-widest">
+                        <i class="ph ph-user-circle text-lg"></i> ${escapeHtml(displayName)}
                     </button>
                     <button onclick="handleAdminLogout(); closeMobileMenu();" class="text-slate-400 hover:text-neon-magenta transition-colors text-left flex items-center gap-2">
                         <i class="ph ph-sign-out text-lg"></i> Logout
@@ -1214,10 +1218,7 @@ Accompanying this visual journey are custom-created artworks, including stunning
             } else {
                 grid.innerHTML = images.map((img, idx) => `
                     <div onclick="openImageViewer(${idx})" class="group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer">
-                        <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\\'>Not found</div>'">
-                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                            <span class="text-white text-[10px] font-mono uppercase tracking-wider">${escapeHtml(img.filename || '')}</span>
-                        </div>
+                        <img src="${escapeHtml(img.src)}" alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\\'>Not found</div>'">
                     </div>
                 `).join('');
             }
@@ -1282,9 +1283,6 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 grid.innerHTML = adminUpload + images.map((img, idx) => `
                     <div onclick="openImageViewer(${idx})" class="group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer">
                         <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\'>Not found</div>'">
-                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                            <span class="text-white text-[10px] font-mono uppercase tracking-wider">${escapeHtml(img.filename || '')}</span>
-                        </div>
                     </div>
                 `).join('');
             }
@@ -1318,7 +1316,14 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 try {
                     await ref.put(file);
                     const url = await ref.getDownloadURL();
-                    uploaded.push({ src: url, filename: file.name, order: (album.images ? album.images.length : 0) + i });
+                    uploaded.push({
+                        src: url,
+                        filename: file.name,
+                        order: (album.images ? album.images.length : 0) + i,
+                        createdBy: currentUser ? currentUser.uid : 'admin',
+                        createdByName: currentUser ? getUserDisplayName(currentUser) : 'Admin',
+                        createdByAvatar: currentUser ? (currentUser.photoURL || '') : ''
+                    });
                 } catch (err) {
                     console.error('Upload failed', err);
                 }
@@ -1452,11 +1457,26 @@ Accompanying this visual journey are custom-created artworks, including stunning
             const imgData = viewerImages[viewerCurrentIdx];
             if (!imgData) return;
             img.src = imgData.src;
-            document.getElementById('viewer-filename').textContent = imgData.filename || 'Untitled';
             const album = allAlbums.find(a => a.id === currentAlbumId);
-            document.getElementById('viewer-album-name').textContent = album ? (album.name || '') : '';
             document.getElementById('viewer-description').textContent = imgData.description || '';
             document.getElementById('viewer-index').textContent = `${viewerCurrentIdx + 1} / ${viewerImages.length}`;
+
+            // Author info
+            const authorNameEl = document.getElementById('viewer-author-name');
+            const authorAvatarEl = document.getElementById('viewer-author-avatar');
+            const authorContainer = document.getElementById('viewer-author');
+            const authorName = imgData.createdByName || (album && album.createdByName) || 'Exinia';
+            const authorAvatar = imgData.createdByAvatar || (album && album.createdByAvatar) || '';
+            if (authorNameEl) authorNameEl.textContent = authorName;
+            if (authorAvatarEl) {
+                if (authorAvatar) {
+                    authorAvatarEl.src = authorAvatar;
+                    authorAvatarEl.classList.remove('hidden');
+                } else {
+                    authorAvatarEl.classList.add('hidden');
+                }
+            }
+
             if (prevBtn) prevBtn.style.display = viewerImages.length > 1 ? 'block' : 'none';
             if (nextBtn) nextBtn.style.display = viewerImages.length > 1 ? 'block' : 'none';
             if (meta) meta.classList.add('translate-y-full');
@@ -1691,8 +1711,8 @@ Accompanying this visual journey are custom-created artworks, including stunning
                     <img src="${escapeHtml(img.src)}" class="w-full aspect-video object-cover cursor-pointer" onerror="this.parentElement.innerHTML='<div class=\\'aspect-video flex items-center justify-center text-slate-600 text-xs\\'>Error</div>'">
                     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         ${isCover ? '<span class="bg-neon-cyan text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded">Cover</span>' : ''}
-                        <button onclick="event.stopPropagation(); openMoveImageModal(${idx})" class="bg-neon-cyan/80 text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-neon-cyan">Move</button>
-                        <button onclick="event.stopPropagation(); deleteAlbumImage(${idx})" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">Del</button>
+                        <button onclick="event.stopPropagation(); openMoveImageModal(${idx})" class="bg-neon-cyan/80 text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-neon-cyan">MV</button>
+                        <button onclick="event.stopPropagation(); deleteAlbumImage(${idx})" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">DEL</button>
                     </div>
                     <div class="absolute bottom-0 inset-x-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-center cursor-pointer">
                         <span class="text-white text-[10px] font-mono">Set cover</span>
@@ -1845,7 +1865,14 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 try {
                     await ref.put(file);
                     const url = await ref.getDownloadURL();
-                    uploaded.push({ src: url, filename: file.name, order: (album.images ? album.images.length : 0) + i });
+                    uploaded.push({
+                        src: url,
+                        filename: file.name,
+                        order: (album.images ? album.images.length : 0) + i,
+                        createdBy: currentUser ? currentUser.uid : 'admin',
+                        createdByName: currentUser ? getUserDisplayName(currentUser) : 'Admin',
+                        createdByAvatar: currentUser ? (currentUser.photoURL || '') : ''
+                    });
                     document.getElementById(`upload-status-${i}`).textContent = 'done';
                     document.getElementById(`upload-status-${i}`).classList.add('text-neon-lime');
                 } catch (err) {

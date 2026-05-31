@@ -980,11 +980,12 @@
             const navAuth = document.getElementById('nav-auth');
             const isAdminSession = sessionStorage.getItem('exinia_auth_session') === 'true';
             if (currentUser) {
+                const displayName = getUserDisplayName(currentUser);
                 navAuth.innerHTML = `
-                    <button onclick="openProfileModal()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
+                    <span onclick="openProfileModal()" class="text-neon-cyan font-mono text-xs hidden lg:inline glow-text cursor-pointer hover:text-white transition-colors">${escapeHtml(displayName)}</span>
+                    <button onclick="openProfileModal()" class="lg:hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-user-circle text-lg"></i> Profile
                     </button>
-                    <span class="text-neon-cyan font-mono text-xs hidden lg:inline">${getUserDisplayName(currentUser)}</span>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-neon-magenta transition-colors flex items-center gap-1 text-xs uppercase tracking-widest">
                         <i class="ph ph-sign-out text-lg"></i> Logout
                     </button>
@@ -1087,9 +1088,10 @@
             const container = document.getElementById('mobile-auth-links');
             if (!container) return;
             if (currentUser) {
+                const displayName = getUserDisplayName(currentUser);
                 container.innerHTML = `
-                    <button onclick="openProfileModal(); closeMobileMenu();" class="text-slate-400 hover:text-neon-cyan transition-colors text-left flex items-center gap-2">
-                        <i class="ph ph-user-circle text-lg"></i> Profile
+                    <button onclick="openProfileModal(); closeMobileMenu();" class="text-neon-cyan glow-text hover:text-white transition-colors text-left flex items-center gap-2 font-mono text-xs uppercase tracking-widest">
+                        <i class="ph ph-user-circle text-lg"></i> ${escapeHtml(displayName)}
                     </button>
                     <button onclick="handleLogout(); closeMobileMenu();" class="text-slate-400 hover:text-neon-magenta transition-colors text-left flex items-center gap-2">
                         <i class="ph ph-sign-out text-lg"></i> Logout
