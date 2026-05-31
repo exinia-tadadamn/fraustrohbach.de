@@ -477,7 +477,7 @@ Accompanying this visual journey are custom-created artworks, including stunning
                     <i class="ph ph-gear text-xl"></i> Manage
                 </button>
                 <button id="gallery-back-btn" onclick="showAlbumGrid()" class="hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
-                    <i class="ph ph-arrow-left text-xl"></i> Albums
+                    <i id="gallery-back-icon" class="ph ph-arrow-left text-xl"></i> <span id="gallery-back-label">Albums</span>
                 </button>
                 <button onclick="closeGallery()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
                     <i class="ph ph-x text-2xl"></i> Close
@@ -777,8 +777,12 @@ Accompanying this visual journey are custom-created artworks, including stunning
             document.getElementById('gallery-header-title').textContent = album.name || 'Album';
             document.getElementById('album-grid-view').classList.add('hidden');
             document.getElementById('album-detail-view').classList.remove('hidden');
-            document.getElementById('gallery-back-btn').classList.remove('hidden');
-            document.getElementById('gallery-admin-btn').classList.toggle('hidden', !isAdmin());
+
+            const backBtn = document.getElementById('gallery-back-btn');
+            backBtn.classList.remove('hidden');
+            document.getElementById('gallery-back-icon').className = 'ph ph-arrow-left text-xl';
+            document.getElementById('gallery-back-label').textContent = 'Back';
+            renderAdminUI();
 
             const meta = document.getElementById('album-detail-meta');
             meta.innerHTML = `
@@ -809,8 +813,47 @@ Accompanying this visual journey are custom-created artworks, including stunning
             document.getElementById('gallery-header-title').textContent = 'VISUAL ARCHIVE';
             document.getElementById('album-grid-view').classList.remove('hidden');
             document.getElementById('album-detail-view').classList.add('hidden');
-            document.getElementById('gallery-back-btn').classList.add('hidden');
+            const backBtn = document.getElementById('gallery-back-btn');
+            backBtn.classList.add('hidden');
             renderAdminUI();
+        }
+
+        function showLegacyView() {
+            currentAlbumId = 'legacy-archive';
+            const album = allAlbums.find(a => a.id === 'legacy-archive');
+            if (!album) {
+                // fallback: show album grid until albums load
+                showAlbumGrid();
+                return;
+            }
+
+            document.getElementById('gallery-header-title').textContent = 'VISUAL ARCHIVE';
+            document.getElementById('album-grid-view').classList.add('hidden');
+            document.getElementById('album-detail-view').classList.remove('hidden');
+
+            const backBtn = document.getElementById('gallery-back-btn');
+            backBtn.classList.remove('hidden');
+            document.getElementById('gallery-back-icon').className = 'ph ph-squares-four text-xl';
+            document.getElementById('gallery-back-label').textContent = 'Albums';
+            renderAdminUI();
+
+            // Hide album meta block for legacy flat view
+            document.getElementById('album-detail-meta').innerHTML = '';
+
+            const grid = document.getElementById('album-images-grid');
+            const images = (album.images || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+            if (images.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-600 font-mono text-sm">No captures found.</div>`;
+            } else {
+                grid.innerHTML = images.map((img, idx) => `
+                    <div onclick="openImageViewer('${escapeHtml(img.src)}')" class="group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer">
+                        <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\'>Not found</div>'">
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                            <span class="text-white text-[10px] font-mono uppercase tracking-wider">${escapeHtml(img.filename || '')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         // ─── GALLERY MODAL ───
@@ -823,20 +866,23 @@ Accompanying this visual journey are custom-created artworks, including stunning
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
             document.body.style.overflow = 'hidden';
 
-            const scrollContainer = document.getElementById('album-grid-view');
-            if (scrollContainer && !scrollListenerAttached) {
-                scrollContainer.addEventListener('scroll', handleGalleryScroll);
-                scrollListenerAttached = true;
-            }
+            const scrollContainers = [document.getElementById('album-grid-view'), document.getElementById('album-detail-view')];
+            scrollContainers.forEach(c => {
+                if (c && !c.dataset.scrollAttached) {
+                    c.addEventListener('scroll', handleGalleryScroll);
+                    c.dataset.scrollAttached = 'true';
+                }
+            });
             if (!galleryKeyboardActive) {
                 galleryKeyboardActive = true;
                 document.addEventListener('keydown', handleGalleryKeyboard);
             }
             if (!albumsLoaded) {
-                loadAlbums();
+                loadAlbums().then(() => showLegacyView());
                 albumsLoaded = true;
+            } else {
+                showLegacyView();
             }
-            showAlbumGrid();
         }
 
         function handleGalleryKeyboard(e) {
@@ -850,7 +896,7 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 return;
             }
             if (e.key === 'Escape') {
-                if (currentAlbumId) showAlbumGrid();
+                if (currentAlbumId && currentAlbumId !== 'legacy-archive') showAlbumGrid();
                 else closeGallery();
             }
         }
@@ -868,7 +914,8 @@ Accompanying this visual journey are custom-created artworks, including stunning
         }
 
         function scrollGalleryToTop() {
-            const c = document.getElementById('album-grid-view') || document.getElementById('album-detail-view');
+            const c = [document.getElementById('album-grid-view'), document.getElementById('album-detail-view')]
+                .find(el => el && !el.classList.contains('hidden'));
             if (c) c.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
