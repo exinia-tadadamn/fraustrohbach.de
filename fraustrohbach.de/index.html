@@ -723,7 +723,7 @@ Accompanying this visual journey are custom-created artworks, including stunning
             } catch (e) {
                 console.warn('Firestore albums load failed, using legacy', e);
             }
-            // Fallback: create legacy album from static images (resolve extensions)
+            // No albums in Firestore yet — create Legacy Archive as a real document
             const legacyImages = [];
             for (let i = 1; i <= totalImages; i++) {
                 const src = await new Promise(resolve => {
@@ -732,14 +732,29 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 if (src) legacyImages.push({ src, filename: `image${i}`, order: i });
             }
             const cover = legacyImages.length > 0 ? legacyImages[0].src : '';
-            allAlbums = [{
-                id: 'legacy-archive',
+            const legacyPayload = {
                 name: 'Legacy Archive',
                 coverImage: cover,
                 images: legacyImages,
                 order: 0,
-                createdAt: new Date().toISOString()
-            }];
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdBy: 'system'
+            };
+            try {
+                const ref = db.collection('galleryAlbums').doc('legacy-archive');
+                await ref.set(legacyPayload);
+                allAlbums = [{ id: 'legacy-archive', ...legacyPayload, createdAt: new Date().toISOString() }];
+            } catch (e) {
+                // Firestore unreachable — keep in-memory only (uploads won't persist)
+                allAlbums = [{
+                    id: 'legacy-archive',
+                    name: 'Legacy Archive',
+                    coverImage: cover,
+                    images: legacyImages,
+                    order: 0,
+                    createdAt: new Date().toISOString()
+                }];
+            }
             renderAlbumGrid();
         }
 
@@ -838,14 +853,33 @@ Accompanying this visual journey are custom-created artworks, including stunning
             renderAdminUI();
 
             // Hide album meta block for legacy flat view
-            document.getElementById('album-detail-meta').innerHTML = '';
+            const meta = document.getElementById('album-detail-meta');
+            meta.innerHTML = '';
 
             const grid = document.getElementById('album-images-grid');
             const images = (album.images || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            // Admin upload strip in legacy flat view
+            const adminUpload = isAdmin() ? `
+                <div class="col-span-full mb-4">
+                    <div id="legacy-dropzone" class="border-2 border-dashed border-slate-700 bg-slate-900/20 rounded-lg p-6 text-center transition-colors hover:border-neon-cyan/50 hover:bg-slate-900/40"
+                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleLegacyDrop(event)">
+                        <i class="ph ph-upload-simple text-3xl text-slate-600 mb-2 block"></i>
+                        <p class="text-slate-400 text-sm font-mono uppercase tracking-widest">Drop photos here to add to gallery</p>
+                        <input type="file" id="legacy-file-input" multiple accept="image/*" class="hidden" onchange="handleLegacyFileSelect(event)">
+                        <div class="flex items-center justify-center gap-4 mt-3">
+                            <button onclick="document.getElementById('legacy-file-input').click()" class="text-neon-cyan text-xs uppercase tracking-widest hover:underline">browse files</button>
+                            <span class="text-slate-600 text-xs">|</span>
+                            <button onclick="openAlbumEdit('legacy-archive')" class="text-neon-magenta text-xs uppercase tracking-widest hover:underline">open manager</button>
+                        </div>
+                    </div>
+                </div>
+            ` : '';
+
             if (images.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-600 font-mono text-sm">No captures found.</div>`;
+                grid.innerHTML = adminUpload + `<div class="col-span-full text-center py-16 text-slate-600 font-mono text-sm">No captures found.</div>`;
             } else {
-                grid.innerHTML = images.map((img, idx) => `
+                grid.innerHTML = adminUpload + images.map((img, idx) => `
                     <div onclick="openImageViewer('${escapeHtml(img.src)}')" class="group relative aspect-video bg-slate-900 overflow-hidden border border-slate-800 hover:border-neon-cyan/50 transition-colors cursor-pointer">
                         <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\'>Not found</div>'">
                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
@@ -854,6 +888,58 @@ Accompanying this visual journey are custom-created artworks, including stunning
                     </div>
                 `).join('');
             }
+        }
+
+        // ─── LEGACY DIRECT UPLOAD HELPERS ───
+        function handleLegacyDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('border-neon-cyan', 'bg-slate-900/60');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (files.length) uploadToLegacy(files);
+        }
+
+        function handleLegacyFileSelect(e) {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            if (files.length) uploadToLegacy(files);
+            e.target.value = '';
+        }
+
+        async function uploadToLegacy(files) {
+            editingAlbumId = 'legacy-archive';
+            const album = allAlbums.find(a => a.id === 'legacy-archive');
+            if (!album) { editingAlbumId = null; return; }
+
+            const uploaded = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+                const ref = storage.ref(`gallery/legacy-archive/${safeName}`);
+                try {
+                    await ref.put(file);
+                    const url = await ref.getDownloadURL();
+                    uploaded.push({ src: url, filename: file.name, order: (album.images ? album.images.length : 0) + i });
+                } catch (err) {
+                    console.error('Upload failed', err);
+                }
+            }
+
+            if (uploaded.length) {
+                const newImages = [...(album.images || []), ...uploaded];
+                try {
+                    await db.collection('galleryAlbums').doc('legacy-archive').update({ images: newImages });
+                    album.images = newImages;
+                    if (!album.coverImage && uploaded[0]) {
+                        album.coverImage = uploaded[0].src;
+                        await db.collection('galleryAlbums').doc('legacy-archive').update({ coverImage: uploaded[0].src });
+                    }
+                    showLegacyView();
+                    renderAlbumGrid();
+                } catch (e) {
+                    alert('Failed to save uploaded images: ' + e.message);
+                }
+            }
+            editingAlbumId = null;
         }
 
         // ─── GALLERY MODAL ───
