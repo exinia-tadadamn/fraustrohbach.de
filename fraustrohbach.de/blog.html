@@ -1021,7 +1021,11 @@
         }
 
         function isAdmin() {
-            return sessionStorage.getItem('exinia_auth_session') === 'true';
+            if (sessionStorage.getItem('exinia_auth_session') === 'true') return true;
+            const user = auth.currentUser;
+            if (!user || !user.email) return false;
+            const email = user.email.toLowerCase();
+            return email === 'exinia@fraustrohbach.de' || email === 'katadvaya@fraustrohbach.de';
         }
 
         // Admin login — hardcoded credentials, Firebase v10 safe

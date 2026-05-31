@@ -779,7 +779,12 @@ Accompanying this visual journey are custom-created artworks, including stunning
 
         // ─── ADMIN AUTH ───
         function isAdmin() {
-            return sessionStorage.getItem('exinia_auth_session') === 'true';
+            if (sessionStorage.getItem('exinia_auth_session') === 'true') return true;
+            // Fallback: check Firebase user email in case sessionStorage was wiped
+            const user = auth.currentUser;
+            if (!user || !user.email) return false;
+            const email = user.email.toLowerCase();
+            return email === 'exinia@fraustrohbach.de' || email === 'katadvaya@fraustrohbach.de';
         }
 
         function renderAdminUI() {
@@ -1369,8 +1374,15 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 document.addEventListener('keydown', handleGalleryKeyboard);
             }
             if (!albumsLoaded) {
-                loadAlbums().then(() => showLegacyView());
-                albumsLoaded = true;
+                loadAlbums().then(() => {
+                    albumsLoaded = true;
+                    showLegacyView();
+                    // Refresh admin panel if it was opened before albums finished loading
+                    const adminModal = document.getElementById('gallery-admin-modal');
+                    if (adminModal && adminModal.style.display === 'flex') {
+                        renderAdminAlbumsList();
+                    }
+                });
             } else {
                 showLegacyView();
             }
@@ -1537,7 +1549,11 @@ Accompanying this visual journey are custom-created artworks, including stunning
             const container = document.getElementById('admin-albums-list');
             if (!container) return;
             if (allAlbums.length === 0) {
-                container.innerHTML = '<p class="text-slate-600 text-sm font-mono">No albums yet.</p>';
+                if (!albumsLoaded) {
+                    container.innerHTML = '<p class="text-slate-500 text-sm font-mono animate-pulse">Loading albums...</p>';
+                } else {
+                    container.innerHTML = '<p class="text-slate-600 text-sm font-mono">No albums yet.</p>';
+                }
                 return;
             }
             container.innerHTML = allAlbums.map(album => {
@@ -1706,21 +1722,23 @@ Accompanying this visual journey are custom-created artworks, including stunning
             container.innerHTML = images.map((img, idx) => {
                 const isCover = album.coverImage === img.src;
                 return `
-                <div class="relative group bg-slate-900 border ${isCover ? 'border-neon-cyan' : 'border-slate-800'} overflow-hidden rounded"
-                     onclick="setAlbumCover(${idx})">
-                    <img src="${escapeHtml(img.src)}" class="w-full aspect-video object-cover cursor-pointer" onerror="this.parentElement.innerHTML='<div class=\\'aspect-video flex items-center justify-center text-slate-600 text-xs\\'>Error</div>'">
+                <div class="relative group bg-slate-900 border ${isCover ? 'border-neon-cyan' : 'border-slate-800'} overflow-hidden rounded">
+                    <div onclick="setAlbumCover(${idx})" class="cursor-pointer">
+                        <img src="${escapeHtml(img.src)}" class="w-full aspect-video object-cover" onerror="this.parentElement.innerHTML='<div class=\\'aspect-video flex items-center justify-center text-slate-600 text-xs\\'>Error</div>'">
+                        <div class="absolute bottom-0 inset-x-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-center">
+                            <span class="text-white text-[10px] font-mono">Set cover</span>
+                        </div>
+                    </div>
                     <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         ${isCover ? '<span class="bg-neon-cyan text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded">Cover</span>' : ''}
                         <button onclick="event.stopPropagation(); openMoveImageModal(${idx})" class="bg-neon-cyan/80 text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-neon-cyan">MV</button>
                         <button onclick="event.stopPropagation(); deleteAlbumImage(${idx})" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">DEL</button>
                     </div>
-                    <div class="absolute bottom-0 inset-x-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-center cursor-pointer">
-                        <span class="text-white text-[10px] font-mono">Set cover</span>
-                    </div>
                     <div class="p-2 border-t border-slate-800">
                         <input type="text"
                                value="${escapeHtml(img.description || '')}"
                                placeholder="Add description..."
+                               onclick="event.stopPropagation()"
                                onkeydown="if(event.key==='Enter'){event.preventDefault();saveImageDescription(${idx},this.value)}"
                                onblur="saveImageDescription(${idx},this.value)"
                                class="w-full bg-transparent text-slate-300 text-[10px] font-mono border border-slate-700 rounded px-2 py-1 focus:border-neon-cyan focus:outline-none">
