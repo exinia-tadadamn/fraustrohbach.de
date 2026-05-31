@@ -32,14 +32,24 @@ service cloud.firestore {
     }
 
     // blogPosts: Blog post content and metadata
+    function isAdmin() {
+      return request.auth != null
+        && (request.auth.token.email == 'exinia@fraustrohbach.de'
+             || request.auth.token.email == 'katadvaya@fraustrohbach.de');
+    }
     match /blogPosts/{docId} {
       allow read: if true;
-      allow create, delete: if request.auth != null
-        && request.auth.token.email == 'exinia@fraustrohbach.de';
+      allow create, delete: if isAdmin();
       // Admin can update anything; anyone can increment viewCount by 1
-      allow update: if (request.auth != null && request.auth.token.email == 'exinia@fraustrohbach.de')
+      allow update: if isAdmin()
         || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount'])
             && request.resource.data.viewCount == resource.data.viewCount + 1);
+    }
+
+    // galleryAlbums: Public read; authenticated users (admins) can write
+    match /galleryAlbums/{docId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
     }
 
     // comments: Anyone can read; authenticated users can create
