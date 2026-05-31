@@ -647,6 +647,10 @@
                             <i class="ph ph-file-code text-lg"></i>
                             Export JSON
                         </button>
+                        <button onclick="downloadFullJSON()" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-6 py-3 uppercase tracking-widest text-xs hover:border-neon-magenta hover:text-neon-magenta transition-all">
+                            <i class="ph ph-download-simple text-lg"></i>
+                            Download Full JSON
+                        </button>
                     </div>
 
                     <div id="json-output-wrap" class="hidden">
@@ -1166,6 +1170,7 @@
                         <button onclick="event.stopPropagation(); editPost('${post.id}')" class="admin-btn" title="Edit"><i class="ph ph-pencil-simple"></i> Edit</button>
                         <button onclick="event.stopPropagation(); toggleVisibility('${post.id}')" class="admin-btn" title="Toggle Visibility">${post.isPublic === false ? '<i class="ph ph-eye"></i> Show' : '<i class="ph ph-eye-slash"></i> Hide'}</button>
                         <button onclick="event.stopPropagation(); toggleArchive('${post.id}')" class="admin-btn archive" title="Toggle Archive">${post.isArchived ? '<i class="ph ph-arrow-u-up-left"></i> Restore' : '<i class="ph ph-archive"></i> Archive'}</button>
+                        <button onclick="event.stopPropagation(); deletePost('${post.id}')" class="admin-btn danger" title="Delete"><i class="ph ph-trash"></i> Delete</button>
                     </div>
                 ` : '';
 
@@ -1405,8 +1410,10 @@
 
         // ─── COMPOSER (Admin only) ───
         function openComposer() {
-            editingPostId = null;
-            resetComposer();
+            // If editingPostId is already set (e.g. from editPost), don't wipe it.
+            if (!editingPostId) {
+                resetComposer();
+            }
             const modal = document.getElementById('composer-modal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -1526,37 +1533,90 @@
             const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
             const date = new Date().toISOString();
             const scheduledAt = scheduledRaw ? new Date(scheduledRaw).toISOString() : null;
+            const postPayload = { title, author, tags, excerpt, featuredImage: image || '', content, isPublic, isArchived, scheduledAt };
 
+            let firestoreOk = false;
+            let localOk = false;
+
+            // ─── 1. Firestore ───
             try {
                 if (editingPostId) {
-                    // Update existing
                     await db.collection('blogPosts').doc(editingPostId).update({
-                        title, author, tags, excerpt, featuredImage: image || '', content,
-                        isPublic, isArchived, scheduledAt,
+                        ...postPayload,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    showAuthMessage('Transmission updated.', 'success');
                 } else {
-                    // Create new
                     const maxOrder = allPosts.length > 0 ? Math.max(...allPosts.map(p => p.order || 0)) : 0;
                     const newDoc = db.collection('blogPosts').doc();
                     await newDoc.set({
                         id: newDoc.id,
-                        title, author, date, tags, excerpt, featuredImage: image || '', content,
-                        isPublic, isArchived, scheduledAt,
+                        ...postPayload,
+                        date,
                         order: maxOrder + 10,
                         viewCount: 0,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    showAuthMessage('Transmission broadcast to database.', 'success');
                 }
+                firestoreOk = true;
+            } catch (e) {
+                console.warn('Firestore save failed', e);
+            }
+
+            // ─── 2. Local JSON fallback / mirror ───
+            try {
+                await saveToLocalServer(postPayload, editingPostId, date);
+                localOk = true;
+            } catch (e) {
+                console.warn('Local JSON save failed', e);
+            }
+
+            if (firestoreOk && localOk) {
+                showAuthMessage(editingPostId ? 'Transmission updated (DB + JSON).' : 'Transmission broadcast (DB + JSON).', 'success');
                 closeComposer();
                 await loadPosts();
-            } catch (e) {
-                console.error(e);
-                alert('Failed to save: ' + e.message);
+            } else if (localOk) {
+                showAuthMessage('Saved to local JSON only (Firestore offline).', 'success');
+                closeComposer();
+                await loadPosts();
+            } else if (firestoreOk) {
+                showAuthMessage('Saved to DB only (local JSON failed).', 'success');
+                closeComposer();
+                await loadPosts();
+            } else {
+                alert('Failed to save to both database and local JSON.');
             }
+        }
+
+        async function saveToLocalServer(post, existingId, fallbackDate) {
+            const res = await fetch('/api/blog-data');
+            if (!res.ok) throw new Error('Could not read local blog-data.json');
+            const data = await res.json();
+            if (existingId) {
+                const idx = data.posts.findIndex(p => p.id === existingId);
+                if (idx !== -1) {
+                    data.posts[idx] = { ...data.posts[idx], ...post, updatedAt: new Date().toISOString() };
+                } else {
+                    data.posts.push({ ...post, id: existingId, date: fallbackDate || new Date().toISOString(), createdAt: new Date().toISOString() });
+                }
+            } else {
+                const maxOrder = data.posts.length > 0 ? Math.max(...data.posts.map(p => p.order || 0)) : 0;
+                const newId = 'tx-' + Date.now().toString(36).slice(-6).toUpperCase();
+                data.posts.push({
+                    ...post,
+                    id: newId,
+                    date: fallbackDate || new Date().toISOString(),
+                    order: maxOrder + 10,
+                    viewCount: 0,
+                    createdAt: new Date().toISOString()
+                });
+            }
+            const saveRes = await fetch('/api/blog-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!saveRes.ok) throw new Error('Could not write local blog-data.json');
         }
 
         function encodeJSON() {
@@ -1596,6 +1656,31 @@
             URL.revokeObjectURL(url);
         }
 
+        async function downloadFullJSON() {
+            try {
+                const res = await fetch('/api/blog-data');
+                if (!res.ok) throw new Error('Local API unreachable');
+                const data = await res.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'blog-data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                // Fallback: build from current allPosts
+                const data = { posts: allPosts };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'blog-data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
         // ─── EDIT / ARCHIVE / VISIBILITY ───
         async function editPost(id) {
             const post = allPosts.find(p => p.id === id);
@@ -1626,6 +1711,30 @@
                 await loadPosts();
             } catch (e) {
                 alert('Failed to update: ' + e.message);
+            }
+        }
+
+        async function deletePost(id) {
+            if (!confirm('Permanently delete this transmission? This cannot be undone.')) return;
+            let deletedLocally = false;
+            // Try Firestore first
+            try {
+                await db.collection('blogPosts').doc(id).delete();
+            } catch (e) {
+                console.warn('Firestore delete failed, falling back to local API', e);
+            }
+            // Always remove from local JSON via API
+            try {
+                const res = await fetch(`/api/blog-posts/${id}`, { method: 'DELETE' });
+                if (res.ok) deletedLocally = true;
+            } catch (localErr) {
+                console.warn('Local API delete failed', localErr);
+            }
+            if (deletedLocally) {
+                showAuthMessage('Transmission deleted.', 'success');
+                await loadPosts();
+            } else {
+                alert('Failed to delete transmission.');
             }
         }
 
