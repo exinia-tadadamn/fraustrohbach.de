@@ -34,16 +34,17 @@ service cloud.firestore {
     // blogPosts: Blog post content and metadata
     function isAdmin() {
       return request.auth != null
-        && (request.auth.token.email == 'exinia@fraustrohbach.de'
-             || request.auth.token.email == 'katadvaya@fraustrohbach.de');
+        && request.auth.token.email != null
+        && (request.auth.token.email.lower() == 'exinia@fraustrohbach.de'
+             || request.auth.token.email.lower() == 'katadvaya@fraustrohbach.de');
     }
     match /blogPosts/{docId} {
       allow read: if true;
       allow create, delete: if isAdmin();
-      // Admin can update anything; anyone can increment viewCount by 1
+      // Admin can update anything; anyone (even not logged in) can increment viewCount
       allow update: if isAdmin()
         || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount'])
-            && request.resource.data.viewCount == resource.data.viewCount + 1);
+            && request.resource.data.viewCount > resource.data.viewCount);
     }
 
     // galleryAlbums: Public read; authenticated users (admins) can write
