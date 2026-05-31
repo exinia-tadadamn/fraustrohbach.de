@@ -1163,17 +1163,19 @@
 
         async function handleAvatarUpload(event) {
             const file = event.target.files[0];
-            if (!file || !currentUser) return;
+            if (!file || !currentUser) { console.warn('Avatar upload: no file or not logged in'); return; }
             if (!file.type.startsWith('image/')) { alert('Please upload an image.'); return; }
             const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
             const ref = storage.ref(`avatars/${currentUser.uid}/${safeName}`);
             try {
                 await ref.put(file);
                 const url = await ref.getDownloadURL();
-                await db.collection('userProfiles').doc(currentUser.uid).update({ avatarURL: url });
+                await db.collection('userProfiles').doc(currentUser.uid).set({ avatarURL: url }, { merge: true });
                 await currentUser.updateProfile({ photoURL: url });
                 document.getElementById('profile-avatar-preview').src = url;
+                console.log('Avatar uploaded:', url);
             } catch (e) {
+                console.error('Avatar upload failed:', e);
                 alert('Avatar upload failed: ' + e.message);
             }
         }

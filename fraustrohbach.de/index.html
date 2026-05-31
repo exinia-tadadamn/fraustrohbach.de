@@ -950,17 +950,19 @@ Accompanying this visual journey are custom-created artworks, including stunning
 
         async function handleAvatarUpload(event) {
             const file = event.target.files[0];
-            if (!file || !currentUser) return;
+            if (!file || !currentUser) { console.warn('Avatar upload: no file or not logged in'); return; }
             if (!file.type.startsWith('image/')) { alert('Please upload an image.'); return; }
             const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
             const ref = storage.ref(`avatars/${currentUser.uid}/${safeName}`);
             try {
                 await ref.put(file);
                 const url = await ref.getDownloadURL();
-                await db.collection('userProfiles').doc(currentUser.uid).update({ avatarURL: url });
+                await db.collection('userProfiles').doc(currentUser.uid).set({ avatarURL: url }, { merge: true });
                 await currentUser.updateProfile({ photoURL: url });
                 document.getElementById('profile-avatar-preview').src = url;
+                console.log('Avatar uploaded:', url);
             } catch (e) {
+                console.error('Avatar upload failed:', e);
                 alert('Avatar upload failed: ' + e.message);
             }
         }
@@ -1681,13 +1683,18 @@ Accompanying this visual journey are custom-created artworks, including stunning
         }
 
         async function deleteAlbumImage(imageIdx) {
-            if (!editingAlbumId) return;
+            console.log('deleteAlbumImage called', { imageIdx, editingAlbumId });
+            if (!editingAlbumId) { console.warn('No editingAlbumId'); return; }
             if (!confirm('Remove this image from the album?')) return;
             const album = allAlbums.find(a => a.id === editingAlbumId);
-            if (!album) return;
+            if (!album) { console.warn('Album not found'); return; }
             const newImages = [...(album.images || [])];
+            console.log('Before splice:', newImages.length, 'images');
             if (imageIdx >= 0 && imageIdx < newImages.length) {
                 newImages.splice(imageIdx, 1);
+                console.log('Spliced at index', imageIdx, 'remaining:', newImages.length);
+            } else {
+                console.warn('Invalid imageIdx', imageIdx, 'length', newImages.length);
             }
             try {
                 await db.collection('galleryAlbums').doc(editingAlbumId).update({ images: newImages });
@@ -1695,7 +1702,9 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 renderEditAlbumImages(album);
                 renderAdminAlbumsList();
                 renderAlbumGrid();
+                console.log('Image deleted successfully');
             } catch (e) {
+                console.error('Failed to remove image:', e);
                 alert('Failed to remove image: ' + e.message);
             }
         }
@@ -1732,7 +1741,7 @@ Accompanying this visual journey are custom-created artworks, including stunning
                             <span class="text-white text-[10px] font-mono">Set cover</span>
                         </div>
                     </div>
-                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    <div class="absolute top-2 right-2 flex gap-1">
                         ${isCover ? '<span class="bg-neon-cyan text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded">Cover</span>' : ''}
                         <button onclick="event.stopPropagation(); openMoveImageModal(${idx})" class="bg-neon-cyan/80 text-black text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-neon-cyan">MV</button>
                         <button onclick="event.stopPropagation(); deleteAlbumImage(${idx})" class="bg-red-500/80 text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded hover:bg-red-500">DEL</button>
