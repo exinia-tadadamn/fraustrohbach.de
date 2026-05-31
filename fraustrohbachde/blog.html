@@ -1716,23 +1716,30 @@
 
         async function deletePost(id) {
             if (!confirm('Permanently delete this transmission? This cannot be undone.')) return;
-            let deletedLocally = false;
+            let firestoreOk = false;
+            let localOk = false;
+
             // Try Firestore first
             try {
                 await db.collection('blogPosts').doc(id).delete();
+                firestoreOk = true;
             } catch (e) {
-                console.warn('Firestore delete failed, falling back to local API', e);
+                console.warn('Firestore delete failed', e);
             }
-            // Always remove from local JSON via API
+
+            // Also try local JSON via API (dev-server fallback)
             try {
                 const res = await fetch(`/api/blog-posts/${id}`, { method: 'DELETE' });
-                if (res.ok) deletedLocally = true;
+                if (res.ok) localOk = true;
             } catch (localErr) {
                 console.warn('Local API delete failed', localErr);
             }
-            if (deletedLocally) {
+
+            if (firestoreOk || localOk) {
                 showAuthMessage('Transmission deleted.', 'success');
-                await loadPosts();
+                // Optimistically remove from local cache so UI updates immediately
+                allPosts = allPosts.filter(p => p.id !== id);
+                renderPosts();
             } else {
                 alert('Failed to delete transmission.');
             }
