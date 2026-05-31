@@ -14,7 +14,7 @@ export default defineConfig({
     trace: 'on-first-retry'
   },
   webServer: {
-    command: 'python3 -m http.server 3000 --directory fraustrohbach.de',
+    command: 'node server.js',
     port: 3000,
     reuseExistingServer: true,
     timeout: 120_000

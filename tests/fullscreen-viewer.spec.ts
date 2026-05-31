@@ -7,7 +7,9 @@ test('clicking a gallery card opens a fullscreen viewer with the same image, Esc
   const modal = page.locator('#gallery-modal');
   await expect(modal).toBeVisible();
 
-  const cards = page.locator('#modal-lenses-grid > div');
+  const cards = page.locator('#album-images-grid > div');
+  // Gallery renders asynchronously; wait for images to appear before asserting full count.
+  await expect.poll(() => cards.count(), { timeout: 10_000 }).toBeGreaterThan(0);
   await expect(cards).toHaveCount(87);
 
   // Capture the first card's image src, then click the card.
@@ -20,10 +22,10 @@ test('clicking a gallery card opens a fullscreen viewer with the same image, Esc
   // Fullscreen viewer becomes visible, shows the same image, and is layered above the gallery modal.
   const viewer = page.locator('#image-viewer');
   await expect(viewer).toBeVisible();
-  await expect(viewer.locator('img')).toHaveAttribute('src', /imagesTimeMashine\/image1\./);
+  await expect(viewer.locator('#image-viewer-img')).toHaveAttribute('src', /imagesTimeMashine\/image1\./);
 
   // The viewer img should occupy a large portion of the viewport (fullscreen, not a thumbnail).
-  const dims = await viewer.locator('img').evaluate((el) => ({
+  const dims = await viewer.locator('#image-viewer-img').evaluate((el) => ({
     w: (el as HTMLImageElement).getBoundingClientRect().width,
     h: (el as HTMLImageElement).getBoundingClientRect().height,
     vw: window.innerWidth,

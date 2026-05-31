@@ -91,6 +91,9 @@ xcuserdata/
 dist/
 .cache/
 
+# Firestore local backups
+backups/
+
 # Playwright
 playwright-report/
 test-results/

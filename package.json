@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node server.js",
     "test": "playwright test",
-    "install-browsers": "playwright install --with-deps chromium"
+    "install-browsers": "playwright install --with-deps chromium",
+    "sync-blog": "node scripts/sync-blog.js",
+    "backup": "node scripts/backup-firestore.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0"
