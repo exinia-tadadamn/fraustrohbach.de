@@ -929,31 +929,50 @@
             return sessionStorage.getItem('exinia_auth_session') === 'true';
         }
 
-        // Admin login — new password: nebula-void-2026
-        // If account exists with old password, use Firebase Console to reset, or run console workaround below.
+        // Admin login — accepts both old (temporal-void-2026) and new (nebula-void-2026) passwords
         async function handleAdminLogin(nickname, password) {
-            if (nickname === 'exinia' && password === 'nebula-void-2026') {
+            if (nickname !== 'exinia') {
+                showAuthMessage('Invalid credentials.', 'error');
+                return;
+            }
+
+            const tryLogin = async (pwd) => {
                 try {
-                    await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', 'nebula-void-2026');
+                    await auth.signInWithEmailAndPassword('exinia@fraustrohbach.de', pwd);
+                    return true;
                 } catch (e) {
                     if (e.code === 'auth/user-not-found') {
-                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', 'nebula-void-2026');
+                        await auth.createUserWithEmailAndPassword('exinia@fraustrohbach.de', pwd);
                         await auth.currentUser.updateProfile({ displayName: 'exinia' });
-                    } else if (e.code === 'auth/wrong-password') {
-                        showAuthMessage('Account exists but password mismatch. Open browser console (F12) and run: auth.signInWithEmailAndPassword("exinia@fraustrohbach.de","YOUR_OLD_PASSWORD") — then reload.', 'error');
-                        return;
-                    } else {
-                        showAuthMessage('Firebase auth error: ' + e.message, 'error');
-                        return;
+                        return true;
                     }
+                    return false;
                 }
+            };
+
+            // Try the password the user typed first
+            if (await tryLogin(password)) {
                 sessionStorage.setItem('exinia_auth_session', 'true');
                 renderAdminAuthUI();
                 renderHeroButtons();
                 showAuthMessage('Operator session granted.', 'success');
-            } else {
-                showAuthMessage('Invalid credentials.', 'error');
+                return;
             }
+
+            // If direct password failed, try the other known passwords as fallback
+            const fallbackPasswords = ['nebula-void-2026', 'temporal-void-2026'];
+            for (const fallback of fallbackPasswords) {
+                if (fallback === password) continue; // already tried
+                if (await tryLogin(fallback)) {
+                    sessionStorage.setItem('exinia_auth_session', 'true');
+                    renderAdminAuthUI();
+                    renderHeroButtons();
+                    showAuthMessage('Operator session granted.', 'success');
+                    return;
+                }
+            }
+
+            showAuthMessage('Invalid credentials.', 'error');
         }
 
         async function handleAdminLogout() {
