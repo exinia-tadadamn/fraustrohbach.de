@@ -493,29 +493,14 @@ Accompanying this visual journey are custom-created artworks, including stunning
                 <i class="ph ph-aperture text-neon-cyan"></i> <span id="gallery-header-title">VISUAL ARCHIVE</span>
             </div>
             <div class="flex items-center gap-4">
-                <button id="gallery-admin-btn" onclick="openGalleryAdmin()" class="hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
-                    <i class="ph ph-gear text-xl"></i> Manage
-                </button>
-                <button id="gallery-back-btn" onclick="showAlbumGrid()" class="hidden text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
-                    <i id="gallery-back-icon" class="ph ph-arrow-left text-xl"></i> <span id="gallery-back-label">Albums</span>
-                </button>
                 <button onclick="closeGallery()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
                     <i class="ph ph-x text-2xl"></i> Close
                 </button>
             </div>
         </div>
 
-        <!-- Album Grid View -->
-        <div id="album-grid-view" class="flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
-            <div class="p-6 md:p-12">
-                <div id="albums-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-screen-2xl mx-auto">
-                    <!-- Albums inserted here by JavaScript -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Album Detail View -->
-        <div id="album-detail-view" class="hidden flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
+        <!-- Gallery Images View -->
+        <div id="album-detail-view" class="flex-1 overflow-y-auto overflow-x-hidden gallery-scrollbar" style="min-height: 0; flex: 1;">
             <div class="p-6 md:p-12">
                 <div id="album-detail-meta" class="max-w-screen-2xl mx-auto mb-8"></div>
                 <div id="album-images-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-screen-2xl mx-auto">
@@ -528,102 +513,6 @@ Accompanying this visual journey are custom-created artworks, including stunning
         <button id="scroll-to-top-btn" onclick="scrollGalleryToTop()" class="fixed bottom-8 right-8 z-50 opacity-0 transition-opacity duration-300 pointer-events-none inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/95 text-slate-300 hover:border-neon-cyan hover:text-neon-cyan focus:outline-none" style="display: none;">
             <span class="text-lg">↑</span>
         </button>
-    </div>
-
-    <!-- Gallery Admin Modal -->
-    <div id="gallery-admin-modal" class="fixed inset-0 z-[120] bg-[#020617]/95 backdrop-blur-xl flex-col opacity-0 transition-opacity duration-300" style="display: none; overflow: hidden;">
-        <div class="flex justify-between items-center p-6 border-b border-slate-800 bg-[#020617] flex-shrink-0">
-            <div class="font-display text-white text-xl tracking-widest flex items-center gap-3">
-                <i class="ph ph-gear text-neon-cyan"></i> Archive Manager
-            </div>
-            <button onclick="closeGalleryAdmin()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
-                <i class="ph ph-x text-2xl"></i> Close
-            </button>
-        </div>
-        <div class="flex-1 overflow-y-auto gallery-scrollbar p-6 md:p-12">
-            <div class="max-w-screen-2xl mx-auto space-y-8">
-                <!-- Create Album -->
-                <div class="border border-slate-800 bg-slate-900/40 p-6 rounded">
-                    <h3 class="text-white font-display text-lg mb-4 flex items-center gap-2"><i class="ph ph-folder-plus text-neon-cyan"></i> Create Album</h3>
-                    <div class="flex gap-3">
-                        <input id="new-album-name" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Album name...">
-                        <button onclick="createAlbum()" class="border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
-                            <i class="ph ph-plus mr-1"></i> Create
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Manage Albums -->
-                <div id="admin-albums-list" class="space-y-6">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Album Edit Modal (upload + cover + rename + reorder) -->
-    <div id="album-edit-modal" class="fixed inset-0 z-[130] bg-[#020617]/95 backdrop-blur-xl flex-col opacity-0 transition-opacity duration-300" style="display: none; overflow: hidden;">
-        <div class="flex justify-between items-center p-6 border-b border-slate-800 bg-[#020617] flex-shrink-0">
-            <div class="font-display text-white text-xl tracking-widest flex items-center gap-3">
-                <i class="ph ph-pencil-simple text-neon-magenta"></i> <span id="edit-album-title">Edit Album</span>
-            </div>
-            <button onclick="closeAlbumEdit()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
-                <i class="ph ph-x text-2xl"></i> Close
-            </button>
-        </div>
-        <div class="flex-1 overflow-y-auto gallery-scrollbar p-6 md:p-12">
-            <div class="max-w-screen-2xl mx-auto space-y-8">
-                <!-- Rename -->
-                <div class="flex gap-3 items-center">
-                    <input id="edit-album-name" type="text" class="terminal-input flex-1 px-4 py-3 rounded text-sm" placeholder="Album name...">
-                    <button onclick="saveAlbumName()" class="border border-neon-cyan bg-neon-cyan/10 text-neon-cyan px-5 py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
-                        <i class="ph ph-check mr-1"></i> Rename
-                    </button>
-                </div>
-
-                <!-- Drag & Drop Upload -->
-                <div id="album-dropzone" class="border-2 border-dashed border-slate-700 bg-slate-900/20 rounded-lg p-10 text-center transition-colors hover:border-neon-cyan/50 hover:bg-slate-900/40"
-                     ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                    <i class="ph ph-upload-simple text-4xl text-slate-600 mb-3 block"></i>
-                    <p class="text-slate-400 text-sm font-mono uppercase tracking-widest">Drop photos here to upload</p>
-                    <p class="text-slate-600 text-xs mt-1">Supports JPG, PNG, WebP</p>
-                    <input type="file" id="album-file-input" multiple accept="image/*" class="hidden" onchange="handleFileSelect(event)">
-                    <button onclick="document.getElementById('album-file-input').click()" class="mt-4 text-neon-cyan text-xs uppercase tracking-widest hover:underline">or click to browse</button>
-                </div>
-
-                <!-- Upload Progress -->
-                <div id="upload-progress-area" class="hidden space-y-2"></div>
-
-                <!-- Cover Selection -->
-                <div>
-                    <h4 class="text-white font-display text-sm uppercase tracking-widest mb-3 flex items-center gap-2"><i class="ph ph-image text-neon-cyan"></i> Click image = set cover • Del = remove • Move = transfer to another album</h4>
-                    <div id="edit-album-images" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        <!-- Images injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Delete Album -->
-                <div class="border-t border-slate-800 pt-6">
-                    <button onclick="deleteCurrentAlbum()" class="border border-red-500/30 bg-red-500/10 text-red-400 px-5 py-3 uppercase tracking-widest text-xs hover:bg-red-500/20 transition-all">
-                        <i class="ph ph-trash mr-1"></i> Delete Album
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Move Image Dialog -->
-    <div id="move-image-modal" class="fixed inset-0 z-[140] bg-black/80 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity duration-300" onclick="if(event.target === this) closeMoveImageModal()">
-        <div class="bg-[#020617] border border-slate-800 p-6 md:p-8 rounded max-w-md w-full mx-4">
-            <h3 class="text-white font-display font-bold text-lg mb-4 flex items-center gap-2"><i class="ph ph-arrows-left-right text-neon-cyan"></i> Move Image</h3>
-            <p class="text-slate-400 text-sm mb-4">Select destination album:</p>
-            <div id="move-album-list" class="space-y-2 mb-6 max-h-60 overflow-y-auto gallery-scrollbar">
-                <!-- Albums injected via JS -->
-            </div>
-            <div class="flex justify-end gap-3">
-                <button onclick="closeMoveImageModal()" class="border border-slate-700 text-slate-400 px-4 py-2 uppercase tracking-widest text-xs hover:text-white transition-all">Cancel</button>
-            </div>
-        </div>
     </div>
 
     <!-- Fullscreen Image Viewer -->
