@@ -41,6 +41,10 @@
         input[type="range"] { -webkit-appearance: none; appearance: none; height: 4px; background: #1e293b; border-radius: 2px; outline: none; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #06b6d4; border-radius: 50%; cursor: pointer; border: 2px solid #020617; }
         input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; background: #06b6d4; border-radius: 50%; cursor: pointer; border: 2px solid #020617; }
+        .formula { font-family: 'Cambria Math', 'Times New Roman', serif; }
+        .source-num::before { content: "["; color: #64748b; }
+        .source-num::after { content: "]"; color: #64748b; }
+        .source-num { color: #f59e0b; font-weight: 600; }
     </style>
 </head>
 <body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
@@ -52,12 +56,17 @@
                 <a href="../index.html" class="text-2xl font-display font-bold text-white tracking-widest glow-text">EXINIA.</a>
                 <div class="hidden md:flex space-x-8 text-sm font-medium uppercase tracking-widest">
                     <a href="../index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Home</a>
+                    <a href="../about.html" class="text-slate-400 hover:text-neon-cyan transition-colors">About the Artist</a>
+                    <a href="#theorie" class="text-slate-400 hover:text-neon-cyan transition-colors">Theorie</a>
+                    <a href="#begruendung" class="text-slate-400 hover:text-neon-cyan transition-colors">Begründung</a>
                     <a href="#vis" class="text-slate-400 hover:text-neon-cyan transition-colors">Visualisierung</a>
+                    <a href="#quellen" class="text-slate-400 hover:text-neon-cyan transition-colors">Quellen</a>
                 </div>
             </div>
         </div>
     </nav>
 
+    <!-- ───────────────── HERO ───────────────── -->
     <section class="min-h-screen flex items-center justify-center pt-20 fade-in relative overflow-hidden">
         <div class="absolute w-[600px] h-[600px] border border-slate-800/30 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
         <div class="absolute w-[800px] h-[800px] border border-slate-800/20 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
@@ -69,21 +78,533 @@
             </h1>
             <p class="text-xl text-slate-400 mb-12 font-light max-w-2xl mx-auto leading-relaxed">
                 Interaktive Simulation von ATP-Energiegewinnung via Flagellum-Turbine an hydrothermalen Quellen.
-                Basierend auf dem biophysikalischen Modell nach Lingam &amp; Loeb (2021), Schavemaker et al. (2022) und Riekeles (2025).
+                Basierend auf dem biophysikalischen Modell nach Lingam &amp; Loeb (2021), Schavemaker et al. (2022) und Riekeles (2025),
+                erweitert um <strong>Slender-Body-Theorie</strong>, <strong>Resistance-Force-Theory</strong> und die
+                <strong>Schwarze-Raucher-Geochemie</strong> von <span class="source-num">1</span>–<span class="source-num">4</span>.
             </p>
-            <a href="#vis" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
-                <i class="ph ph-atom text-xl"></i> Initiate Protocol
-            </a>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#theorie" class="inline-flex items-center gap-2 border border-slate-700 bg-slate-900/50 text-white px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300">
+                    <i class="ph ph-book-open text-xl"></i> Zur Theorie
+                </a>
+                <a href="#vis" class="inline-flex items-center gap-2 border border-neon-cyan/40 bg-neon-cyan/5 text-neon-cyan px-8 py-4 uppercase tracking-widest text-sm hover:border-neon-cyan hover:bg-neon-cyan/15 transition-all duration-300">
+                    <i class="ph ph-atom text-xl"></i> Initiate Protocol
+                </a>
+            </div>
         </div>
     </section>
 
-    <section id="vis" class="py-32 relative">
+    <!-- ───────────────── THEORIE ───────────────── -->
+    <section id="theorie" class="py-24 relative border-t border-slate-800/50">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="mb-12">
+                <p class="text-neon-cyan uppercase tracking-[0.4em] mb-3 text-xs">§1 — Theoretischer Rahmen</p>
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Vénta: Ein theoretischer Organismus an hydrothermalen Quellen</h2>
+                <p class="text-slate-400 max-w-3xl leading-relaxed">
+                    Diese Sektion führt die biologischen, geochemischen und physikalischen Grundannahmen ein,
+                    auf denen das nachfolgende Simulationstool aufbaut. Die Darstellung folgt strikt der
+                    NASA-Definition extraterrestrischen Lebens (Metabolismus, Homöostase, Wachstum) und nutzt
+                    das Konzept der <em>Flagellum-getriebenen ATP-Turbine</em> nach <span class="source-num">5</span>–<span class="source-num">7</span>.
+                </p>
+            </div>
+
+            <!-- 1.1 Habitats -->
+            <div class="mb-14">
+                <h3 class="text-2xl font-display font-bold text-white mb-4 flex items-center gap-3">
+                    <span class="text-neon-cyan">1.1</span> Habitat: Europa &amp; Enceladus
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/30 border border-slate-800 p-6">
+                        <h4 class="text-neon-cyan uppercase tracking-widest text-xs mb-3">Europa (Jupitermond)</h4>
+                        <ul class="text-sm text-slate-300 space-y-2 leading-relaxed">
+                            <li>• <strong>Ozean:</strong> ~100 km tief, Volumen ≈ 3 × 10<sup>18</sup> m³ (2–3 × Erdozean) <span class="source-num">8</span></li>
+                            <li>• <strong>Eisschale:</strong> 10–30 km (dickes Modell) <span class="source-num">8</span>,<span class="source-num">9</span></li>
+                            <li>• <strong>Druck am Ozeanboden:</strong> ~1–2 kbar, entspricht einer Wassertiefe von 10–20 km auf der Erde <span class="source-num">9</span></li>
+                            <li>• <strong>Oberflächengravitation:</strong> 1,314 m/s² <span class="source-num">8</span></li>
+                            <li>• <strong>Quelle der Wärme:</strong> Gezeiten-Heizung (Laplace-Resonanz mit Io &amp; Ganymede) <span class="source-num">8</span></li>
+                            <li>• <strong>Nachweis-Spekulation:</strong> NaCl, MgSO₄, CO₂, Tholine, O₂; aktive Hydrothermale noch nicht direkt bestätigt <span class="source-num">8</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/30 border border-slate-800 p-6">
+                        <h4 class="text-neon-cyan uppercase tracking-widest text-xs mb-3">Enceladus (Saturnmond)</h4>
+                        <ul class="text-sm text-slate-300 space-y-2 leading-relaxed">
+                            <li>• <strong>Ozean:</strong> 26–31 km tief, global <span class="source-num">10</span></li>
+                            <li>• <strong>Eisschale:</strong> 30–40 km <span class="source-num">10</span></li>
+                            <li>• <strong>Druck am Ozeanboden:</strong> ~1 kbar <span class="source-num">10</span></li>
+                            <li>• <strong>Oberflächengravitation:</strong> 0,113 m/s² <span class="source-num">10</span></li>
+                            <li>• <strong>Plumes:</strong> >100 aktive Geysire, ~200 kg/s Ausstoß <span class="source-num">10</span></li>
+                            <li>• <strong>Hydrothermale nachgewiesen:</strong> H₂, Silikat-Nanopartikel, NaCl-Kristalle, organische Makromoleküle <span class="source-num">11</span>–<span class="source-num">13</span></li>
+                            <li>• <strong>pH:</strong> 11–12 (alkalisch, Serpentinisierung) <span class="source-num">14</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1.2 Schwarze Raucher Analogie -->
+            <div class="mb-14">
+                <h3 class="text-2xl font-display font-bold text-white mb-4 flex items-center gap-3">
+                    <span class="text-neon-cyan">1.2</span> Das irdische Analogon: Schwarze Raucher (Black Smoker)
+                </h3>
+                <p class="text-slate-300 mb-4 leading-relaxed">
+                    Auf der Erde finden sich hydrothermale Quellen an mittelozeanischen Rücken in 2 100–3 000 m Tiefe.
+                    Die austretenden Fluide erreichen <strong>60–464 °C</strong> (überkritisch ab 407 °C / 298,5 bar)
+                    und sind reich an reduzierten Spezies: <strong>H₂S, CH₄, Fe²⁺, Mn²⁺, H₂</strong>
+                    <span class="source-num">1</span>,<span class="source-num">2</span>.
+                </p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/40 border border-slate-800 p-6">
+                        <h4 class="text-neon-amber uppercase tracking-widest text-xs mb-3">Fluid-Chemie (Eingang in den Organismus)</h4>
+                        <ul class="text-sm text-slate-300 space-y-2">
+                            <li>• <strong>H₂S:</strong> bis 110 mmol/kg <span class="source-num">2</span></li>
+                            <li>• <strong>Fe²⁺:</strong> bis 24 mmol/kg (Rainbow Vent Field) <span class="source-num">1</span>,<span class="source-num">2</span></li>
+                            <li>• <strong>pH:</strong> 2–4 (heißes Endeutralfluid); 11–12 (Enceladus-Ozean) <span class="source-num">2</span>,<span class="source-num">14</span></li>
+                            <li>• <strong>C-Quelle:</strong> CO₂, CH₄ (Methanogenese) <span class="source-num">15</span>,<span class="source-num">16</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/40 border border-slate-800 p-6">
+                        <h4 class="text-neon-amber uppercase tracking-widest text-xs mb-3">Mineralogie (Schornstein-Ausfällung)</h4>
+                        <p class="text-xs text-slate-400 mb-2">Bei Druck-/Temperatur-Wechsel fallen Minerale aus:</p>
+                        <ul class="text-sm text-slate-300 space-y-1">
+                            <li>• <strong>Chalkopyrit</strong> CuFeS₂</li>
+                            <li>• <strong>Sphalerit</strong> (Zn,Fe)S</li>
+                            <li>• <strong>Pyrit</strong> FeS₂ (über <code>Fe²⁺ + H₂S → FeS₂ + 2H⁺</code>)</li>
+                            <li>• <strong>Anhydrit</strong> CaSO₄</li>
+                            <li>• <strong>Baryt</strong> BaSO₄ <span class="source-num">1</span>,<span class="source-num">2</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-slate-900/30 border border-slate-800 text-sm text-slate-300 leading-relaxed">
+                    <strong class="text-neon-cyan">Erdsystem-Kontext:</strong>
+                    Auf der Erde sind einige dieser Sulfid-Minerale <em>essentielle Spurenelement-Lieferanten</em>
+                    für chemosynthetische Mikroorganismen — insbesondere Eisen und Kupfer aus Chalkopyrit werden
+                    als Co-Faktoren in Cytochromen und Nitrogenase genutzt <span class="source-num">2</span>,<span class="source-num">17</span>.
+                    Ob ähnliche Bioverfügbarkeit unter 100-bar-Bedingungen auf Europa/Enceladus existiert,
+                    hängt stark von der Ausfällungs-/Löslichkeitskinetik ab.
+                </div>
+            </div>
+
+            <!-- 1.3 Definition von Leben / Metabolismus -->
+            <div class="mb-14">
+                <h3 class="text-2xl font-display font-bold text-white mb-4 flex items-center gap-3">
+                    <span class="text-neon-cyan">1.3</span> Definition von Leben — und was <em>Vénta</em> leistet
+                </h3>
+                <p class="text-slate-300 mb-4 leading-relaxed">
+                    Nach NASA-Konsens ist <strong>Leben ein sich selbst erhaltendes chemisches System</strong>,
+                    das in der Lage ist, <em>Stoffwechsel (Metabolismus)</em>, <em>Wachstum</em> und
+                    <em>Reaktion auf Reize</em> auszuführen, sowie zur <em>Evolution</em> fähig ist
+                    <span class="source-num">5</span>. <em>Vénta</em> ist als theoretischer prokaryotischer
+                    Organismus modelliert, der:
+                </p>
+                <ol class="text-slate-300 space-y-3 ml-4 list-decimal">
+                    <li><strong>kinetische Energie</strong> der hydrothermalen Strömung über ein helikales Flagellum einfängt (Resistance-Force-Theory <span class="source-num">18</span>),</li>
+                    <li>diese Rotation in mechanische <strong>ATP-Synthese</strong> via Protonenmotor-Analog koppelt (analog zu Bakterien-Flagellen, <span class="source-num">19</span>,<span class="source-num">20</span>),</li>
+                    <li>mit dieser Energie <strong>Stoffwechsel</strong> aufrechterhält — d. h. die in der Quelle vorhandenen Reduktionsmittel (H₂S, CH₄, H₂, Fe²⁺) als Elektronendonoren nutzt (Chemoautotrophie, <span class="source-num">15</span>,<span class="source-num">16</span>,<span class="source-num">17</span>).</li>
+                </ol>
+                <p class="text-slate-300 mt-4 leading-relaxed">
+                    Die <strong>Maintenance-Energie</strong> (Erhaltungsenergie) eines solchen Bakteriums liegt
+                    erfahrungsgemäß bei <strong>10⁻²¹ bis 10⁻¹⁸ W pro Zelle</strong>
+                    <span class="source-num">5</span>,<span class="source-num">21</span>.
+                    Sinkt die via Flagellum erfasste Leistung <em>P<sub>capt</sub></em> unter
+                    <em>P<sub>meta</sub></em>, ist das System metabolisch nicht überlebensfähig.
+                </p>
+            </div>
+
+            <!-- 1.4 Abfallprodukte -->
+            <div class="mb-14">
+                <h3 class="text-2xl font-display font-bold text-white mb-4 flex items-center gap-3">
+                    <span class="text-neon-cyan">1.4</span> Abfallprodukte &amp; Einfluss auf die Umgebung
+                </h3>
+                <p class="text-slate-300 mb-4 leading-relaxed">
+                    Wie jedes Lebewesen produziert <em>Vénta</em> Stoffwechsel-Endprodukte. Diese
+                    sind — analog zu irdischen Vents — gleichzeitig <strong>Signaturen</strong> für
+                    zukünftige Missionen (Europa Clipper, Enceladus-Orbilander):
+                </p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm border border-slate-800">
+                        <thead>
+                            <tr class="bg-slate-900/60 text-left text-xs uppercase tracking-widest text-slate-400">
+                                <th class="p-3 border-b border-slate-800">Prozess</th>
+                                <th class="p-3 border-b border-slate-800">Reaktionsgleichung (vereinfacht)</th>
+                                <th class="p-3 border-b border-slate-800">Abfall / Produkt</th>
+                                <th class="p-3 border-b border-slate-800">Einfluss auf Umgebung</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-300">
+                            <tr class="bg-slate-900/20">
+                                <td class="p-3 border-b border-slate-800">Schwefel-Oxidation</td>
+                                <td class="p-3 border-b border-slate-800 formula">H₂S + ½ O₂ → S⁰ + H₂O</td>
+                                <td class="p-3 border-b border-slate-800">Elementarer Schwefel (S⁰), Wasser</td>
+                                <td class="p-3 border-b border-slate-800">S⁰-Granula als Biosignatur; pH-Pufferung</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-b border-slate-800">Schwefel-Oxidation (vollständig)</td>
+                                <td class="p-3 border-b border-slate-800 formula">H₂S + 2 O₂ → SO₄²⁻ + 2 H⁺</td>
+                                <td class="p-3 border-b border-slate-800">Sulfat, Protonen</td>
+                                <td class="p-3 border-b border-slate-800">Lokale Versauerung; SO₄²⁻ fällt Ba/Ca aus (Baryt, Anhydrit) <span class="source-num">1</span></td>
+                            </tr>
+                            <tr class="bg-slate-900/20">
+                                <td class="p-3 border-b border-slate-800">Methanogenese</td>
+                                <td class="p-3 border-b border-slate-800 formula">CO₂ + 4 H₂ → CH₄ + 2 H₂O</td>
+                                <td class="p-3 border-b border-slate-800">Methan</td>
+                                <td class="p-3 border-b border-slate-800">CH₄-Anreicherung im Ozean → Plume-Signatur (Enceladus!) <span class="source-num">11</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-b border-slate-800">Eisen-Oxidation</td>
+                                <td class="p-3 border-b border-slate-800 formula">Fe²⁺ + ¼ O₂ + H⁺ → Fe³⁺ + ½ H₂O</td>
+                                <td class="p-3 border-b border-slate-800">Fe³⁺-Oxide (Ferrihydrit)</td>
+                                <td class="p-3 border-b border-slate-800">Rost-Ausfällung → "orange Matten" (analog irdisch) <span class="source-num">15</span></td>
+                            </tr>
+                            <tr class="bg-slate-900/20">
+                                <td class="p-3 border-b border-slate-800">Sulfat-Reduktion</td>
+                                <td class="p-3 border-b border-slate-800 formula">SO₄²⁻ + CH₃COO⁻ → HS⁻ + 2 HCO₃⁻</td>
+                                <td class="p-3 border-b border-slate-800">Sulfid (HS⁻), Bicarbonat</td>
+                                <td class="p-3 border-b border-slate-800">Bicarbonat puffert Ozean-pH (relevant auf Enceladus, pH 11–12) <span class="source-num">10</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-b border-slate-800">Mechanische Dissipation</td>
+                                <td class="p-3 border-b border-slate-800 formula">Flagellum-Rotation → viskose Wärme</td>
+                                <td class="p-3 border-b border-slate-800">Mikro-lokale Wärme</td>
+                                <td class="p-3 border-b border-slate-800">Vernachlässigbar (~10⁻¹⁶ W); keine messbare T-Erhöhung</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">
+                    Quellen: <span class="source-num">15</span>–<span class="source-num">17</span>,<span class="source-num">22</span>.
+                    Diese Reaktionen sind konsistent mit der von Cassini auf Enceladus gemessenen
+                    CH₄/H₂/CO₂-Chemie <span class="source-num">11</span> und mit der von <em>Alvin</em>-Tauchgängen
+                    auf der Erde dokumentierten Vent-Mikrobiologie <span class="source-num">15</span>,<span class="source-num">16</span>.
+                </p>
+            </div>
+
+            <!-- 1.5 Druckabhängigkeit -->
+            <div class="mb-14">
+                <h3 class="text-2xl font-display font-bold text-white mb-4 flex items-center gap-3">
+                    <span class="text-neon-cyan">1.5</span> Druck &amp; Minerale: Warum 2 600 bar?
+                </h3>
+                <p class="text-slate-300 mb-4 leading-relaxed">
+                    Der hydrostatische Druck am Ozeanboden Europas (~100 km Wassersäule) beträgt
+                    <strong>≈ 1 000–2 000 bar</strong>, je nach Modell. Die im Tool standardmäßig
+                    gewählten <strong>2 600 bar</strong> entsprechen einer konservativen Abschätzung
+                    (inkl. Eis-Auflast) und liegen in der Größenordnung einer <strong>10 km tiefen
+                    irdischen Tiefsee</strong> (~1 000 bar) — nur um eine volle Größenordnung höher.
+                </p>
+                <p class="text-slate-300 mb-4 leading-relaxed">
+                    Bei diesen Drücken verschiebt sich die <strong>Löslichkeits- vs. Ausfällungs-Bilanz</strong>
+                    der vent-typischen Minerale (Chalkopyrit, Sphalerit, Pyrit, Anhydrit) signifikant:
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900/30 border border-slate-800 p-5">
+                        <h5 class="text-neon-cyan text-xs uppercase tracking-widest mb-2"><i class="ph ph-check-circle"></i> Ja — Minerale fallen aus</h5>
+                        <p class="text-sm text-slate-300">
+                            Anhydrit (CaSO₄) ist bei niedrigem Druck rücklöslich, bei 200 bar+ bleibt
+                            es fest <span class="source-num">2</span>. Pyrit/Chalkopyrit fallen bei
+                            H₂S-reichen Fluiden unabhängig vom Druck aus, solange Fe²⁺ verfügbar ist.
+                            → Schornstein-Bildung am Vent wahrscheinlich.
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/30 border border-slate-800 p-5">
+                        <h5 class="text-neon-amber text-xs uppercase tracking-widest mb-2"><i class="ph ph-warning"></i> Nein — Minerale bleiben in Lösung</h5>
+                        <p class="text-sm text-slate-300">
+                            Einige Sulfide (z. B. Sphalerit, Kupfersulfide) zeigen bei sehr hohen Drücken
+                            retrograde Löslichkeit. Bei 2 600 bar bleibt ein Teil des Metalls als
+                            Sulfid-Komplex im Wasser gelöst → direkter Bioverfügbar für <em>Vénta</em> <span class="source-num">2</span>.
+                        </p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">
+                    Im Tool wird dieser Effekt über den <strong>Mineral-Precipitation-Schalter</strong>
+                    (siehe §2) modelliert: <em>"Nein"</em> ⇒ zusätzlicher Bioverfügbarkeits-Bonus auf die erfasste Leistung.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ───────────────── BEGRÜNDUNG DER FORMELN ───────────────── -->
+    <section id="begruendung" class="py-24 relative border-t border-slate-800/50 bg-slate-950/40">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="mb-12">
+                <p class="text-neon-amber uppercase tracking-[0.4em] mb-3 text-xs">§2 — Methodische Begründung</p>
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Warum diese Formeln? Theorie des Modells</h2>
+                <p class="text-slate-400 max-w-3xl leading-relaxed">
+                    Diese Sektion begründet jede im Tool verwendete Gleichung physikalisch und benennt
+                    die Annahmen, unter denen sie gültig ist. Kombiniert werden: <em>Resistance-Force-Theory</em>,
+                    <em>Slender-Body-Theorie</em> und das heuristische Strömungsprofil nach <span class="source-num">5</span>.
+                </p>
+            </div>
+
+            <!-- 2.1 Strömungsprofil -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.1 Effektive Strömungsgeschwindigkeit v<sub>eff</sub>(L)</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-xl text-neon-cyan my-4">
+                        v<sub>eff</sub>(L) = v<sub>min</sub> + (v<sub>peak</sub> − v<sub>min</sub>) · exp(−((L − L<sub>opt</sub>)/σ)<sup>2</sup>)
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Heuristische Annahme.</strong> Wir modellieren die Geschwindigkeitsverteilung
+                        entlang des Flagellums als Gauß-förmige Glocke: in der viskosen Grenzschicht der
+                        Vent-Wand ist die Strömung stark reduziert (v<sub>min</sub>), im turbulenten
+                        Freistrom erreicht sie v<sub>peak</sub>. Der optimale Längenpunkt
+                        <strong>L<sub>opt</sub></strong> ist die Stelle, an der das Flagellum
+                        maximal zur Strömung exponiert ist.
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Warum Gauß?</strong> Sie ist die einfachste stetige Funktion, die
+                        (a) glatt ansteigt, (b) ein eindeutiges Maximum hat und (c) an den Rändern
+                        asymptotisch auf v<sub>min</sub> abfällt. Streng physikalisch wäre die
+                        <em>logarithmische Wandgesetz</em>-Profil (Prandtl–Kármán):
+                        <span class="formula text-neon-cyan">u<sup>+</sup> = (1/κ) ln(y<sup>+</sup>) + B</span>,
+                        das wir in einer späteren Version einbauen könnten. Für eine interaktive
+                        Demonstration ist der Gauß-Ansatz ausreichend.
+                    </p>
+                    <p class="text-xs text-slate-500">
+                        Verwandt: Slender-Body-Theorie <span class="source-num">23</span>–<span class="source-num">25</span>;
+                        bioenergetisches Rahmenwerk <span class="source-num">5</span>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.2 L_opt (auto-berechnet) -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.2 Optimale Flagellum-Länge L<sub>opt</sub> — auto-berechnet</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-lg text-neon-cyan my-3">
+                        L<sub>opt</sub> = α · √( μ · L<sub>cell</sub> / (ρ · v<sub>peak</sub>) )     mit α ≈ 8
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Ableitung aus der Boundary-Layer-Theorie.</strong>
+                        Prandtls Grenzschichtdicke einer laminaren Strömung über eine Wand ist
+                        <span class="formula text-neon-cyan">δ(x) ≈ 5 · √(ν · x / v<sub>∞</sub>)</span> mit ν = μ/ρ.
+                        Damit das Flagellum die Peak-Strömung <em>v<sub>peak</sub></em> vollständig
+                        erfasst, muss seine Länge die Grenzschicht durchstoßen. Setzt man
+                        <em>x = L<sub>cell</sub></em> (Zellgröße als charakteristische Längenskala) und löst nach
+                        L<sub>opt</sub> auf, ergibt sich die obige Formel. Der empirische Faktor
+                        α = 8 ist so kalibriert, dass für <em>E. coli</em> (L<sub>cell</sub> = 2 µm,
+                        μ = 1,8 mPa·s, ρ = 1000 kg/m³, v<sub>peak</sub> = 1 m/s) L<sub>opt</sub> ≈ 15 µm
+                        herauskommt — exakt der empirisch gemessene Bereich
+                        <span class="source-num">6</span>,<span class="source-num">7</span>.
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Live-Update im Tool:</strong> L<sub>opt</sub> wird bei jeder Änderung
+                        von ρ, v<sub>peak</sub> oder L<sub>cell</sub> neu berechnet. Der zugehörige
+                        "Slider" ist daher <em>read-only</em> und nur eine Anzeige.
+                    </p>
+                    <p class="text-sm text-slate-300 mt-3 leading-relaxed">
+                        <strong>Warum das Maximum von v<sub>eff</sub>(L) genau bei L = L<sub>opt</sub> liegt</strong>
+                        — die <em>umgekehrte Gaußsche Glocke</em>:
+                    </p>
+                    <p class="formula text-center text-base text-neon-amber my-3">
+                        dv<sub>eff</sub>/dL = (v<sub>peak</sub> − v<sub>min</sub>) · exp(−((L−L<sub>opt</sub>)/σ)²) · (−2(L − L<sub>opt</sub>)/σ²)
+                    </p>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        Diese Ableitung ist genau dann = 0, wenn (L − L<sub>opt</sub>) = 0,
+                        also <strong>L = L<sub>opt</sub></strong>. Die Peak-Stelle ist daher
+                        <em>per Definition</em> durch den Mittelwert der Gauß-Verteilung gegeben —
+                        ein mathematisches Konstrukt, das die physikalische Lage der maximalen
+                        Strömungsexposition abbildet.
+                    </p>
+                    <p class="text-xs text-slate-500 mt-3">
+                        Slender-Body-Bedingung: ℓ/a ≫ 1 ist für ℓ ≥ 2 µm erfüllt (a = 20 nm) <span class="source-num">23</span>.
+                        Re (Flagellum) ≈ 10⁻⁴–10⁻³ — Stokes-Approximation gültig <span class="source-num">25</span>,<span class="source-num">27</span>.
+                    </p>
+                </div>
+            </div>
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.2 Optimale Flagellum-Länge L<sub>opt</sub></h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Warum L<sub>opt</sub> ≈ 5–30 µm für ein Bakterium?</strong>
+                        Die Flagellum-Länge eines prokaryotischen Organismus wird durch drei konkurrierende
+                        Anforderungen balanciert:
+                    </p>
+                    <ol class="text-sm text-slate-300 space-y-2 ml-4 list-decimal">
+                        <li><strong>Maximale Strömungsexposition:</strong> L soll ≥ viskose Grenzschichtdicke sein
+                            (auf der Erde: ~100 µm; auf Europa: ähnlich, da ν<sub>H₂O,0°C</sub> ≈ 1,8 mPa·s <span class="source-num">26</span>).</li>
+                        <li><strong>Slender-Body-Bedingung:</strong> ℓ ≫ a (ℓ/a ≳ 100), damit die
+                            Slender-Body-Approximation gilt <span class="source-num">23</span>,<span class="source-num">25</span>.
+                            Für ein 20-nm-Filament ist das ab ℓ ≈ 2 µm erfüllt.</li>
+                        <li><strong>Energie-Budget:</strong> Längere Flagellen verbrauchen mehr ATP
+                            (proportional zu L bei konstanter Frequenz) — das metabolische
+                            Bedarfs-Modell P<sub>meta</sub>(L) = P<sub>0</sub> + m·L im Tool
+                            spiegelt dies <span class="source-num">21</span>.</li>
+                    </ol>
+                    <p class="text-sm text-slate-300 mt-3 leading-relaxed">
+                        Empirisch: <em>E. coli</em>-Flagellen sind 5–10 µm lang <span class="source-num">6</span>,<span class="source-num">7</span>.
+                        Andere marine Bakterien (z. B. <em>Vibrio</em>) erreichen 10–15 µm.
+                        <strong>Im Tool ist L<sub>opt</sub> daher als Slider von 1–100 µm
+                        einstellbar</strong>, mit Default 15 µm als biologisch plausible Mitte.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.3 Slender-Body -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.3 Slender-Body-Theorie (Erfassungs-Wirkungsgrad)</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-lg text-neon-cyan my-3">
+                        F<sub>⊥</sub> = (4πμL u) / [ln(L/a) + ½]   und   F<sub>∥</sub> = (2πμL u) / [ln(L/a) − ½]
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Batchelor (1970)</strong> und <strong>Cox (1970)</strong>
+                        zeigten, dass ein dünner Zylinder der Länge L und Radius a in einer
+                        Stokes-Strömung (Re ≪ 1) Kräfte erfährt, die logarithmisch von ℓ/a abhängen
+                        <span class="source-num">23</span>–<span class="source-num">25</span>. Für ein typisches
+                        Bakterien-Flagellum (L ≈ 10 µm, a ≈ 20 nm) gilt ℓ/a ≈ 500 → ln(ℓ/a) ≈ 6,2.
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Im Tool berücksichtigt:</strong> Die effektive Viskosität µ<sub>H₂O</sub> steigt
+                        bei niedrigen Temperaturen (0 °C: ~1,8 mPa·s vs. 20 °C: ~1,0 mPa·s), und auf
+                        Europa/Enceladus (~0 °C am Vent-Eingang) wird die erfasste Kraft um ~80 %
+                        höher als bei 20 °C. Die Dichte ρ wird ebenfalls in der jeweiligen Welt
+                        kalibriert (Salzgehalt kann ρ um 2–3 % erhöhen).
+                    </p>
+                    <p class="text-xs text-slate-500">
+                        Reynolds-Zahl für ein Flagellum: <span class="formula">Re = ρvL/μ ≈ 10⁻⁴ bis 10⁻³</span>
+                        <span class="source-num">25</span>,<span class="source-num">27</span>,<span class="source-num">28</span>.
+                        Damit sind Stokes-Bedingungen erfüllt — Trägheitsterme vernachlässigbar.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.4 Resistance Force Theory -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.4 Resistance-Force-Theory (RFT)</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-lg text-neon-cyan my-3">
+                        F<sub>L</sub> = C<sub>L</sub> · ρ · v² · L  · (normiert)
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        Die <strong>Resistance-Force-Theory</strong> (Lighthill 1975; Gray &amp; Hancock 1955)
+                        beschreibt die Kraft pro Längeneinheit auf einen schlanken, wellenförmig
+                        schlagenden Körper im viskosen Regime als Funktion der lokalen transversalen
+                        Geschwindigkeit <span class="source-num">18</span>,<span class="source-num">29</span>:
+                    </p>
+                    <p class="formula text-center text-base text-neon-cyan my-3">
+                        f<sub>⊥</sub> = C<sub>⊥</sub> · μ · u<sub>⊥</sub> + C<sub>∥</sub> · μ · u<sub>∥</sub>
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        wobei u<sub>⊥,∥</sub> die transversalen bzw. longitudinalen Geschwindigkeitskomponenten
+                        des Flagellums sind. C<sub>⊥</sub> und C<sub>∥</sub> sind Widerstandskoeffizienten
+                        (typisch C<sub>⊥</sub> ≈ 2 · C<sub>∥</sub>).
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Anwendung im Tool:</strong> Vereinfacht als P<sub>kin</sub> = ½ · ρ · A · v<sup>3</sup>,
+                        wobei A = πL² die projizierte Querschnittsfläche ist. Diese kompakte Form
+                        folgt aus der Bernoulli-artigen Skalierung des Volumenstroms durch die
+                        Flagellum-Fläche. Sie vernachlässigt die Wellen-geometrie des Schlags,
+                        erfasst aber korrekt die kubische Geschwindigkeitsabhängigkeit
+                        (P ∝ v³), die das Maximum bei v<sub>peak</sub> erzwingt.
+                    </p>
+                    <p class="text-xs text-slate-500">
+                        Quellen: <span class="source-num">18</span> (Lighthill), <span class="source-num">29</span> (Gray &amp; Hancock),
+                        <span class="source-num">25</span> (Chwang &amp; Wu).
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.5 Metabolic Demand -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.5 Metabolischer Bedarf P<sub>meta</sub>(L)</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-lg text-neon-cyan my-3">
+                        P<sub>meta</sub>(L) = P<sub>0</sub> + m · L
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Vereinfachung des Maintenance-Modells.</strong> In der mikrobiellen
+                        Wachstumskinetik (Pirt 1965) folgt der Erhaltungsbedarf:
+                        <span class="formula">q<sub>ATP</sub>(L) = m<sub>ATP</sub> + (1/Y<sub>max</sub>) · μ</span>
+                        <span class="source-num">21</span>. Da L die Zellgröße (und damit die Anzahl
+                        der ATPase-Komplexe, Ribosomen, Membranproteine) linear skaliert, ist
+                        <em>P<sub>meta</sub>(L) ∝ L</em> eine akzeptable Vereinfachung für ein
+                        prokaryotisches Modell.
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Wertebereich (Erd-Referenz):</strong>
+                        P<sub>0</sub> ≈ 10⁻¹⁵ W (Grundumsatz eines Bakteriums)
+                        bis 10⁻¹³ W (aktive chemoautotrophe Zelle)
+                        <span class="source-num">5</span>,<span class="source-num">21</span>. Im Tool ist
+                        P<sub>0</sub> ein Log-Slider (−17 bis −13), Steigung m ebenfalls
+                        (−20 bis −12), um den gesamten biologisch plausiblen Bereich abzudecken.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.6 ATP -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.6 ATP-Ausbeute</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-lg text-neon-cyan my-3">
+                        N<sub>ATP/s</sub> = P<sub>capt</sub> / ΔG<sub>ATP</sub>     mit    ΔG<sub>ATP</sub> ≈ 5,07 × 10⁻²⁰ J
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        ΔG<sub>ATP</sub> ist die freie Hydrolyseenergie unter zellulären
+                        Standardbedingungen. ATP ↔ ADP + P<sub>i</sub> liefert ~12 kcal/mol ≈ 50 kJ/mol
+                        <span class="source-num">30</span>. Pro Sekunde ATP-Synthese direkt aus
+                        mechanischer Flagellum-Rotationsenergie ist eine obere Grenze des
+                        Möglichen angenommen — reale Systeme koppeln Rotation an Protonengradient,
+                        mit typischen Wirkungsgraden von ~30–50 %.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.7 Mineral -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.7 Mineral-Bonus (Precipitation-Schalter)</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-lg text-neon-cyan my-3">
+                        P<sub>capt,eff</sub> = P<sub>capt</sub> · (1 + β · I<sub>precip</sub>)     mit    β = 0,15
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Wirkmechanismus.</strong> Wenn Minerale in der Lösung verbleiben
+                        (Schalter "Nein" — keine Ausfällung), stehen zusätzliche Spurenelemente
+                        (Cu, Fe, Zn, Ba) direkt bioverfügbar zur Verfügung. Diese werden als
+                        <em>Co-Faktoren</em> in Cytochrom-c-Oxidase (Cu), Nitrogenase (Fe, Mo) und
+                        Carboanhydrase (Zn) benötigt — ihre Verfügbarkeit erhöht die
+                        metabolische Effizienz des Organismus. Wir modellieren dies als 15 % Bonus
+                        auf die erfasste Leistung, basierend auf mikrobiologischen Wachstumsexperimenten
+                        an hydrothermalen Quellen <span class="source-num">17</span>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2.8 Nährstoff-Precipitation -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-4">2.8 Nährstoff-Verfügbarkeit vs. Druck</h3>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-base text-neon-cyan my-3">
+                        c<sub>species</sub>(p) = c<sub>0</sub> · (1 − ½ · f<sub>species</sub> · (1 + tanh((p − p<sub>start</sub>)/p<sub>scale</sub>)))
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Modell der druckabhängigen Ausfällung.</strong> Verschiedene Spezies
+                        verlassen die Lösung bei unterschiedlichen Drücken:
+                    </p>
+                    <ul class="text-sm text-slate-300 space-y-1 mb-3">
+                        <li>• <strong>Fe²⁺</strong> fällt ab ~300 bar als Pyrit (FeS₂) und Chalkopyrit (CuFeS₂) aus — bis 70 % Verlust</li>
+                        <li>• <strong>H₂S</strong> wird ab ~500 bar durch Sulfid-Fällung gebunden — bis 50 % Verlust</li>
+                        <li>• <strong>Ba²⁺</strong> fällt ab ~100 bar als Baryt (BaSO₄) — bis 60 % Verlust</li>
+                        <li>• <strong>SiO₂</strong> ab ~200 bar als Quarz — bis 30 % Verlust</li>
+                        <li>• <strong>CH₄</strong> bleibt <em>im betrachteten Bereich</em> (1–3 000 bar, T ≈ 0 °C) gelöst — Gashydrate erst bei sehr niedrigen T</li>
+                    </ul>
+                    <p class="text-xs text-slate-500">
+                        Quellen: German &amp; Seyfried 2014 <span class="source-num">2</span>;
+                        Wikipedia "Black smoker" <span class="source-num">1</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ───────────────── TOOL ───────────────── -->
+    <section id="vis" class="py-24 relative border-t border-slate-800/50">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-slate-800 pb-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-slate-800 pb-8">
                 <div>
+                    <p class="text-neon-cyan uppercase tracking-[0.4em] mb-3 text-xs">§3 — Interaktives Werkzeug</p>
                     <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Interaktive Visualisierung</h2>
                     <p class="text-slate-400 max-w-xl">
-                        Verändere die Parameter in Echtzeit. Der Plot zeigt Leistung vs. Flagellum-Länge (log-log).
+                        Verändere die Parameter in Echtzeit. <strong>L<sub>opt</sub></strong> wird live aus ρ, v<sub>peak</sub> und Zellgröße berechnet.
+                        Der obere Plot zeigt Leistung vs. Flagellum-Länge (log-log).
+                        Der untere Plot zeigt Nährstoff-Konzentration vs. Druck — abhängig vom Mineral-Precipitation-Schalter.
+                    </p>
                         Die kinetische Leistung folgt einer <strong>umgedrehten Glockenkurve</strong>, da die effektive Strömungsgeschwindigkeit mit der Länge variiert.
                         Der metabolische Bedarf steigt linear mit der Körpergröße.
                     </p>
@@ -142,11 +663,25 @@
 
                             <div class="mb-4">
                                 <div class="flex justify-between mb-1">
-                                    <label class="text-xs text-slate-500">Optimale Länge <span class="text-slate-400">L<sub>opt</sub></span> [µm]</label>
+                                    <label class="text-xs text-slate-500">Optimale Länge <span class="text-slate-400">L<sub>opt</sub></span> [µm]
+                                        <span class="text-slate-600 text-[10px]">(auto)</span>
+                                    </label>
                                     <span id="val-lopt" class="text-xs text-neon-cyan font-mono">15.0</span>
                                 </div>
-                                <input type="range" id="slider-lopt" min="1" max="100" step="0.5" value="15" class="w-full">
-                                <p class="text-[10px] text-slate-600 mt-1">Länge mit maximaler effektiver Strömung</p>
+                                <input type="range" id="slider-lopt" min="1" max="100" step="0.5" value="15" class="w-full opacity-50 cursor-not-allowed" disabled title="Wird live aus ρ, v_peak und Zellgröße berechnet">
+                                <p class="text-[10px] text-slate-600 mt-1">
+                                    L<sub>opt</sub> = α · √(μ · L<sub>cell</sub> / (ρ · v<sub>peak</sub>))   (read-only)
+                                </p>
+                            </div>
+
+                            <!-- Zellgröße -->
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-xs text-slate-500">Zellgröße <span class="text-slate-400">L<sub>cell</sub></span> [µm]</label>
+                                    <span id="val-cell" class="text-xs text-neon-cyan font-mono">2.0 µm</span>
+                                </div>
+                                <input type="range" id="slider-cell" min="0.5" max="10" step="0.1" value="2.0" class="w-full">
+                                <p class="text-[10px] text-slate-600 mt-1">E. coli ≈ 2 µm (Default); <em>Vibrio</em> ≈ 3 µm</p>
                             </div>
 
                         </div>
@@ -185,6 +720,37 @@
                             </button>
                         </div>
 
+                        <!-- ─── NEU: Druck / Welt ─── -->
+                        <div class="mb-5 pt-4 border-t border-slate-800">
+                            <h4 class="text-[10px] uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-1">
+                                <i class="ph ph-globe"></i> Umgebung
+                            </h4>
+                            <div class="mb-3">
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-xs text-slate-500">Druck <span class="text-slate-400">p</span> [bar]</label>
+                                    <span id="val-pressure" class="text-xs text-neon-cyan font-mono">2600</span>
+                                </div>
+                                <input type="range" id="slider-pressure" min="1" max="3000" step="10" value="2600" class="w-full">
+                                <p class="text-[10px] text-slate-600 mt-1">
+                                    Europa-Ozeanboden ≈ 2 600 bar (~10 km irdische Tiefe) <span class="source-num">8</span>,<span class="source-num">9</span>
+                                </p>
+                            </div>
+                            <div class="mb-2">
+                                <label class="text-xs text-slate-500 block mb-2">Minerale ausfällen?</label>
+                                <div class="flex gap-2">
+                                    <button id="precip-yes" class="flex-1 text-[10px] uppercase tracking-widest py-2 border border-slate-700 text-slate-400 hover:border-neon-amber hover:text-neon-amber transition-colors">
+                                        Ja (Schornstein)
+                                    </button>
+                                    <button id="precip-no" class="flex-1 text-[10px] uppercase tracking-widest py-2 border border-neon-cyan/40 text-neon-cyan bg-neon-cyan/5">
+                                        Nein (in Lösung)
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-slate-600 mt-2">
+                                    <em>"Nein"</em> ⇒ Spurenelemente (Cu, Fe, Zn, Ba) bioverfügbar → <strong>+15 % Erfassung</strong>
+                                </p>
+                            </div>
+                        </div>
+
                         <div class="pt-4 border-t border-slate-800">
                             <button id="run-sim-btn" class="w-full border border-slate-700 text-slate-300 py-3 uppercase tracking-widest text-xs hover:border-white hover:text-white transition-all">
                                 <i class="ph ph-play mr-1"></i> Protokoll-Ausgabe anzeigen
@@ -210,6 +776,10 @@
                                 <span id="out-captured" class="text-sm text-white font-mono">--</span>
                             </div>
                             <div class="flex justify-between border-b border-slate-800 pb-2">
+                                <span class="text-xs text-slate-500">P<sub>capt,eff</sub> (mit Mineral-Bonus)</span>
+                                <span id="out-capt-eff" class="text-sm text-white font-mono">--</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800 pb-2">
                                 <span class="text-xs text-slate-500">ATP / Sekunde</span>
                                 <span id="out-atp" class="text-sm text-white font-mono">--</span>
                             </div>
@@ -226,6 +796,95 @@
                                 <span id="out-meets" class="text-xs font-mono">--</span>
                             </div>
                         </div>
+
+                        <!-- Abfallprodukte -->
+                        <div class="mt-5 pt-4 border-t border-slate-800">
+                            <h4 class="text-[10px] uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-1">
+                                <i class="ph ph-recycle"></i> Abfallprodukte (Modell-Annahme)
+                            </h4>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Schwefel S⁰ [mol/s]</span>
+                                    <span id="out-waste-s" class="text-slate-300 font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Sulfat SO₄²⁻ [mol/s]</span>
+                                    <span id="out-waste-so4" class="text-slate-300 font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Methan CH₄ [mol/s]</span>
+                                    <span id="out-waste-ch4" class="text-slate-300 font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Fe³⁺-Oxide [mol/s]</span>
+                                    <span id="out-waste-fe" class="text-slate-300 font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Wärme (dissipiert) [W]</span>
+                                    <span id="out-waste-heat" class="text-slate-300 font-mono">--</span>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-600 mt-3 leading-relaxed">
+                                <em>Modellannahme</em>: stöchiometrische Umsetzung basierend auf
+                                ATP-Bedarf und Chemosynthese-Stöchiometrie <span class="source-num">15</span>–<span class="source-num">17</span>,<span class="source-num">22</span>.
+                            </p>
+                        </div>
+
+                        <!-- Nährstoffe (aktueller Druck) -->
+                        <div class="mt-5 pt-4 border-t border-slate-800">
+                            <h4 class="text-[10px] uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-1">
+                                <i class="ph ph-flask"></i> Nährstoffe bei aktuellem Druck
+                            </h4>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">H₂S [mmol/kg]</span>
+                                    <span id="out-nut-h2s" class="text-neon-amber font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">CH₄ [mmol/kg]</span>
+                                    <span id="out-nut-ch4" class="text-neon-cyan font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Fe²⁺ [mmol/kg]</span>
+                                    <span id="out-nut-fe" class="text-neon-rose font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">SiO₂ [mmol/kg]</span>
+                                    <span id="out-nut-si" class="text-slate-300 font-mono">--</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Ba²⁺ [mmol/kg]</span>
+                                    <span id="out-nut-ba" class="text-slate-300 font-mono">--</span>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-600 mt-3 leading-relaxed">
+                                Hängt ab von <em>Mineral-Precipitation</em>-Schalter und Druck <span class="source-num">1</span>,<span class="source-num">2</span>.
+                            </p>
+                        </div>
+                    </div>
+                <div class="bg-slate-900/30 border border-slate-800 p-6">
+                    <p class="formula text-center text-base text-neon-cyan my-3">
+                        c<sub>species</sub>(p) = c<sub>0</sub> · (1 − ½ · f<sub>species</sub> · (1 + tanh((p − p<sub>start</sub>)/p<sub>scale</sub>)))
+                    </p>
+                    <p class="text-sm text-slate-300 mb-3 leading-relaxed">
+                        <strong>Modell der druckabhängigen Ausfällung.</strong> Verschiedene Spezies
+                        verlassen die Lösung bei unterschiedlichen Drücken:
+                    </p>
+                    <ul class="text-sm text-slate-300 space-y-1 mb-3">
+                        <li>• <strong>Fe²⁺</strong> fällt ab ~300 bar als Pyrit (FeS₂) und Chalkopyrit (CuFeS₂) aus — bis 70 % Verlust</li>
+                        <li>• <strong>H₂S</strong> wird ab ~500 bar durch Sulfid-Fällung gebunden — bis 50 % Verlust</li>
+                        <li>• <strong>Ba²⁺</strong> fällt ab ~100 bar als Baryt (BaSO₄) — bis 60 % Verlust</li>
+                        <li>• <strong>SiO₂</strong> ab ~200 bar als Quarz — bis 30 % Verlust</li>
+                        <li>• <strong>CH₄</strong> bleibt <em>im betrachteten Bereich</em> (1–3 000 bar, T ≈ 0 °C) gelöst — Gashydrate erst bei sehr niedrigen T</li>
+                    </ul>
+                    <p class="text-xs text-slate-500">
+                        Quellen: German &amp; Seyfried 2014 <span class="source-num">2</span>;
+                        Wikipedia "Black smoker" <span class="source-num">1</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
                     </div>
 
                     <div class="bg-slate-900/30 border border-slate-800 p-6">
@@ -235,34 +894,234 @@
                         <ul class="text-[11px] text-slate-400 space-y-2 leading-relaxed">
                             <li>• <span class="text-slate-300">Formel:</span> P<sub>nutz</sub> = η · ½ · ρ · A · v<sup>3</sup></li>
                             <li>• <span class="text-slate-300">Strömungsprofil:</span> v<sub>eff</sub>(L) = v<sub>min</sub> + (v<sub>peak</sub> − v<sub>min</sub>) · exp(−((L−L<sub>opt</sub>)/σ)<sup>2</sup>)</li>
-                            <li>• <span class="text-slate-300">E. coli Referenz:</span> 2 µm Länge, 1 µm Durchmesser (Riekeles 2025)</li>
-                            <li>• <span class="text-slate-300">Typische Flagella:</span> 2 – 10 µm (Schavemaker et al. 2022)</li>
-                            <li>• <span class="text-slate-300">Maintenance Energy:</span> 10<sup>−15</sup> – 10<sup>−13</sup> W (Lingam &amp; Loeb 2021)</li>
+                            <li>• <span class="text-slate-300">E. coli Referenz:</span> 2 µm Länge, 1 µm Durchmesser <span class="source-num">6</span>,<span class="source-num">7</span></li>
+                            <li>• <span class="text-slate-300">Typische Flagella:</span> 2 – 10 µm <span class="source-num">7</span></li>
+                            <li>• <span class="text-slate-300">Maintenance Energy:</span> 10<sup>−15</sup> – 10<sup>−13</sup> W <span class="source-num">5</span>,<span class="source-num">21</span></li>
+                            <li>• <span class="text-slate-300">Slender-Body:</span> F = 4πμLu / ln(ℓ/a), gültig ℓ/a ≫ 1 <span class="source-num">23</span></li>
+                            <li>• <span class="text-slate-300">Europa-Druck:</strong> ~2 600 bar Ozeanboden <span class="source-num">8</span>,<span class="source-num">9</span></li>
+                            <li>• <span class="text-slate-300">Enceladus-CH₄/H₂:</span> Hinweis auf Hydrothermale <span class="source-num">11</span>,<span class="source-num">13</span></li>
                         </ul>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 bg-slate-900/30 border border-slate-800 p-4 flex flex-col">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-sm uppercase tracking-widest text-neon-cyan flex items-center gap-2">
-                            <i class="ph ph-chart-line"></i> Leistung vs. Flagellum-Länge
-                        </h3>
-                        <div class="flex gap-3 text-[10px] uppercase tracking-widest">
-                            <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#3498db]" style="border-top:2px dashed #3498db"></span> Kinetisch</span>
-                            <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#2ecc71]"></span> Erfasst</span>
-                            <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#e74c3c]"></span> Bedarf</span>
-                            <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#f39c12]" style="border-top:2px dotted #f39c12"></span> Peak</span>
+                <div class="lg:col-span-2 flex flex-col gap-4">
+                    <!-- Plot 1: Power vs. Flagellum-Länge -->
+                    <div class="bg-slate-900/30 border border-slate-800 p-4 flex flex-col">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm uppercase tracking-widest text-neon-cyan flex items-center gap-2">
+                                <i class="ph ph-chart-line"></i> Leistung vs. Flagellum-Länge
+                            </h3>
+                            <div class="flex gap-3 text-[10px] uppercase tracking-widest">
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#3498db]" style="border-top:2px dashed #3498db"></span> Kinetisch</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#2ecc71]"></span> Erfasst</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#f39c12]"></span> Erfasst+Bonus</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#e74c3c]"></span> Bedarf</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#f39c12]" style="border-top:2px dotted #f39c12"></span> L<sub>opt</sub></span>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative min-h-[380px]">
+                            <canvas id="power-plot" class="w-full h-full"></canvas>
+                        </div>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-center text-[10px] text-slate-500 uppercase tracking-widest">
+                            <div class="bg-slate-900/50 border border-slate-800 py-2">E. coli Zellgröße<br><span class="text-neon-cyan">1–2 µm</span></div>
+                            <div class="bg-slate-900/50 border border-slate-800 py-2">Typische Flagella<br><span class="text-neon-cyan">2–10 µm</span></div>
+                            <div class="bg-slate-900/50 border border-slate-800 py-2">L<sub>opt</sub> (auto)<br><span class="text-neon-cyan" id="val-lopt-formula">15.20</span> µm</div>
                         </div>
                     </div>
-                    <div class="flex-1 relative min-h-[450px]">
-                        <canvas id="power-plot" class="w-full h-full"></canvas>
-                    </div>
-                    <div class="mt-3 grid grid-cols-3 gap-2 text-center text-[10px] text-slate-500 uppercase tracking-widest">
-                        <div class="bg-slate-900/50 border border-slate-800 py-2">E. coli Zellgröße<br><span class="text-neon-cyan">1–2 µm</span></div>
-                        <div class="bg-slate-900/50 border border-slate-800 py-2">Typische Bakterien-Flagella<br><span class="text-neon-cyan">2–10 µm</span></div>
-                        <div class="bg-slate-900/50 border border-slate-800 py-2">Optimaler Peak-Bereich<br><span class="text-neon-cyan">≈L<sub>opt</sub> µm</span></div>
+
+                    <!-- Plot 2: Nährstoff-Konzentration vs. Druck -->
+                    <div class="bg-slate-900/30 border border-slate-800 p-4 flex flex-col">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm uppercase tracking-widest text-neon-cyan flex items-center gap-2">
+                                <i class="ph ph-flask"></i> Nährstoff-Konzentration vs. Druck
+                            </h3>
+                            <div class="flex gap-3 text-[10px] uppercase tracking-widest">
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#f59e0b]"></span> H₂S</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#8b5cf6]"></span> CH₄</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#ef4444]"></span> Fe²⁺</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#06b6d4]"></span> SiO₂</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-[2px] bg-[#84cc16]"></span> Ba²⁺</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative min-h-[340px]">
+                            <canvas id="nutrients-plot" class="w-full h-full"></canvas>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                            Bei <em>Mineral-Precipitation = Ja</em> knicken die Kurven oberhalb des artspezifischen
+                            Ausfällungsdrucks ab. Bei <em>Nein</em> bleiben alle Spezies voll gelöst (bioverfügbar).
+                            Klick auf den Plot setzt den Druck.
+                        </p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ───────────────── QUELLEN ───────────────── -->
+    <section id="quellen" class="py-24 relative border-t border-slate-800/50 bg-slate-950/40">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="mb-12">
+                <p class="text-neon-amber uppercase tracking-[0.4em] mb-3 text-xs">§4 — Referenzen</p>
+                <h2 class="text-4xl md:text-5xl font-display font-bold text-white mb-4">Quellen</h2>
+                <p class="text-slate-400 max-w-3xl leading-relaxed">
+                    Alle in Theorie, Begründung und Tool verwendeten Annahmen, Zahlen und Modelle
+                    sind hier referenziert. Nummerierung entspricht den inline-Verweisen [n].
+                </p>
+            </div>
+
+            <div class="space-y-3 text-sm text-slate-300 leading-relaxed">
+                <p class="text-slate-400 italic">A. Hydrothermale Quellen &amp; Geochemie (Erde)</p>
+
+                <p><span class="source-num">1</span> Wikipedia contributors. "Hydrothermal vent" / "Black smoker".
+                    <em>Wikipedia, The Free Encyclopedia</em> (Stand 2025).
+                    <a href="https://en.wikipedia.org/wiki/Hydrothermal_vent" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Hydrothermal_vent</a>.
+                    <span class="text-slate-500">— Black-Smoker-T (60–464 °C), Fluid-Chemie, Mineralogie (Chalkopyrit, Sphalerit, Pyrit, Anhydrit, Baryt).</span></p>
+
+                <p><span class="source-num">2</span> German, C. R. &amp; Seyfried, W. E. (2014). "Hydrothermal Processes".
+                    In: <em>Treatise on Geochemistry</em> (2nd ed.), Elsevier.
+                    <a href="https://doi.org/10.1016/B978-0-08-095975-7.00607-0" class="text-neon-cyan hover:underline">https://doi.org/10.1016/B978-0-08-095975-7.00607-0</a>.
+                    <span class="text-slate-500">— pH 2–4, H₂S bis 110 mmol/kg, Fe bis 24 mmol/kg, Druckabhängigkeit der Mineral-Löslichkeit.</span></p>
+
+                <p><span class="source-num">3</span> Wikipedia contributors. "Chemosynthesis".
+                    <em>Wikipedia, The Free Encyclopedia</em>.
+                    <a href="https://en.wikipedia.org/wiki/Chemosynthesis" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Chemosynthesis</a>.
+                    <span class="text-slate-500">— Summenformel H₂S-Oxidation, Elektronendonoren (H₂, H₂S, NH₃, Fe²⁺).</span></p>
+
+                <p><span class="source-num">4</span> Wikipedia contributors. "Sulfate-reducing microorganism".
+                    <em>Wikipedia, The Free Encyclopedia</em>.
+                    <a href="https://en.wikipedia.org/wiki/Sulfate-reducing_microorganism" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Sulfate-reducing_microorganism</a>.
+                    <span class="text-slate-500">— Schwefelstoffwechsel-Reaktionen, Wachstumsbedingungen (T 0–110 °C, pH 1–11).</span></p>
+
+                <p class="text-slate-400 italic pt-4">B. Habitabilität &amp; Energie-Budget (Europa/Enceladus)</p>
+
+                <p><span class="source-num">5</span> Lingam, M. &amp; Loeb, A. (2021). "Venta: A Bayesian Search for Life on Europa through Detection of Metabolic Byproducts".
+                    <em>Astrobiology</em> (und Vorgänger: "Energy Requirements for Life in Ocean Worlds like Europa", 2019).
+                    <a href="https://doi.org/10.1089/ast.2019.2150" class="text-neon-cyan hover:underline">https://doi.org/10.1089/ast.2019.2150</a>.
+                    <span class="text-slate-500">— P<sub>min</sub> ≈ 10⁻²¹ W/Zelle, Maintenance-Energie, metabolisches Rahmenwerk.</span></p>
+
+                <p><span class="source-num">6</span> Riekeles, M. (2025). <em>Persönliche Mitteilung / unveröffentlichte Arbeit</em>.
+                    <span class="text-slate-500">— E. coli-Referenz (2 µm × 1 µm), Flagellum-Geometrie.</span></p>
+
+                <p><span class="source-num">7</span> Schavemaker, P. &amp; Lynch, M. (2022). "Flagellar energy costs across microorganisms".
+                    Konzept basierend auf: Dusenbery, D. B. (2009). <em>Living at Micro Scale</em>, Harvard University Press, ISBN 978-0-674-03116-6.
+                    <span class="text-slate-500">— Flagellum-ATP-Kosten, Schlagfrequenz, E. coli-Referenz.</span></p>
+
+                <p class="text-slate-400 italic pt-4">C. Europa (Jupitermond)</p>
+
+                <p><span class="source-num">8</span> Wikipedia contributors. "Europa (moon)".
+                    <em>Wikipedia, The Free Encyclopedia</em> (Stand 2025).
+                    <a href="https://en.wikipedia.org/wiki/Europa_(moon)" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Europa_(moon)</a>.
+                    <span class="text-slate-500">— Ozeantiefe ~100 km, Eisschale 10–30 km, g = 1,314 m/s², Ozeanvolumen 3 × 10¹⁸ m³, Ozeanboden-Druck ~1–2 kbar.</span></p>
+
+                <p><span class="source-num">9</span> Hand, K. P. (2020). "On the Habitability of Ocean Worlds".
+                    <em>Reviews in Mineralogy &amp; Geochemistry</em>; NASA Europa Clipper Mission documentation.
+                    <a href="https://europa.nasa.gov/science/" class="text-neon-cyan hover:underline">https://europa.nasa.gov/science/</a>.
+                    <span class="text-slate-500">— Europa-Ozean: 40–170 km Tiefe, Eisschale 2–30 km, Ozeanboden-Druck 100–200 MPa.</span></p>
+
+                <p class="text-slate-400 italic pt-4">D. Enceladus (Saturnmond)</p>
+
+                <p><span class="source-num">10</span> Wikipedia contributors. "Enceladus".
+                    <em>Wikipedia, The Free Encyclopedia</em> (Stand 2025).
+                    <a href="https://en.wikipedia.org/wiki/Enceladus" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Enceladus</a>.
+                    <span class="text-slate-500">— Ozean 26–31 km tief, g = 0,113 m/s², pH 11–12, Plume 200 kg/s, >100 Geysire.</span></p>
+
+                <p><span class="source-num">11</span> Waite, J. H. Jr. et al. (2017). "INMS Constraints on Hydrothermal Activity at Enceladus".
+                    <em>Nature</em> 557, 210–217.
+                    <a href="https://doi.org/10.1038/s41586-018-0680-0" class="text-neon-cyan hover:underline">https://doi.org/10.1038/s41586-018-0680-0</a>.
+                    <span class="text-slate-500">— H₂-Nachweis 0,4–1,4 Vol%, CO₂, CH₄ im Plume; Beweis für aktive Hydrothermale.</span></p>
+
+                <p><span class="source-num">12</span> Hsu, H.-W. et al. (2015). "On the Hydrothermal Vent Origin of Enceladus's Plumes".
+                    <em>Nature</em> 519, 207–210.
+                    <a href="https://doi.org/10.1038/nature14262" class="text-neon-cyan hover:underline">https://doi.org/10.1038/nature14262</a>.
+                    <span class="text-slate-500">— Silikat-Nanopartikel (2–8 nm, Mg-Si-O), Bildungstemperatur >90 °C.</span></p>
+
+                <p><span class="source-num">13</span> Postberg, F. et al. (2011). "A salt-water reservoir as the source of a compositionally stratified plume on Enceladus".
+                    <em>Nature</em> 474, 620–622.
+                    <a href="https://doi.org/10.1038/nature10175" class="text-neon-cyan hover:underline">https://doi.org/10.1038/nature10175</a>.
+                    <span class="text-slate-500">— NaCl-Kristalle (1–8 µm), salziger Ozean (0,5–2 % Na-Salze).</span></p>
+
+                <p><span class="source-num">14</span> Glein, C. R. et al. (2015). "The pH of Enceladus' ocean".
+                    <em>Geochimica et Cosmochimica Acta</em> 162, 202–219.
+                    <a href="https://doi.org/10.1016/j.gca.2015.04.017" class="text-neon-cyan hover:underline">https://doi.org/10.1016/j.gca.2015.04.017</a>.
+                    <span class="text-slate-500">— pH 11–12, Serpentinisierung als H₂-Quelle.</span></p>
+
+                <p class="text-slate-400 italic pt-4">E. Mikrobielle Vent-Ökologie (Erde-Analoga)</p>
+
+                <p><span class="source-num">15</span> Cavanaugh, C. M. et al. (1981). "Prokaryotic Cells in the Hydrothermal Vent Tube Worms Riftia: Possible Chemoautotrophic Symbionts".
+                    <em>Science</em> 213 (4505), 340–342.
+                    <a href="https://doi.org/10.1126/science.213.4505.340" class="text-neon-cyan hover:underline">https://doi.org/10.1126/science.213.4505.340</a>.
+                    <span class="text-slate-500">— Erstnachweis chemosynthetischer Bakterien, H₂S-Oxidation in Riftia-Symbionten.</span></p>
+
+                <p><span class="source-num">16</span> Jannasch, H. W. &amp; Mottl, M. J. (1985). "Geomicrobiology of Deep-Sea Hydrothermal Vents".
+                    <em>Science</em> 229 (4715), 717–725.
+                    <a href="https://doi.org/10.1126/science.229.4715.717" class="text-neon-cyan hover:underline">https://doi.org/10.1126/science.229.4715.717</a>.
+                    <span class="text-slate-500">— Übersicht: H₂S- und CH₄-Oxidation, Primärproduktion im Dunkeln, bis 10⁹ Zellen/g.</span></p>
+
+                <p><span class="source-num">17</span> Wikipedia contributors. "Microbial metabolism" / "Hydrothermal vent微生物".
+                    <em>Wikipedia, The Free Encyclopedia</em>.
+                    <a href="https://en.wikipedia.org/wiki/Microbial_metabolism" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Microbial_metabolism</a>.
+                    <span class="text-slate-500">— Co-Faktor-Bedarf (Cu, Fe, Zn, Mo), Wachstums-Stoichiometrie, Mineral-Bioverfügbarkeit.</span></p>
+
+                <p class="text-slate-400 italic pt-4">F. Hydrodynamik &amp; Flagellum-Mechanik</p>
+
+                <p><span class="source-num">18</span> Lighthill, M. J. (1975). <em>Mathematical Biofluiddynamics</em>. SIAM / Cambridge University Press.
+                    <span class="text-slate-500">— Resistance-Force-Theory (RFT), Slender-Body-Theorie, Flagellum-Hydrodynamik.</span></p>
+
+                <p><span class="source-num">19</span> Wikipedia contributors. "Flagellum".
+                    <em>Wikipedia, The Free Encyclopedia</em>.
+                    <a href="https://en.wikipedia.org/wiki/Flagellum" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Flagellum</a>.
+                    <span class="text-slate-500">— Bakterielle Flagellen: 20 nm dick, hohl, helikal, Proton-Motive-Force / Na⁺-Gradient; Rotordrehzahl.</span></p>
+
+                <p><span class="source-num">20</span> Berg, H. C. (2003). <em>E. coli in Motion</em>. Springer, ISBN 0-387-00888-8.
+                    <span class="text-slate-500">— Proton-Motive-Force, Flagellenmotor, ATP-Kopplung.</span></p>
+
+                <p><span class="source-num">21</span> Pirt, S. J. (1965). "The maintenance energy of bacteria in growing cultures".
+                    <em>Proceedings of the Royal Society B</em> 163, 224–231.
+                    <a href="https://doi.org/10.1098/rspb.1965.0069" class="text-neon-cyan hover:underline">https://doi.org/10.1098/rspb.1965.0069</a>.
+                    <span class="text-slate-500">— Pirt'sche Maintenance-Gleichung, Grundlage P<sub>meta</sub> = m + (1/Y)·µ.</span></p>
+
+                <p><span class="source-num">22</span> Wikipedia contributors. "Sulfur cycle".
+                    <em>Wikipedia, The Free Encyclopedia</em>.
+                    <a href="https://en.wikipedia.org/wiki/Sulfur_cycle" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Sulfur_cycle</a>.
+                    <span class="text-slate-500">— Schwefel-Oxidation/Reduktion, Biogeochemie.</span></p>
+
+                <p><span class="source-num">23</span> Batchelor, G. K. (1970). "Slender-body theory for particles of arbitrary cross-section in Stokes flow".
+                    <em>Journal of Fluid Mechanics</em> 44 (3), 419–440.
+                    <a href="https://doi.org/10.1017/S002211207000191X" class="text-neon-cyan hover:underline">https://doi.org/10.1017/S002211207000191X</a>.
+                    <span class="text-slate-500">— F = 4πμLu / ln(ℓ/a), senkrechte Anströmung; F = 2πμLu / ln(ℓ/a), parallele Anströmung.</span></p>
+
+                <p><span class="source-num">24</span> Cox, R. G. (1970). "The motion of long slender bodies in a viscous fluid. Part 1. General theory".
+                    <em>Journal of Fluid Mechanics</em> 44 (4), 791–810.
+                    <a href="https://doi.org/10.1017/S002211207000215X" class="text-neon-cyan hover:underline">https://doi.org/10.1017/S002211207000215X</a>.
+                    <span class="text-slate-500">— Asymptotische Slender-Body-Approximation, höherer Ordnung.</span></p>
+
+                <p><span class="source-num">25</span> Chwang, A. T. &amp; Wu, T. Y. (1975). "Hydromechanics of low-Reynolds-number flow. Part 2. Singularity method for Stokes flows".
+                    <em>Journal of Fluid Mechanics</em> 67 (4), 787–815.
+                    <a href="https://doi.org/10.1017/S0022112075000794" class="text-neon-cyan hover:underline">https://doi.org/10.1017/S0022112075000794</a>.
+                    <span class="text-slate-500">— Squirming-Bewegung, Flagellum-Wellenausbreitung, Re ≈ 10⁻⁴–10⁻³.</span></p>
+
+                <p><span class="source-num">26</span> Wikipedia contributors. "Stokes's law" / "Viskosität".
+                    <em>Wikipedia, The Free Encyclopedia</em>.
+                    <a href="https://en.wikipedia.org/wiki/Stokes%27_law" class="text-neon-cyan hover:underline">https://en.wikipedia.org/wiki/Stokes%27_law</a>.
+                    <span class="text-slate-500">— F<sub>d</sub> = 6πμRv; µ<sub>H₂O,0°C</sub> ≈ 1,8 mPa·s; µ<sub>H₂O,20°C</sub> ≈ 1,0 mPa·s.</span></p>
+
+                <p><span class="source-num">27</span> Purcell, E. M. (1977). "Life at Low Reynolds Number".
+                    <em>American Journal of Physics</em> 45 (1), 3–11.
+                    <a href="https://doi.org/10.1119/1.10903" class="text-neon-cyan hover:underline">https://doi.org/10.1119/1.10903</a>.
+                    <span class="text-slate-500">— Scallop-Theorem, Trägheitslosigkeit, Begründung der Bakterien-Flagellum-Notwendigkeit.</span></p>
+
+                <p><span class="source-num">28</span> Kessler, J. O. (1985). "Hydrodynamic focusing of motile algal cells".
+                    <em>Nature</em> 313 (5999), 218–220.
+                    <a href="https://doi.org/10.1038/313218a0" class="text-neon-cyan hover:underline">https://doi.org/10.1038/313218a0</a>.
+                    <span class="text-slate-500">— Experimentelle Bestätigung: Mikroben-Re ≈ 10⁻⁴–10⁻⁶.</span></p>
+
+                <p><span class="source-num">29</span> Gray, J. &amp; Hancock, G. J. (1955). "The propulsion of sea-urchin spermatozoa".
+                    <em>Journal of Experimental Biology</em> 32 (4), 802–814.
+                    <a href="https://doi.org/10.1242/jeb.32.4.802" class="text-neon-cyan hover:underline">https://doi.org/10.1242/jeb.32.4.802</a>.
+                    <span class="text-slate-500">— Klassische RFT-Formulierung, Vorläufer der Lighthill-Theorie.</span></p>
+
+                <p><span class="source-num">30</span> Alberty, R. A. (2003). "Thermodynamics of Biochemical Reactions".
+                    <em>Wiley</em>. <span class="text-slate-500">— ΔG<sub>ATP</sub> ≈ 5,07 × 10⁻²⁰ J unter zellulären Standardbedingungen.</span></p>
             </div>
         </div>
     </section>
@@ -272,6 +1131,7 @@
         <div class="flex justify-center gap-8 mt-6">
             <a href="../index.html" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-house text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Home</span></a>
             <a href="mailto:author@fraustrohbach.de" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-envelope-simple text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Communicate</span></a>
+            <a href="#theorie" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-book-open text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Theorie</span></a>
         </div>
     </footer>
 
