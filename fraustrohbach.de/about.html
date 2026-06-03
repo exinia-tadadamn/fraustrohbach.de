@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exinia | About the Artist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            mono: ['Share Tech Mono', 'monospace'],
+          },
+          colors: {
+            neon: {
+              cyan: '#06b6d4',
+              blue: '#3b82f6',
+              magenta: '#d946ef',
+              lime: '#84cc16'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background-color: #020617; }
+    .fade-in { animation: fadeIn 1s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .glow-text { text-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .gallery-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #22d3ee #0f172a;
+      scrollbar-gutter: stable;
+    }
+    .gallery-scrollbar::-webkit-scrollbar { width: 10px; }
+    .gallery-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+    .gallery-scrollbar::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 6px; border: 2px solid #0f172a; }
+    .gallery-scrollbar::-webkit-scrollbar-thumb:hover { background: #67e8f9; }
+    .terminal-input {
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      color: #e2e8f0;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .terminal-input:focus {
+      outline: none;
+      border-color: #06b6d4;
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+    }
+    .admin-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      background: rgba(6, 182, 212, 0.1);
+      color: #22d3ee;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .admin-btn:hover {
+      background: rgba(6, 182, 212, 0.25);
+      border-color: #22d3ee;
+    }
+    .admin-btn.danger {
+      border-color: rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+    }
+    .admin-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: #fca5a5;
+    }
+    .admin-btn.magenta {
+      border-color: rgba(217, 70, 239, 0.3);
+      background: rgba(217, 70, 239, 0.1);
+      color: #e879f9;
+    }
+    .admin-btn.magenta:hover {
+      background: rgba(217, 70, 239, 0.25);
+      border-color: #e879f9;
+    }
+    .drag-overlay {
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .drag-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .folder-card {
+      transition: all 0.3s ease;
+    }
+    .folder-card:hover {
+      border-color: rgba(6, 182, 212, 0.5);
+      transform: translateY(-2px);
+    }
+    .image-card {
+      transition: all 0.3s ease;
+    }
+    .image-card:hover {
+      border-color: rgba(6, 182, 212, 0.5);
+    }
+    .image-card:hover .image-actions {
+      opacity: 1;
+    }
+    .image-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .album-badge {
+      font-size: 9px;
+      font-family: 'Share Tech Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 6px;
+      border-radius: 2px;
+    }
+    .album-badge.public {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #22d3ee;
+    }
+    .album-badge.private {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+  </style>
+</head>
+<body class="text-slate-300 font-sans antialiased selection:bg-neon-cyan selection:text-black">
+  <div class="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#020617] to-black opacity-80"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed w-full bg-[#020617]/80 backdrop-blur-lg z-50 border-b border-slate-800/50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex justify-between items-center h-20">
+        <a href="index.html" class="text-2xl font-display font-bold text-white tracking-widest glow-text">
+          EXINIA.
+        </a>
+        <div class="hidden md:flex items-center space-x-8 text-sm font-medium uppercase tracking-widest">
+          <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors">The Lenses</a>
+          <a href="index.html#videos" class="text-slate-400 hover:text-neon-cyan transition-colors">Recordings</a>
+          <a href="index.html#books" class="text-slate-400 hover:text-neon-cyan transition-colors">Fragments</a>
+          <a href="blog.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Blog</a>
+          <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
+          <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
+          <a href="about.html" class="text-neon-cyan transition-colors">About the Artist</a>
+          <div id="nav-auth" class="flex items-center gap-3 ml-4 pl-4 border-l border-slate-800">
+          </div>
+        </div>
+        <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-neon-cyan transition-colors">
+          <i class="ph ph-list text-2xl"></i>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-[#020617]/95 border-b border-slate-800/50 px-6 pb-6">
+      <div class="flex flex-col space-y-4 text-sm font-medium uppercase tracking-widest">
+        <a href="index.html#lenses" class="text-slate-400 hover:text-neon-cyan transition-colors pt-2">The Lenses</a>
+        <a href="index.html#videos" class="text-slate-400 hover:text-neon-cyan transition-colors">Recordings</a>
+        <a href="index.html#books" class="text-slate-400 hover:text-neon-cyan transition-colors">Fragments</a>
+        <a href="blog.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Blog</a>
+        <a href="quiz.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Am I Vegan? ˚˚˚QUIZ˚˚˚</a>
+        <a href="vent/index.html" class="text-slate-400 hover:text-neon-cyan transition-colors">Vénta</a>
+        <a href="about.html" class="text-neon-cyan transition-colors">About the Artist</a>
+        <div id="mobile-auth-links" class="pt-4 border-t border-slate-800 flex flex-col gap-3">
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="min-h-[50vh] flex items-center justify-center pt-20 fade-in relative overflow-hidden">
+    <div class="absolute w-[500px] h-[500px] border border-slate-800/30 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute w-[700px] h-[700px] border border-slate-800/20 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="text-center px-4 max-w-4xl relative z-10">
+      <p class="text-neon-cyan uppercase tracking-[0.4em] mb-6 text-xs md:text-sm">Artist Archive</p>
+      <h1 class="text-5xl md:text-7xl font-display font-bold text-white mb-8 leading-tight tracking-tight glow-text">
+        About the <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-blue">Artist.</span>
+      </h1>
+      <p class="text-xl text-slate-400 mb-12 font-light max-w-2xl mx-auto leading-relaxed">
+        A curated gallery of visual works, installations, and creative fragments. Explore the archive by album or browse the uncategorized stream.
+      </p>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section id="gallery" class="py-16 relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <!-- Admin Toolbar -->
+      <div id="admin-toolbar" class="hidden mb-8">
+        <div class="flex flex-wrap items-center gap-3 p-4 border border-slate-800 bg-slate-900/40 rounded">
+          <span class="text-xs font-mono text-neon-cyan uppercase tracking-widest mr-2">Operator Controls</span>
+          <label class="admin-btn cursor-pointer inline-flex items-center gap-2">
+            <i class="ph ph-upload-simple"></i> Upload Images
+            <input type="file" id="admin-file-input" multiple accept="image/*" class="hidden">
+          </label>
+          <button onclick="openCreateAlbumModal()" class="admin-btn inline-flex items-center gap-2">
+            <i class="ph ph-folder-plus"></i> Create Folder
+          </button>
+          <div id="upload-status" class="text-xs font-mono text-slate-500 ml-auto hidden"></div>
+        </div>
+      </div>
+
+      <!-- Breadcrumb / Back nav -->
+      <div id="gallery-breadcrumb" class="hidden mb-6 flex items-center gap-3 text-sm">
+        <button onclick="showMainGallery()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-1">
+          <i class="ph ph-house"></i> Gallery
+        </button>
+        <span class="text-slate-600">/</span>
+        <span id="breadcrumb-album-name" class="text-neon-cyan font-mono text-xs uppercase tracking-widest"></span>
+      </div>
+
+      <!-- Drag & Drop Overlay -->
+      <div id="drag-overlay" class="drag-overlay fixed inset-0 z-[90] bg-[#020617]/90 backdrop-blur-sm flex items-center justify-center border-4 border-dashed border-neon-cyan/50 m-4 rounded-lg">
+        <div class="text-center">
+          <i class="ph ph-upload-simple text-6xl text-neon-cyan mb-4"></i>
+          <p class="text-neon-cyan font-mono text-lg uppercase tracking-widest">Drop images to upload</p>
+          <p class="text-slate-500 text-xs mt-2 font-mono">Images without an album will appear at the top</p>
+        </div>
+      </div>
+
+      <!-- Gallery Content -->
+      <div id="gallery-content" class="space-y-12">
+        <!-- Uncategorized Images -->
+        <div id="uncategorized-section">
+          <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+            <h2 class="text-xl font-display font-bold text-white flex items-center gap-2">
+              <i class="ph ph-images text-neon-cyan"></i> Uncategorized
+            </h2>
+            <span id="uncategorized-count" class="text-xs font-mono text-slate-500">0 items</span>
+          </div>
+          <div id="uncategorized-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- JS renders here -->
+          </div>
+        </div>
+
+        <!-- Albums / Folders -->
+        <div id="albums-section">
+          <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+            <h2 class="text-xl font-display font-bold text-white flex items-center gap-2">
+              <i class="ph ph-folders text-neon-cyan"></i> Albums
+            </h2>
+            <span id="albums-count" class="text-xs font-mono text-slate-500">0 folders</span>
+          </div>
+          <div id="albums-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- "+ New Folder"-Card (nur für Admins sichtbar, via JS hinzugefügt) -->
+            <div id="new-folder-card" class="hidden">
+              <div class="aspect-square bg-slate-900/50 border-2 border-dashed border-slate-700 hover:border-neon-amber transition-colors flex flex-col items-center justify-center text-slate-500 hover:text-neon-amber cursor-pointer"
+                   onclick="openCreateAlbumModal()">
+                <i class="ph ph-folder-plus text-5xl mb-2"></i>
+                <p class="text-xs font-mono uppercase tracking-widest">New Folder</p>
+                <p class="text-[10px] font-mono text-slate-600 mt-1">or drop images</p>
+              </div>
+            </div>
+            <!-- Bestehende Alben via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Album Detail View -->
+      <div id="album-detail-view" class="hidden space-y-6">
+        <div id="album-detail-header" class="border-b border-slate-800 pb-4 flex items-end justify-between">
+          <div>
+            <h2 id="album-detail-title" class="text-2xl font-display font-bold text-white"></h2>
+            <p id="album-detail-meta" class="text-xs font-mono text-slate-500 mt-1"></p>
+          </div>
+          <div id="album-detail-actions" class="flex gap-2"></div>
+        </div>
+        <div id="album-detail-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <!-- JS renders here -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Image Viewer Modal -->
+  <div id="image-viewer" class="fixed inset-0 z-[110] bg-black/95 backdrop-blur-xl flex-col items-center justify-center opacity-0 transition-opacity duration-300" style="display: none;" onclick="handleViewerBackdropClick(event)">
+    <button onclick="closeImageViewer()" class="absolute top-6 right-6 z-10 text-slate-300 hover:text-neon-cyan transition-colors flex items-center gap-2 text-sm uppercase tracking-widest">
+      <i class="ph ph-x text-2xl"></i> Close
+    </button>
+    <button id="viewer-prev" onclick="event.stopPropagation(); viewerNavigate(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-slate-400 hover:text-neon-cyan transition-colors p-2">
+      <i class="ph ph-caret-left text-3xl"></i>
+    </button>
+    <button id="viewer-next" onclick="event.stopPropagation(); viewerNavigate(1)" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-slate-400 hover:text-neon-cyan transition-colors p-2">
+      <i class="ph ph-caret-right text-3xl"></i>
+    </button>
+    <div class="relative flex items-center justify-center max-w-[95vw] max-h-[80vh]">
+      <img id="image-viewer-img" alt="Fullscreen" class="max-w-full max-h-full object-contain select-none pointer-events-none" draggable="false" oncontextmenu="return false;" />
+    </div>
+    <div id="viewer-meta" class="absolute bottom-0 inset-x-0 bg-black/70 backdrop-blur-sm p-4 md:p-6 border-t border-slate-800/50 transform translate-y-full transition-transform duration-300">
+      <div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div class="flex-1">
+          <p id="viewer-filename" class="text-neon-cyan text-xs font-mono uppercase tracking-wider mb-1"></p>
+          <p id="viewer-description" class="text-slate-400 text-sm leading-relaxed"></p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="viewer-index" class="text-slate-600 text-xs font-mono"></span>
+        </div>
+      </div>
+    </div>
+    <button id="viewer-meta-toggle" onclick="event.stopPropagation(); toggleViewerMeta()" class="absolute bottom-4 right-4 z-20 text-slate-400 hover:text-neon-cyan transition-colors">
+      <i class="ph ph-info text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Create Album Modal -->
+  <div id="create-album-modal" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300 flex items-center justify-center" onclick="if(event.target === this) closeCreateAlbumModal()">
+    <div class="bg-[#020617] border border-slate-800 w-full max-w-md mx-4 p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+        <h3 class="text-white font-display text-lg uppercase tracking-widest flex items-center gap-2">
+          <i class="ph ph-folder-plus text-neon-cyan"></i> New Folder
+        </h3>
+        <button onclick="closeCreateAlbumModal()" class="text-slate-400 hover:text-neon-cyan">
+          <i class="ph ph-x text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Folder Name</label>
+          <input id="new-album-name" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="e.g. Installations 2025">
+        </div>
+        <div class="flex items-center gap-3">
+          <input id="new-album-public" type="checkbox" checked class="w-4 h-4 accent-neon-cyan">
+          <label for="new-album-public" class="text-sm text-slate-400">Public (visible to visitors)</label>
+        </div>
+        <button onclick="createAlbum()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+          <i class="ph ph-check mr-2"></i> Create
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Move Image Modal -->
+  <div id="move-image-modal" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300 flex items-center justify-center" onclick="if(event.target === this) closeMoveImageModal()">
+    <div class="bg-[#020617] border border-slate-800 w-full max-w-md mx-4 p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+        <h3 class="text-white font-display text-lg uppercase tracking-widest flex items-center gap-2">
+          <i class="ph ph-arrows-left-right text-neon-cyan"></i> Move Image
+        </h3>
+        <button onclick="closeMoveImageModal()" class="text-slate-400 hover:text-neon-cyan">
+          <i class="ph ph-x text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <p class="text-sm text-slate-400">Select a destination folder:</p>
+        <div id="move-album-list" class="space-y-2 max-h-60 overflow-y-auto gallery-scrollbar pr-2">
+          <!-- JS renders albums here -->
+        </div>
+        <button onclick="moveImageToAlbum(null)" class="w-full border border-slate-700 bg-slate-900/50 text-slate-400 py-3 uppercase tracking-widest text-xs hover:border-neon-cyan hover:text-neon-cyan transition-all">
+          <i class="ph ph-house mr-2"></i> Remove from folder (uncategorized)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Set Cover Modal -->
+  <div id="set-cover-modal" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300 flex items-center justify-center" onclick="if(event.target === this) closeSetCoverModal()">
+    <div class="bg-[#020617] border border-slate-800 w-full max-w-lg mx-4 p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+        <h3 class="text-white font-display text-lg uppercase tracking-widest flex items-center gap-2">
+          <i class="ph ph-image text-neon-cyan"></i> Set Cover
+        </h3>
+        <button onclick="closeSetCoverModal()" class="text-slate-400 hover:text-neon-cyan">
+          <i class="ph ph-x text-xl"></i>
+        </button>
+      </div>
+      <p class="text-sm text-slate-400 mb-4">Click an image to set it as the folder cover:</p>
+      <div id="set-cover-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-80 overflow-y-auto gallery-scrollbar pr-2">
+        <!-- JS renders images here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" onclick="if(event.target === this) closeProfileModal()" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300 flex items-start justify-center overflow-y-auto">
+    <div class="w-full max-w-xl mx-auto p-4 md:p-8 min-h-screen">
+      <div class="bg-[#020617] border border-slate-800 relative overflow-hidden mt-20 mb-12">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+          <div class="flex items-center gap-3">
+            <i class="ph ph-user-circle text-neon-cyan text-xl"></i>
+            <span class="font-mono text-xs text-neon-cyan uppercase tracking-widest">Operator Profile</span>
+          </div>
+          <button onclick="closeProfileModal()" class="text-slate-400 hover:text-neon-cyan transition-colors flex items-center gap-2 text-xs uppercase tracking-widest">
+            <i class="ph ph-x text-xl"></i> Close
+          </button>
+        </div>
+        <div id="profile-content" class="p-6 md:p-10 space-y-8">
+          <div class="flex items-center gap-6">
+            <div class="relative">
+              <img id="profile-avatar-preview" src="" alt="Avatar" class="w-20 h-20 rounded-full object-cover border-2 border-slate-700 bg-slate-800">
+              <label class="absolute -bottom-1 -right-1 bg-neon-cyan text-black rounded-full p-1 cursor-pointer hover:bg-cyan-300 transition-colors">
+                <i class="ph ph-camera text-sm"></i>
+                <input type="file" id="profile-avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+              </label>
+            </div>
+            <div>
+              <p class="text-white font-display font-bold text-lg" id="profile-display-name">Operator</p>
+              <p class="text-slate-500 text-xs font-mono" id="profile-email"></p>
+            </div>
+          </div>
+          <div class="space-y-5">
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Display Name</label>
+              <input id="profile-name-input" type="text" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="Your name...">
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2 font-mono">Short Bio</label>
+              <textarea id="profile-bio-input" rows="3" class="terminal-input w-full px-4 py-3 rounded text-sm" placeholder="A few words about yourself..."></textarea>
+            </div>
+            <button onclick="saveProfileInfo()" class="w-full border border-neon-cyan bg-neon-cyan/10 text-neon-cyan py-3 uppercase tracking-widest text-xs hover:bg-neon-cyan/20 transition-all">
+              <i class="ph ph-floppy-disk mr-2"></i> Save Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-black border-t border-slate-800 py-12 text-center text-slate-500 text-sm mt-16">
+    <p>&copy; 2026 Exinia [Null.Null] / Ksenia Strohbach. Transmission ended.</p>
+    <div class="flex justify-center gap-8 mt-6">
+      <a href="https://www.instagram.com/exinia0.0" target="_blank" rel="noopener noreferrer" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-instagram-logo text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Visuals</span></a>
+      <a href="https://www.youtube.com/@exinia0.0" target="_blank" rel="noopener noreferrer" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-youtube-logo text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Broadcasts</span></a>
+      <a href="mailto:author@fraustrohbach.de" class="hover:text-neon-cyan transition-colors flex items-center gap-2"><i class="ph ph-envelope-simple text-xl"></i> <span class="uppercase tracking-widest text-xs hidden sm:inline">Communicate</span></a>
+    </div>
+  </footer>
+
+  <script src="js/about-gallery.js"></script>
+</body>
+</html>
