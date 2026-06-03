@@ -3,12 +3,23 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAdmin() {
+      // Email/Password-Authentifizierung: token.email wird automatisch von
+      // Firebase Auth in den ID-Token geschrieben. Für andere Provider
+      // (Google, GitHub etc.) ist token.email manchmal null — dann
+      // funktioniert der alternative Pfad via Custom Claim `admin: true`.
+      let email = request.auth.token.email;
       return request.auth != null
-        && request.auth.token.email != null
-        && (request.auth.token.email.toLowerCase() == 'exinia@fraustrohbach.de'
-             || request.auth.token.email.toLowerCase() == 'katadvaya@fraustrohbach.de'
-             || request.auth.token.admin == true);
+        && (
+          (email != null
+            && (email.toLowerCase() == 'exinia@fraustrohbach.de'
+                || email.toLowerCase() == 'katadvaya@fraustrohbach.de'))
+          || request.auth.token.admin == true
+        );
     }
+
+    // Doku: isAdmin() nutzt request.auth.token.email — bei Firebase Auth
+    // Email/Password-Login ist das automatisch gesetzt. Debug-Log: in
+    // Browser-DevTools-Console nach "request.auth.token.email" prüfen.
 
     match /blogPosts/{docId} {
       allow read: if true;
@@ -19,6 +30,19 @@ service cloud.firestore {
     }
 
     match /galleryAlbums/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Galerie-Alben der "About the Artist"-Sektion.
+    // Hinweis: Frontend schreibt in 'artistGalleryAlbums' (nicht 'galleryAlbums').
+    match /artistGalleryAlbums/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Galerie-Bilder
+    match /artistGalleryImages/{docId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
