@@ -131,7 +131,7 @@ test.describe('Vent-Tool — Sanity (Pre-Deploy)', () => {
     await page.goto(BASE + '/vent/index.html');
 
     await expect(page.locator('#val-density')).toHaveText('1000');
-    await expect(page.locator('#val-vpeak')).toHaveText('1.000');
+    await expect(page.locator('#val-vpeak')).toHaveText('0.050');
     await expect(page.locator('#val-cell')).toHaveText('2.0 µm');
     await expect(page.locator('#val-length')).toHaveText('10.0');
     await expect(page.locator('#val-pressure')).toHaveText('2600');

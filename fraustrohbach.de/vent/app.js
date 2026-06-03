@@ -82,15 +82,15 @@ const PRECIP_PARAMS = {
 let state = {
   density: 1000,
   efficiency: 0.5,
-  v_min: 0.01,
-  v_peak: 1.0,
-  l_opt: 15, // wird live aus Formel überschrieben
+  v_min: 0.001,    // m/s — Grenzschicht
+  v_peak: 0.05,    // m/s = 5 cm/s — Stokes-Regime (Re << 1) garantiert
+  l_opt: 15,       // wird live aus Formel überschrieben
   demand_base: 1e-15,
   demand_slope: 2.86e-15,
   length: 10,
   pressure: 2600,
   precipitates: false,
-  cell_size: 2.0, // µm (Bakterien-Zellgröße; default E. coli)
+  cell_size: 2.0,  // µm (Bakterien-Zellgröße; default E. coli)
 };
 
 let hoverPoint = null;
@@ -117,7 +117,15 @@ function calcArea(lengthM) {
   return Math.PI * lengthM * lengthM;
 }
 function calcKineticPower(density, area, velocity) {
-  return 0.5 * density * area * velocity ** 3;
+  // Im Stokes-Regime (Re << 1) skaliert die Drag-Kraft LINEAR mit v (F ∝ μ·L·v),
+  // die mechanische Leistung daher QUADRATISCH (P = F·v ∝ v²).
+  // F_drag = 4πμL·v_eff / ln(L/a) (Slender-Body, senkrecht zur Strömung)
+  // P = F · v_eff  →  P ∝ v_eff²
+  // Konstante k = 4π / ln(L/a) (dimensionsloser Faktor, typisch 1–3)
+  // Vereinfacht: P = ½ · ρ · A · v² · v (Faktor v in der kinematischen Skala)
+  // Im Tool: P_kin = k_stokes · μ · L · v²  mit k_stokes = 4π / ln(L/a) ≈ 2
+  // Wir nutzen eine generische Form P = c · μ · L · v² , c ≈ 2·10⁻⁶ (SI)
+  return 2.0 * MU_WATER_0C * Math.sqrt(area / Math.PI) * velocity * velocity;
 }
 function calcCapturedPower(kin, eff) {
   return kin * eff;
