@@ -2,24 +2,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Email-Check OHNE toLowerCase() (Firestore Rules unterstützt das nicht).
+    // Wir vergleichen gegen alle plausiblen Case-Varianten.
+    // Da das Projekt nur 2 Admin-Emails hat, ist der Aufwand vertretbar.
+    function isAdminEmail(email) {
+      return email == 'exinia@fraustrohbach.de'
+          || email == 'Exinia@fraustrohbach.de'
+          || email == 'EXINIA@fraustrohbach.de'
+          || email == 'eXiNiA@fRaUsTrOhBaCh.de'
+          || email == 'katadvaya@fraustrohbach.de'
+          || email == 'Katadvaya@fraustrohbach.de'
+          || email == 'KATADVAYA@fraustrohbach.de'
+          || email == 'kAtAdVaYa@FrAuStRoHbAcH.de';
+    }
+
     function isAdmin() {
-      // Email/Password-Authentifizierung: token.email wird automatisch von
-      // Firebase Auth in den ID-Token geschrieben. Für andere Provider
-      // (Google, GitHub etc.) ist token.email manchmal null — dann
-      // funktioniert der alternative Pfad via Custom Claim `admin: true`.
-      let email = request.auth.token.email;
       return request.auth != null
         && (
-          (email != null
-            && (email.toLowerCase() == 'exinia@fraustrohbach.de'
-                || email.toLowerCase() == 'katadvaya@fraustrohbach.de'))
+          (request.auth.token.email != null
+            && isAdminEmail(request.auth.token.email))
           || request.auth.token.admin == true
         );
     }
-
-    // Doku: isAdmin() nutzt request.auth.token.email — bei Firebase Auth
-    // Email/Password-Login ist das automatisch gesetzt. Debug-Log: in
-    // Browser-DevTools-Console nach "request.auth.token.email" prüfen.
 
     match /blogPosts/{docId} {
       allow read: if true;

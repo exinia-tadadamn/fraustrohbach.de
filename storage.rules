@@ -1,12 +1,27 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isAdminEmail(email) {
+      return email == 'exinia@fraustrohbach.de'
+          || email == 'Exinia@fraustrohbach.de'
+          || email == 'EXINIA@fraustrohbach.de'
+          || email == 'eXiNiA@fRaUsTrOhBaCh.de'
+          || email == 'katadvaya@fraustrohbach.de'
+          || email == 'Katadvaya@fraustrohbach.de'
+          || email == 'KATADVAYA@fraustrohbach.de'
+          || email == 'kAtAdVaYa@FrAuStRoHbAcH.de';
+    }
+    function isAdmin() {
+      return request.auth != null
+        && (
+          (request.auth.token.email != null
+            && isAdminEmail(request.auth.token.email))
+          || request.auth.token.admin == true
+        );
+    }
     match /{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email != null
-        && (request.auth.token.email.toLowerCase() == 'exinia@fraustrohbach.de'
-             || request.auth.token.email.toLowerCase() == 'katadvaya@fraustrohbach.de'
-             || request.auth.token.admin == true);
+      allow write: if isAdmin();
     }
   }
 }
