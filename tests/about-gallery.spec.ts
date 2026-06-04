@@ -295,3 +295,63 @@ test.describe('About-Gallery — Galerie-Initialisierung', () => {
     expect(config.storageBucket).toContain('website-7c871');
   });
 });
+
+test.describe('About-Gallery — Filename-Sichtbarkeit (Besucher)', () => {
+  test('Image-Cards zeigen keinen filename-Overlay (Gast)', async ({ page }) => {
+    await page.goto(ABOUT_URL);
+    await waitForGalleryReady(page);
+
+    const imgCount = await page.locator('.image-card').count();
+    test.skip(imgCount === 0, 'Kein Bild vorhanden');
+
+    const firstCard = page.locator('.image-card').first();
+    // Kein filename-Overlay innerhalb einer Image-Card
+    const overlayCount = await firstCard.locator('p.text-\\[10px\\].font-mono.text-slate-300').count();
+    expect(overlayCount).toBe(0);
+
+    // alt-Attribut enthält keinen filename
+    const alt = await firstCard.locator('img').getAttribute('alt');
+    expect(alt).toBe('');
+  });
+
+  test('Image-Cards zeigen keinen filename-Overlay (Admin)', async ({ page }) => {
+    await loginAsAdmin(page);
+    await waitForGalleryReady(page);
+
+    const imgCount = await page.locator('.image-card').count();
+    test.skip(imgCount === 0, 'Kein Bild vorhanden');
+
+    const firstCard = page.locator('.image-card').first();
+    const overlayCount = await firstCard.locator('p.text-\\[10px\\].font-mono.text-slate-300').count();
+    expect(overlayCount).toBe(0);
+  });
+
+  test('Lightbox-Viewer zeigt keinen Filename (Gast)', async ({ page }) => {
+    await page.goto(ABOUT_URL);
+    await waitForGalleryReady(page);
+
+    const imgCount = await page.locator('.image-card').count();
+    test.skip(imgCount === 0, 'Kein Bild vorhanden');
+
+    await page.locator('.image-card').first().locator('img').click();
+    await page.waitForFunction(() => {
+      const v = document.getElementById('image-viewer');
+      return v && v.style.display === 'flex';
+    }, { timeout: 3000 });
+
+    const filenameVisible = await page.locator('#viewer-filename').isVisible();
+    expect(filenameVisible).toBeFalsy();
+  });
+});
+
+test.describe('About-Gallery — Spacing', () => {
+  test('Grids verwenden gap-6 (mobile) / gap-8 (desktop)', async ({ page }) => {
+    await page.goto(ABOUT_URL);
+    await waitForGalleryReady(page);
+
+    // Tailwind: gap-6 → gap: 1.5rem (24px) auf < md; gap-8 → 2rem (32px) auf md+
+    const classes = await page.locator('#uncategorized-grid').getAttribute('class');
+    expect(classes).toContain('gap-6');
+    expect(classes).toContain('md:gap-8');
+  });
+});

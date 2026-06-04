@@ -179,7 +179,6 @@ async function uploadFiles(files, albumId) {
             const url = await ref.getDownloadURL();
             await db.collection('artistGalleryImages').add({
                 src: url,
-                filename: file.name,
                 albumId: albumId || null,
                 storagePath: path,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -454,15 +453,12 @@ function renderImageCard(img, opts = {}) {
         <div class="image-card group relative aspect-square bg-slate-900 overflow-hidden border border-slate-800 cursor-pointer"
              ${draggable} ${dragHandlers}
              data-image-id="${img.id}">
-            <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" loading="lazy"
+            <img src="${escapeHtml(img.src)}" alt="" loading="lazy"
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                  onclick="openImageViewer('${img.id}')"
                  onerror="this.parentElement.innerHTML='<div class=\'absolute inset-0 flex items-center justify-center text-slate-600 italic text-xs\'>Not found</div>'">
             ${albumInfo}
             ${actions}
-            <div class="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm p-2 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p class="text-[10px] font-mono text-slate-300 truncate">${escapeHtml(img.filename || 'Untitled')}</p>
-            </div>
         </div>
     `;
 }
@@ -704,7 +700,7 @@ function openSetCoverModal(albumId) {
     } else {
         grid.innerHTML = albumImages.map(img => `
             <button onclick="setAlbumCover('${albumId}', '${img.id}'); closeSetCoverModal();" class="group relative aspect-square bg-slate-900 border border-slate-800 hover:border-neon-cyan overflow-hidden">
-                <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.filename || '')}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                <img src="${escapeHtml(img.src)}" alt="" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
             </button>
         `).join('');
     }
@@ -795,7 +791,8 @@ function _applyViewerImage() {
     const imgData = viewerImages[viewerCurrentIdx];
     if (!imgData) return;
     img.src = imgData.src;
-    filenameEl.textContent = imgData.filename || 'Untitled';
+    filenameEl.textContent = '';
+    filenameEl.style.display = 'none';
     descEl.textContent = imgData.description || '';
     idxEl.textContent = `${viewerCurrentIdx + 1} / ${viewerImages.length}`;
     if (prevBtn) prevBtn.style.display = viewerImages.length > 1 ? 'block' : 'none';
